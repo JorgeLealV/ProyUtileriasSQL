@@ -1,0 +1,100 @@
+@startuml
+autonumber
+title Diagrama de Secuencia - Flujo Principal de la Aplicación
+
+actor User
+
+participant "main.py" as Main
+participant "ui:MainWindow" as MainWindow
+participant "view:PanelPrincipalView" as PanelPrincipal
+participant "data:ConfInsert.txt" as Config
+participant "service:funciones.py" as Service
+participant "data:archivo.xlsx" as Excel
+participant "data:salida.sql" as SQL
+
+User -> Main : Inicia la aplicación
+activate Main
+
+Main -> MainWindow : new()
+activate MainWindow
+Main -> MainWindow : show()
+MainWindow --> User : Muestra la ventana principal
+deactivate Main
+
+User -> MainWindow : Clic en "Creación"
+MainWindow -> PanelPrincipal : new()
+activate PanelPrincipal
+MainWindow -> PanelPrincipal : show()
+MainWindow -> MainWindow : hide()
+deactivate MainWindow
+
+PanelPrincipal --> User : Muestra el panel principal
+deactivate PanelPrincipal
+
+User -> PanelPrincipal : Selecciona archivo Excel, \ndirectorio de salida y tablas
+activate PanelPrincipal
+
+PanelPrincipal -> Config : _write_to_config("ArchExcel", ...)
+activate Config
+Config --> PanelPrincipal
+deactivate Config
+
+PanelPrincipal -> Config : _write_to_config("DirSal", ...)
+activate Config
+Config --> PanelPrincipal
+deactivate Config
+
+PanelPrincipal -> Config : _save_tables_config()
+activate Config
+Config --> PanelPrincipal
+deactivate Config
+
+deactivate PanelPrincipal
+
+
+User -> PanelPrincipal : Clic en "Ejecutar creación"
+activate PanelPrincipal
+
+PanelPrincipal -> PanelPrincipal : _ejecutar_creacion_scripts()
+activate PanelPrincipal
+    PanelPrincipal -> Config : Read()
+    activate Config
+    Config --> PanelPrincipal : Contenido del archivo
+    deactivate Config
+    
+    alt Validaciones OK
+        loop para cada tabla en la configuración
+            PanelPrincipal -> Service : excel_to_postgres_inserts(...)
+            activate Service
+            Service -> Excel : read_excel(sheet)
+            activate Excel
+            Excel --> Service : DataFrame con datos
+            deactivate Excel
+            
+            Service -> SQL : write(INSERT...)\n o append(INSERT...)
+            activate SQL
+            SQL --> Service
+            deactivate SQL
+            
+            Service --> PanelPrincipal : return
+            deactivate Service
+        end
+        
+        PanelPrincipal -> User : Muestra QMessageBox("Éxito")
+        
+    else Validaciones Fallidas
+        PanelPrincipal -> User : Muestra QMessageBox("Errores...")
+    end
+deactivate PanelPrincipal
+deactivate PanelPrincipal
+
+User -> PanelPrincipal : Clic en "Salir"
+activate PanelPrincipal
+PanelPrincipal -> MainWindow : show()
+activate MainWindow
+PanelPrincipal -> PanelPrincipal : hide()
+deactivate PanelPrincipal
+deactivate MainWindow
+
+
+@enduml

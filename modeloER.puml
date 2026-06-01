@@ -1,0 +1,216 @@
+@startuml DiagramaER_Nominas
+!define TABLE(name,desc) entity name as "desc" << (T, #FFAAAA) >>
+!define PK(x) <u>x</u>
+!define FK(x) <i>x</i>
+
+skinparam entityAttributeIconSize 0
+skinparam linetype ortho
+skinparam entity {
+  BackgroundColor #FFF9E6
+  BorderColor #B8860B
+  FontColor #333333
+}
+skinparam arrow {
+  Color #555555
+}
+
+title Diagrama Entidad-Relación - Sistema de Nóminas
+
+' ============================================================
+' ENTIDADES
+' ============================================================
+
+entity Usuarios {
+  * PK(id_usuario) : INTEGER
+  --
+  Usuario : VARCHAR
+  Password : VARCHAR
+  NombreUsuario : VARCHAR
+  NoCredencial : VARCHAR
+  creado_en : TIMESTAMPTZ
+  actualizado_en : TIMESTAMPTZ
+}
+
+entity TipoEstaSAT {
+  * PK(id_estsat) : INTEGER
+  --
+  DescTEstSAT : VARCHAR
+  * FK(id_usuario) : INTEGER
+  creado_en : TIMESTAMPTZ
+  actualizado_en : TIMESTAMPTZ
+}
+
+entity TipoNomina {
+  * PK(id_tiponom) : INTEGER
+  --
+  DescTNomina : VARCHAR
+  * FK(id_usuario) : INTEGER
+  creado_en : TIMESTAMPTZ
+  actualizado_en : TIMESTAMPTZ
+}
+
+entity TipoDivision {
+  * PK(id_Division) : INTEGER
+  --
+  DescDivision : VARCHAR
+  * FK(id_usuario) : INTEGER
+  creado_en : TIMESTAMPTZ
+  actualizado_en : TIMESTAMPTZ
+}
+
+entity TipoEstNom {
+  * PK(id_estnom) : INTEGER
+  --
+  DescTEstNom : VARCHAR
+  * FK(id_usuario) : INTEGER
+  creado_en : TIMESTAMPTZ
+  actualizado_en : TIMESTAMPTZ
+}
+
+entity TipoParam {
+  * PK(id_TParam) : INTEGER
+  --
+  DescTParam : VARCHAR
+  * FK(id_usuario) : INTEGER
+  creado_en : TIMESTAMPTZ
+  actualizado_en : TIMESTAMPTZ
+}
+
+entity TipoPermiso {
+  * PK(id_tpermiso) : INTEGER
+  --
+  DescTPermiso : VARCHAR
+  Acronimo : VARCHAR
+  * FK(id_usuario) : INTEGER
+  creado_en : TIMESTAMPTZ
+  actualizado_en : TIMESTAMPTZ
+}
+
+entity TipAlcance {
+  * PK(id_talcance) : INTEGER
+  --
+  Alcance : VARCHAR
+  DescTAlcance : VARCHAR
+  * FK(id_tpermiso) : INTEGER
+  * FK(id_usuario) : INTEGER
+  creado_en : TIMESTAMPTZ
+  actualizado_en : TIMESTAMPTZ
+}
+
+entity PerUsuario {
+  * PK(id_PUsuario) : INTEGER
+  --
+  * FK(id_talcance) : INTEGER
+  * FK(id_usuariomod) : INTEGER
+  * FK(id_usuario) : INTEGER
+  creado_en : TIMESTAMPTZ
+  actualizado_en : TIMESTAMPTZ
+}
+
+entity Nominas {
+  * PK(id_nomina) : INTEGER
+  --
+  Anio : INTEGER
+  mes : INTEGER
+  nomina : VARCHAR
+  FechaInic : DATE
+  FechaFin : DATE
+  * FK(id_tiponom) : INTEGER
+  * FK(id_Division) : INTEGER
+  DireccionArch : VARCHAR
+  FechaGenXML : TIMESTAMPTZ
+  FechaSolTimb : TIMESTAMPTZ
+  FechaTim : TIMESTAMPTZ
+  CodigoSegSAT : VARCHAR
+  * FK(id_usuario) : INTEGER
+  NoRegistros : INTEGER
+  creado_en : TIMESTAMPTZ
+  actualizado_en : TIMESTAMPTZ
+}
+
+entity EstatSATNom {
+  * PK(id_estatus) : INTEGER
+  --
+  FechaCons : TIMESTAMPTZ
+  * FK(id_estsat) : INTEGER
+  * FK(id_nomina) : INTEGER
+  * FK(id_usuario) : INTEGER
+  creado_en : TIMESTAMPTZ
+  actualizado_en : TIMESTAMPTZ
+}
+
+entity LogProcesos {
+  * PK(id_log) : INTEGER
+  --
+  Fecha : TIMESTAMPTZ
+  Descripcion : VARCHAR
+  * FK(id_nomina) : INTEGER
+  * FK(id_usuario) : INTEGER
+  creado_en : TIMESTAMPTZ
+}
+
+entity UUIDDNom {
+  * PK(id_uidd) : BIGINT
+  --
+  UIDD : UUID
+  RFC : VARCHAR
+  * FK(id_nomina) : INTEGER
+  * FK(id_estnom) : INTEGER
+  NoCreden : VARCHAR
+  * FK(id_usuario) : INTEGER
+  creado_en : TIMESTAMPTZ
+  actualizado_en : TIMESTAMPTZ
+}
+
+entity Parametros {
+  * PK(id_param) : INTEGER
+  --
+  * FK(id_TParam) : INTEGER
+  Clave : VARCHAR
+  Valor : VARCHAR
+  FechaInic : DATE
+  FechaFin : DATE
+  DescParametro : VARCHAR
+  * FK(id_usuario) : INTEGER
+  * FK(id_Division) : INTEGER
+  creado_en : TIMESTAMPTZ
+  actualizado_en : TIMESTAMPTZ
+}
+
+
+' ============================================================
+' RELACIONES
+' ============================================================
+
+Usuarios ||--|{ TipoEstaSAT : "registra"
+Usuarios ||--|{ TipoNomina : "registra"
+Usuarios ||--|{ TipoDivision : "registra"
+Usuarios ||--|{ TipoEstNom : "registra"
+Usuarios ||--|{ TipoParam : "registra"
+Usuarios ||--|{ TipoPermiso : "registra"
+Usuarios ||--o{ TipAlcance : "registra"
+Usuarios ||--o{ PerUsuario : "es dueño"
+Usuarios ||--o{ PerUsuario : "modifica"
+Usuarios ||--o{ Nominas : "registra"
+Usuarios ||--o{ EstatSATNom : "registra"
+Usuarios ||--o{ LogProcesos : "registra"
+Usuarios ||--o{ UUIDDNom : "registra"
+Usuarios ||--o{ Parametros : "registra"
+
+TipoPermiso ||--o{ TipAlcance : "define"
+TipAlcance ||--o{ PerUsuario : "asigna"
+
+TipoNomina ||--o{ Nominas : "clasifica"
+TipoDivision ||--o{ Nominas : "agrupa"
+TipoDivision ||--o{ Parametros : "aplica a"
+
+TipoEstaSAT ||--o{ EstatSATNom : "define estado"
+TipoEstNom ||--o{ UUIDDNom : "define estado"
+
+Nominas ||--o{ EstatSATNom : "tiene estado SAT"
+Nominas ||--o{ LogProcesos : "genera log"
+Nominas ||--o{ UUIDDNom : "contiene"
+
+TipoParam ||--o{ Parametros : "define"
+
+@enduml

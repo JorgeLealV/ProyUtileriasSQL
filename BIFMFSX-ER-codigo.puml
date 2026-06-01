@@ -1,0 +1,169 @@
+@startuml
+!theme plain
+hide circle
+skinparam linetype ortho
+
+' ==========================================
+' DEFINICIÓN DE ENTIDADES
+' ==========================================
+
+entity "Usuarios" {
+  * id_usuario : integer <<PK>>
+  --
+  Usuario : varchar
+  Password : varchar
+  NombreUsuario : varchar
+  NoCredencial : varchar
+}
+
+entity "TipoEstaSAT" {
+  * id_estsat : integer <<PK>>
+  --
+  DescTEstSAT : varchar
+  id_usuario : integer <<FK>>
+}
+
+entity "TipoNomina" {
+  * id_tiponom : integer <<PK>>
+  --
+  DescTNomina : varchar
+  id_usuario : integer <<FK>>
+}
+
+entity "TipoDivision" {
+  * id_Division : integer <<PK>>
+  --
+  DescDivision : varchar
+  id_usuario : integer <<FK>>
+}
+
+entity "TipoEstNom" {
+  * id_estnom : integer <<PK>>
+  --
+  DescTEstNom : varchar
+  id_usuario : integer <<FK>>
+}
+
+entity "TipoParam" {
+  * id_TParam : integer <<PK>>
+  --
+  DescTParam : varchar
+  id_usuario : integer <<FK>>
+}
+
+entity "TipoPermiso" {
+  * id_tpermiso : integer <<PK>>
+  --
+  DescTPermiso : varchar
+  Acronimo : varchar
+  id_usuario : integer <<FK>>
+}
+
+entity "TipAlcance" {
+  * id_talcance : integer <<PK>>
+  --
+  Alcance : varchar
+  DescTAlcance : varchar
+  id_tpermiso : integer <<FK>>
+  id_usuario : integer <<FK>>
+}
+
+entity "PerUsuario" {
+  * id_PUsuario : integer <<PK>>
+  --
+  id_talcance : integer <<FK>>
+  id_usuariomod : integer <<FK>>
+  id_usuario : integer <<FK>>
+}
+
+entity "Nominas" {
+  * id_nomina : integer <<PK>>
+  --
+  Anio : integer
+  mes : integer
+  nomina : varchar
+  id_tiponom : integer <<FK>>
+  id_Division : integer <<FK>>
+  id_usuario : integer <<FK>>
+}
+
+entity "EstatSATNom" {
+  * id_estatus : integer <<PK>>
+  --
+  FechaCons : timestamp
+  id_estsat : integer <<FK>>
+  id_nomina : integer <<FK>>
+  id_usuario : integer <<FK>>
+}
+
+entity "LogProcesos" {
+  * id_log : integer <<PK>>
+  --
+  Fecha : timestamp
+  Descripcion : varchar
+  id_nomina : integer <<FK>>
+  id_usuario : integer <<FK>>
+}
+
+entity "UUIDDNom" {
+  * id_uidd : bigint <<PK>>
+  --
+  UIDD : uuid
+  RFC : varchar
+  id_nomina : integer <<FK>>
+  id_estnom : integer <<FK>>
+  id_usuario : integer <<FK>>
+}
+
+entity "Parametros" {
+  * id_param : integer <<PK>>
+  --
+  Clave : varchar
+  Valor : varchar
+  id_TParam : integer <<FK>>
+  id_usuario : integer <<FK>>
+  id_Division : integer <<FK>>
+}
+
+' ==========================================
+' RELACIONES Y LLAVES FORÁNEAS
+' ==========================================
+
+' Relaciones de Auditoría/Creación con Usuarios
+Usuarios ||--o{ TipoEstaSAT : "crea"
+Usuarios ||--o{ TipoNomina : "crea"
+Usuarios ||--o{ TipoDivision : "crea"
+Usuarios ||--o{ TipoEstNom : "crea"
+Usuarios ||--o{ TipoParam : "crea"
+Usuarios ||--o{ TipoPermiso : "crea"
+Usuarios ||--o{ TipAlcance : "crea"
+Usuarios ||--o{ Nominas : "gestiona"
+Usuarios ||--o{ EstatSATNom : "registra"
+Usuarios ||--o{ LogProcesos : "ejecuta"
+Usuarios ||--o{ UUIDDNom : "registra"
+Usuarios ||--o{ Parametros : "configura"
+
+' Relaciones del Módulo de Permisos
+TipoPermiso ||--o{ TipAlcance : "agrupa"
+TipAlcance ||--o{ PerUsuario : "asigna alcance"
+Usuarios ||--o{ PerUsuario : "dueño del permiso"
+Usuarios ||--o{ PerUsuario : "modifica permiso"
+
+' Relaciones Centrales de Nóminas
+TipoNomina ||--o{ Nominas : "clasifica"
+TipoDivision ||--o{ Nominas : "pertenece a"
+
+' Relaciones Dependientes de Nóminas
+Nominas ||--o{ EstatSATNom : "tiene historial"
+TipoEstaSAT ||--o{ EstatSATNom : "define estatus"
+
+Nominas ||--o{ LogProcesos : "genera logs"
+
+Nominas ||--o{ UUIDDNom : "contiene timbres"
+TipoEstNom ||--o{ UUIDDNom : "define estado"
+
+' Relaciones de Parámetros
+TipoParam ||--o{ Parametros : "tipifica"
+TipoDivision |o--o{ Parametros : "aplica regla (opcional)"
+
+@enduml
