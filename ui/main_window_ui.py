@@ -72,7 +72,7 @@ class Ui_Form(object):
         self.btn_configuracion.setText(QCoreApplication.translate("Form", u"Configuraci\u00f3n", None))
         self.btn_ejecucion.setText(QCoreApplication.translate("Form", u"Ejecuci\u00f3n de scripts", None))
         self.btn_exportacion.setText(QCoreApplication.translate("Form", u"Exportaci\u00f3n a Excel", None))
-        self.btn_creacion.setText(QCoreApplication.translate("Form", u"Creaci\u00f3n de scripts", None))
+        self.btn_creacion.setText(QCoreApplication.translate("Form", u"Crear Inserts", None))
         self.btn_salida.setText(QCoreApplication.translate("Form", u"Salida", None))
     # retranslateUi
 

@@ -29,7 +29,7 @@ from PySide6.QtWidgets import (
     QApplication,
 )
 from PySide6.QtWidgets import QMessageBox as QMB
-from PySide6.QtCore import QFile, QIODeviceBase
+from PySide6.QtCore import QFile, QIODeviceBase, Qt
 from PySide6.QtUiTools import QUiLoader
 from services.funciones import excel_to_postgres_inserts
 
@@ -58,6 +58,7 @@ class PanelPrincipalView(QMainWindow):
         """
         # `super()` llama al constructor de la clase padre (QMainWindow). Es fundamental.
         super(PanelPrincipalView, self).__init__()
+        self.setWindowFlag(Qt.WindowType.WindowCloseButtonHint, False)
 
         self.main_window = (
             main_window  # Guardamos la referencia a la ventana que nos llamó.
@@ -70,7 +71,7 @@ class PanelPrincipalView(QMainWindow):
         self.btn_browse_archivo_excel = None
         self.lineEdit_directorio_salida = None
         self.btn_browse_directorio_salida = None
-        self.comboBox_hojas = None
+        self.listWidget_hojas = None
         self.btn_agregar = None
         self.btn_quitar = None
         self.listWidget_tablas_seleccionadas = None
@@ -131,7 +132,7 @@ class PanelPrincipalView(QMainWindow):
         self.btn_browse_directorio_salida = self.findChild(
             QPushButton, "btn_browse_directorio_salida"
         )
-        self.comboBox_hojas = self.findChild(QComboBox, "comboBox_hojas")
+        self.listWidget_hojas = self.findChild(QListWidget, "listWidget_hojas")
         self.btn_agregar = self.findChild(QPushButton, "btn_agregar")
         self.btn_quitar = self.findChild(QPushButton, "btn_quitar")
         self.listWidget_tablas_seleccionadas = self.findChild(
@@ -197,8 +198,8 @@ class PanelPrincipalView(QMainWindow):
             self.btn_salir.clicked.connect(self._go_to_main_window)
 
         # Actualiza el estado de los botones si cambia la selección en las listas.
-        if self.comboBox_hojas:
-            self.comboBox_hojas.currentIndexChanged.connect(self._update_button_states)
+        if self.listWidget_hojas:
+            self.listWidget_hojas.itemSelectionChanged.connect(self._update_button_states)
         if self.listWidget_tablas_seleccionadas:
             self.listWidget_tablas_seleccionadas.itemSelectionChanged.connect(
                 self._update_button_states
@@ -391,7 +392,7 @@ class PanelPrincipalView(QMainWindow):
         Lee las hojas de un archivo Excel y las carga en el ComboBox.
         También actualiza la lista de tablas seleccionadas si el archivo cambia.
         """
-        self.comboBox_hojas.clear()
+        self.listWidget_hojas.clear()
         self.listWidget_tablas_seleccionadas.clear()
 
         if not filepath or not os.path.exists(filepath):
@@ -412,7 +413,7 @@ class PanelPrincipalView(QMainWindow):
                 if sheet_name in self.config_tablas:
                     self.listWidget_tablas_seleccionadas.addItem(sheet_name)
                 else:
-                    self.comboBox_hojas.addItem(sheet_name)
+                    self.listWidget_hojas.addItem(sheet_name)
 
             self._save_tables_config()
 
@@ -428,8 +429,7 @@ class PanelPrincipalView(QMainWindow):
     def _update_button_states(self):
         """Habilita o deshabilita los botones 'Agregar' y 'Quitar' según el contexto."""
         self.btn_agregar.setEnabled(
-            self.comboBox_hojas.currentIndex() >= 0
-            and self.comboBox_hojas.currentText() != ""
+            len(self.listWidget_hojas.selectedItems()) > 0
         )
         self.btn_quitar.setEnabled(
             len(self.listWidget_tablas_seleccionadas.selectedItems()) > 0
@@ -437,16 +437,16 @@ class PanelPrincipalView(QMainWindow):
 
     def _add_item(self):
         """Mueve una tabla de la lista de disponibles a la de seleccionadas."""
-        current_text = self.comboBox_hojas.currentText()
-        if not current_text:
+        selected_items = self.listWidget_hojas.selectedItems()
+        if not selected_items:
             return
 
-        self.listWidget_tablas_seleccionadas.addItem(current_text)
-        current_index = self.comboBox_hojas.currentIndex()
-        self.comboBox_hojas.removeItem(current_index)
+        for item in selected_items:
+            self.listWidget_tablas_seleccionadas.addItem(item.text())
+            self.listWidget_hojas.takeItem(self.listWidget_hojas.row(item))
 
         self._update_button_states()
-        self._save_tables_config()  # Guarda el cambio en ConfInsert.txt
+        self._save_tables_config()
 
     def _remove_item(self):
         """Mueve una tabla de la lista de seleccionadas a la de disponibles."""
@@ -455,7 +455,7 @@ class PanelPrincipalView(QMainWindow):
             return
 
         for item in selected_items:
-            self.comboBox_hojas.addItem(item.text())
+            self.listWidget_hojas.addItem(item.text())
             self.listWidget_tablas_seleccionadas.takeItem(
                 self.listWidget_tablas_seleccionadas.row(item)
             )
@@ -555,8 +555,8 @@ class PanelPrincipalView(QMainWindow):
             self.lineEdit_archivo_excel.clear()
         if self.lineEdit_directorio_salida:
             self.lineEdit_directorio_salida.clear()
-        if self.comboBox_hojas:
-            self.comboBox_hojas.clear()
+        if self.listWidget_hojas:
+            self.listWidget_hojas.clear()
         if self.listWidget_tablas_seleccionadas:
             self.listWidget_tablas_seleccionadas.clear()
         if self.lineEdit_archivo_todos:
@@ -804,18 +804,25 @@ class PanelPrincipalView(QMainWindow):
                 border-color: #181408;
             }
             QPushButton#btn_salir {
-                background-color: transparent;
-                border: 1px solid #111827;
-                color: #28303C;
-                font-size: 9pt;
-                padding: 6px 18px;
-                font-weight: 400;
-                letter-spacing: 0.5px;
+                background-color: #111827;
+                border: 1px solid #1E2D40;
+                border-top: 2px solid #243550;
+                color: #7A8CA8;
+                font-size: 10pt;
+                padding: 12px 36px;
+                font-weight: 600;
+                letter-spacing: 0.8px;
             }
             QPushButton#btn_salir:hover {
-                border-color: #5A1818;
-                color: #805050;
-                background-color: #100808;
+                background-color: #161E30;
+                border-color: #2A3D58;
+                border-top-color: #B8922A;
+                color: #C0CCDC;
+            }
+            QPushButton#btn_salir:pressed {
+                background-color: #0C1420;
+                border-top-color: #8A6D1A;
+                color: #8898A8;
             }
             QGroupBox {
                 border: 1px solid #1A2D40;
@@ -889,9 +896,8 @@ class PanelPrincipalView(QMainWindow):
 
     def closeEvent(self, event):
         """
-        Se ejecuta automáticamente cuando el usuario cierra la ventana.
-        Se aprovecha para desconectar señales y guardar configuraciones finales.
+        Intercepta el intento de cierre de ventana (botón X del SO).
+        En lugar de cerrar el programa, regresa al menú principal.
         """
-        self.lineEdit_archivo_excel.textChanged.disconnect(self._load_excel_sheets)
-        self._save_tables_config()
-        super(PanelPrincipalView, self).closeEvent(event)
+        event.ignore()
+        self._go_to_main_window()

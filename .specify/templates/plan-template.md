@@ -40,7 +40,15 @@
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-[Gates determined based on constitution file]
+Verificar los cinco principios de la constitución v1.0.0:
+
+| # | Principio                   | Verificación requerida                                              | Estado |
+|---|-----------------------------|---------------------------------------------------------------------|--------|
+| I | Arquitectura en Capas       | ¿Lógica de negocio en `services/`? ¿UI solo en `views/`?           | [ ]    |
+| II| Identidad Visual Ejecutiva  | ¿Paleta `#0D1117`/`#B8922A`? ¿QGroupBox para secciones?            | [ ]    |
+|III| Separación Estricta UI–BD   | ¿`views/` sin imports de psycopg2/pandas? ¿`services/` sin PySide6?| [ ]    |
+| IV| Navegación Controlada       | ¿X deshabilitado? ¿closeEvent redirige a `_go_to_main_window()`?   | [ ]    |
+| V | Calidad y Persistencia      | ¿try/finally en BD? ¿errores via `_show_message_box()`?            | [ ]    |
 
 ## Project Structure
 
@@ -98,6 +106,18 @@ api/
 
 ios/ or android/
 └── [platform-specific structure: feature modules, UI flows, platform tests]
+
+# [REMOVE IF UNUSED] Option 4: Desktop app PySide6 (ProyUtileriasSQL pattern)
+views/
+├── <nombre>_view.py          # QMainWindow: carga .ui, conecta señales, valida
+services/
+├── funciones.py              # funciones de negocio puras (sin PySide6)
+└── <nombre>.py
+controllers/
+└── <nombre>.py               # scripts CLI opcionales
+ui/
+├── <nombre>.ui               # diseño Qt Designer (cargado con QUiLoader)
+└── <nombre>_ui.py            # generado (solo referencia, no usado en runtime)
 ```
 
 **Structure Decision**: [Document the selected structure and reference the real

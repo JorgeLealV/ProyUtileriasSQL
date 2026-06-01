@@ -15,10 +15,10 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QFont, QFontDatabase, QGradient, QIcon,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
-from PySide6.QtWidgets import (QApplication, QComboBox, QGridLayout, QLabel,
-    QLineEdit, QListWidget, QListWidgetItem, QMainWindow,
-    QPushButton, QSizePolicy, QSpacerItem, QTabWidget,
-    QVBoxLayout, QWidget)
+from PySide6.QtWidgets import (QApplication, QGridLayout, QLabel, QLineEdit,
+    QListWidget, QListWidgetItem, QMainWindow, QPushButton,
+    QSizePolicy, QSpacerItem, QTabWidget, QVBoxLayout,
+    QWidget)
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -59,7 +59,7 @@ class Ui_MainWindow(object):
         self.verticalLayout_2.addItem(self.verticalSpacer)
 
 
-        self.gridLayout.addLayout(self.verticalLayout_2, 7, 1, 1, 1)
+        self.gridLayout.addLayout(self.verticalLayout_2, 5, 1, 1, 1)
 
         self.label_tablas_disponibles = QLabel(self.tab_genera_inserts)
         self.label_tablas_disponibles.setObjectName(u"label_tablas_disponibles")
@@ -84,7 +84,7 @@ class Ui_MainWindow(object):
         self.listWidget_tablas_seleccionadas = QListWidget(self.tab_genera_inserts)
         self.listWidget_tablas_seleccionadas.setObjectName(u"listWidget_tablas_seleccionadas")
 
-        self.gridLayout.addWidget(self.listWidget_tablas_seleccionadas, 7, 2, 1, 1)
+        self.gridLayout.addWidget(self.listWidget_tablas_seleccionadas, 5, 2, 1, 1)
 
         self.lineEdit_directorio_salida = QLineEdit(self.tab_genera_inserts)
         self.lineEdit_directorio_salida.setObjectName(u"lineEdit_directorio_salida")
@@ -101,13 +101,10 @@ class Ui_MainWindow(object):
 
         self.gridLayout.addWidget(self.lineEdit_archivo_excel, 1, 0, 1, 2)
 
-        self.comboBox_hojas = QComboBox(self.tab_genera_inserts)
-        self.comboBox_hojas.setObjectName(u"comboBox_hojas")
-        font = QFont()
-        font.setBold(True)
-        self.comboBox_hojas.setFont(font)
+        self.listWidget_hojas = QListWidget(self.tab_genera_inserts)
+        self.listWidget_hojas.setObjectName(u"listWidget_hojas")
 
-        self.gridLayout.addWidget(self.comboBox_hojas, 5, 0, 1, 1)
+        self.gridLayout.addWidget(self.listWidget_hojas, 5, 0, 1, 1)
 
         self.tabWidget.addTab(self.tab_genera_inserts, "")
         self.tab_ejecuta_querys = QWidget()
@@ -139,18 +136,14 @@ class Ui_MainWindow(object):
         self.label_archivo_excel.setText(QCoreApplication.translate("MainWindow", u"Proporciona la direcci\u00f3n del archivo excel que contiene los datos", None))
         self.btn_agregar.setText(QCoreApplication.translate("MainWindow", u"Agregar", None))
         self.btn_quitar.setText(QCoreApplication.translate("MainWindow", u"Quitar", None))
-        self.label_tablas_disponibles.setText(QCoreApplication.translate("MainWindow", u"Proporciona el nombre de las tablas que requieras crear sus inserts", None))
+        self.label_tablas_disponibles.setText(QCoreApplication.translate("MainWindow", u"Tablas disponibles", None))
         self.btn_browse_archivo_excel.setText(QCoreApplication.translate("MainWindow", u"...", None))
         self.label_tablas_seleccionadas.setText(QCoreApplication.translate("MainWindow", u"Tablas seleccionadas", None))
         self.label_directorio_salida.setText(QCoreApplication.translate("MainWindow", u"Proporciona el directorio de salida donde se depositaran los archivos", None))
         self.btn_browse_directorio_salida.setText(QCoreApplication.translate("MainWindow", u"...", None))
-        self.comboBox_hojas.setStyleSheet(QCoreApplication.translate("MainWindow", u"\n"
-"            background-color: #36454F;\n"
-"            color: white;\n"
-"           ", None))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_genera_inserts), QCoreApplication.translate("MainWindow", u"Genera Inserts", None))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_genera_inserts), QCoreApplication.translate("MainWindow", u"Crear Inserts", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_ejecuta_querys), QCoreApplication.translate("MainWindow", u"Ejecuta Querys", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_exportar_tablas), QCoreApplication.translate("MainWindow", u"Exportar Tablas", None))
-        self.btn_salir.setText(QCoreApplication.translate("MainWindow", u"Salida", None))
+        self.btn_salir.setText(QCoreApplication.translate("MainWindow", u"\u2190  Men\u00fa principal", None))
     # retranslateUi
 

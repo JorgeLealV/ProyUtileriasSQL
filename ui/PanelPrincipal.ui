@@ -22,7 +22,7 @@
       </property>
       <widget class="QWidget" name="tab_genera_inserts">
        <attribute name="title">
-        <string>Genera Inserts</string>
+        <string>Crear Inserts</string>
        </attribute>
        <layout class="QGridLayout" name="gridLayout">
         <property name="verticalSpacing">
@@ -35,7 +35,7 @@
           </property>
          </widget>
         </item>
-        <item row="7" column="1">
+        <item row="5" column="1">
          <layout class="QVBoxLayout" name="verticalLayout_2">
           <property name="spacing">
            <number>0</number>
@@ -72,7 +72,7 @@
         <item row="4" column="0">
          <widget class="QLabel" name="label_tablas_disponibles">
           <property name="text">
-           <string>Proporciona el nombre de las tablas que requieras crear sus inserts</string>
+           <string>Tablas disponibles</string>
           </property>
          </widget>
         </item>
@@ -97,7 +97,7 @@
           </property>
          </widget>
         </item>
-        <item row="7" column="2">
+        <item row="5" column="2">
          <widget class="QListWidget" name="listWidget_tablas_seleccionadas"/>
         </item>
         <item row="3" column="0" colspan="2">
@@ -114,19 +114,7 @@
          <widget class="QLineEdit" name="lineEdit_archivo_excel"/>
         </item>
         <item row="5" column="0">
-         <widget class="QComboBox" name="comboBox_hojas">
-          <property name="font">
-           <font>
-            <bold>true</bold>
-           </font>
-          </property>
-          <property name="styleSheet">
-           <string>
-            background-color: #36454F;
-            color: white;
-           </string>
-          </property>
-         </widget>
+         <widget class="QListWidget" name="listWidget_hojas"/>
         </item>
        </layout>
       </widget>
@@ -145,7 +133,7 @@
     <item>
      <widget class="QPushButton" name="btn_salir">
       <property name="text">
-       <string>Salida</string>
+       <string>←  Menú principal</string>
       </property>
      </widget>
     </item>

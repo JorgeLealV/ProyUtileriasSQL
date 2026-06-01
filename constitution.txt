@@ -1,0 +1,199 @@
+# Constitución del Proyecto: ProyUtileriasSQL
+# Versión: 1.0  |  Fecha: 2026-06-01
+# Uso: alimentar como input al comando /speckit-constitution
+
+================================================================================
+SECCIÓN 1 — IDENTIDAD Y PROPÓSITO
+================================================================================
+
+ProyUtileriasSQL es una aplicación de escritorio para Windows orientada a equipos
+técnicos (DBA, desarrolladores) y clientes ejecutivos que administran bases de
+datos PostgreSQL y datos en Excel. Su objetivo es automatizar tres flujos
+operativos repetitivos:
+
+  1. Crear Inserts   — Convertir hojas de Excel en scripts SQL INSERT listos para
+                       ejecutarse en PostgreSQL.
+  2. Ejecutar Querys — Ejecutar scripts .sql directamente sobre una base de datos
+                       PostgreSQL desde la interfaz.
+  3. Exportar Tablas — Exportar tablas de PostgreSQL a hojas de un archivo Excel
+                       con formato ejecutivo.
+
+Adicionalmente el proyecto contiene utilidades de desarrollador (no visibles en
+el menú principal):
+  - sql_to_puml.py  : Genera diagramas PlantUML entidad-relación a partir de un
+                       script SQL con CREATE TABLE.
+  - diagram_tools.py: Renderiza archivos .puml a imágenes PNG usando el servidor
+                       público de PlantUML.
+
+El público objetivo valora el profesionalismo visual, la confiabilidad operativa
+y la claridad de la interfaz por encima de la cantidad de funciones.
+
+================================================================================
+SECCIÓN 2 — STACK TÉCNICO FIJO
+================================================================================
+
+  Lenguaje           : Python 3.14
+  GUI Framework      : PySide6 6.11.1 (Qt 6)
+  Diseño de UI       : Archivos .ui de Qt Designer cargados con QUiLoader
+                       (NO se usa compilación estática a Python en runtime)
+  Datos / Excel      : pandas 3.0.3  +  openpyxl 3.1.5
+  Base de datos      : psycopg2-binary 2.9.12  (PostgreSQL)
+  Diagramas          : plantuml 0.3.0  +  servidor público plantuml.com
+  Sistema operativo  : Windows 10 / 11
+  Python ejecutable  : C:\Users\jleal\AppData\Local\Python\bin\python.exe
+
+Restricción: No se agregarán dependencias externas sin justificación escrita en
+el spec de la feature correspondiente.
+
+================================================================================
+SECCIÓN 3 — ARQUITECTURA EN CAPAS
+================================================================================
+
+Estructura de directorios y responsabilidades:
+
+  main.py             Punto de entrada. Instancia QApplication, crea MainWindow
+                      (menú principal) y arranca el event loop.
+
+  ui/                 Archivos .ui (Qt Designer) y sus contrapartes compiladas
+                      en Python (solo para referencia, no se cargan en runtime).
+                      No contienen lógica de negocio.
+
+  views/              Clases que heredan de QMainWindow.
+                      Responsabilidades exclusivas:
+                        - Cargar el .ui con QUiLoader.
+                        - Conectar señales Qt a slots (métodos internos).
+                        - Validar entradas del usuario antes de llamar servicios.
+                        - Mostrar resultados y errores al usuario.
+                        - Gestionar la configuración persistente (ConfInsert.txt).
+                      Prohibido: contener lógica de negocio o consultas SQL.
+
+  services/           Funciones de negocio puras.
+                      Responsabilidades exclusivas:
+                        - Operar sobre archivos (Excel, SQL) y bases de datos.
+                        - Ser importables sin efectos secundarios.
+                      Prohibido: importar nada de PySide6.
+
+  controllers/        Scripts de línea de comandos que llaman directamente a
+                      servicios. Sirven para pruebas y automatización sin GUI.
+
+Reglas de navegación entre ventanas:
+  - La navegación usa hide() / show(), nunca close() sobre ventanas secundarias.
+  - Toda ventana secundaria deshabilita el botón X del SO con:
+      self.setWindowFlag(Qt.WindowType.WindowCloseButtonHint, False)
+  - closeEvent en ventanas secundarias intercepta el evento con event.ignore()
+    y llama a _go_to_main_window() para regresar al menú principal.
+
+Persistencia de configuración:
+  - Archivo de texto plano: ConfInsert.txt (en el directorio de trabajo).
+  - Formato de línea: 01|Clave|Valor
+  - Claves actuales: ArchExcel, DirSal, Tablas, ArchTodos.
+  - Toda nueva configuración de usuario sigue este mismo formato.
+
+================================================================================
+SECCIÓN 4 — PRINCIPIOS DE UI/UX
+================================================================================
+
+Tema visual: Dark Executive (navy oscuro + acento dorado)
+
+  Fondo principal    : #0D1117
+  Superficies        : #111827  /  #141B27
+  Bordes             : #1A2435
+  Acento primario    : #B8922A  (dorado)
+  Acento hover       : #E0C570  (dorado claro)
+  Texto principal    : #C8D0DF
+  Texto secundario   : #68748A  (labels)
+  Tipografía         : Segoe UI, 10pt base, labels en 8.5pt bold + letter-spacing
+
+Delimitación de secciones:
+  - Usar QGroupBox con título en dorado y borde #1A2D40.
+  - Los títulos de QGroupBox van en MAYÚSCULAS con letter-spacing: 2px.
+  - Nunca usar bordes redondeados mayores a 2px.
+  - No usar fondos blancos ni colores brillantes (evitar apariencia informal).
+
+Jerarquía de botones (de más a menos prominente):
+  1. Acción principal (ejecutar proceso) : fondo ámbar oscuro, texto dorado.
+  2. Acción constructiva (agregar)       : fondo verde petróleo oscuro.
+  3. Acción destructiva (quitar/limpiar) : fondo rojo vino oscuro.
+  4. Navegación (regresar al menú)       : fondo #111827, borde superior dorado en hover,
+                                           texto descriptivo con flecha "←  Menú principal".
+  5. Examinar archivos (...)             : gris neutro, dorado en hover.
+
+Patrones de interacción:
+  - Selección de tablas: patrón "transfer list" (disponibles | Agregar/Quitar | seleccionadas).
+    Ambas listas son QListWidget en la misma fila del grid para alineación perfecta.
+  - El Agregar soporta selección múltiple (mover varias hojas a la vez).
+  - Tamaño de ventana panel principal: min(1500, pantalla-80) × min(920, pantalla-80).
+  - Tamaño de ventana menú principal: ~400×520 px adaptativo al monitor.
+
+================================================================================
+SECCIÓN 5 — CONVENCIONES DE CÓDIGO
+================================================================================
+
+Idioma:
+  - Comentarios, docstrings y mensajes al usuario: ESPAÑOL.
+  - Nombres de variables, funciones, clases y archivos: inglés (PEP 8).
+
+Estructura de clases View:
+  - Atributos de UI declarados como None en __init__ antes de load_ui().
+  - Secuencia fija de inicialización:
+      load_ui() → setup_ui() → connect_signals() → _apply_styles()
+      → _update_button_states() → _load_config_file()
+  - Métodos privados/internos: prefijo _ (ej. _apply_styles, _browse_excel_file).
+  - Toda conexión de señales Qt en connect_signals(), nunca dispersas.
+  - Stylesheets definidos exclusivamente en _apply_styles().
+    Inline setStyleSheet() solo permitido con justificación documentada.
+
+Manejo de errores:
+  - Usar _show_message_box(title, text, icon) para comunicar errores al usuario.
+  - Servicios que operan sobre BD: bloque try/except/finally con conn.close() garantizado.
+  - Servicios que operan sobre archivos: capturar Exception con mensaje descriptivo.
+  - No silenciar errores con bare except.
+
+Importaciones:
+  - Cada módulo importa solo lo que usa.
+  - sys.path.insert(0, ...) solo en main.py para garantizar el directorio raíz.
+
+================================================================================
+SECCIÓN 6 — ESTÁNDARES DE CALIDAD
+================================================================================
+
+  - Validar configuración antes de ejecutar procesos (verificar rutas, campos
+    obligatorios) y reportar TODOS los errores encontrados juntos, no uno por uno.
+  - Guardar configuración de usuario al ocultar ventana (no al cerrar).
+  - Las señales Qt deben desconectarse si el widget se reutiliza; si se recrea
+    en cada apertura (patrón actual) no es necesario.
+  - Strings de texto en la UI deben evitar instrucciones técnicas largas; usar
+    labels cortos y descriptivos (ej. "Tablas disponibles" en lugar de párrafos).
+  - Los scripts en controllers/ deben poder ejecutarse independientemente con
+    rutas absolutas o relativas documentadas.
+
+================================================================================
+SECCIÓN 7 — REGLAS DE EXTENSIÓN (Features Futuras)
+================================================================================
+
+Para agregar una nueva funcionalidad al menú principal:
+  1. Crear la pestaña en PanelPrincipal.ui (o nuevo archivo .ui).
+  2. Crear la clase view en views/<nombre>_view.py.
+  3. Crear las funciones de negocio en services/funciones.py o services/<nombre>.py.
+  4. Conectar el botón en MainWindow (main.py) siguiendo el patrón de open_panel_principal().
+  5. La nueva ventana DEBE deshabilitar el botón X y redirigir al menú.
+
+Pestañas reservadas para implementación futura (ya existe la estructura .ui):
+  - "Ejecuta Querys"  : ejecutar scripts .sql sobre PostgreSQL con feedback visual.
+  - "Exportar Tablas" : exportar tablas PostgreSQL a Excel con selección de tablas
+                        mediante el mismo patrón transfer list ya implementado.
+
+Para nuevas utilidades de desarrollador (sin GUI):
+  - Agregar script en controllers/ o en la raíz del proyecto.
+  - Documentar parámetros con docstring en español.
+  - Llamar exclusivamente a funciones de services/.
+
+Prohibiciones explícitas en extensiones:
+  - No agregar lógica SQL directamente en views/.
+  - No crear ventanas que se cierren definitivamente sin ofrecer retorno al menú.
+  - No cambiar la paleta de colores establecida sin actualizar _apply_styles() global.
+  - No compilar archivos .ui a Python para uso en runtime.
+
+================================================================================
+FIN DE LA CONSTITUCIÓN
+================================================================================
