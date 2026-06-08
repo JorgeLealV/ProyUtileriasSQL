@@ -1,0 +1,234 @@
+Table "Usuarios" {
+  "id_usuario" INTEGER [pk, increment]
+  "Usuario" VARCHAR(20) [unique, not null]
+  "Password" VARCHAR(255) [not null]
+  "NombreUsuario" VARCHAR(200) [not null]
+  "NoCredencial" VARCHAR(15)
+  "creado_en" TIMESTAMPTZ [default: `CURRENT_TIMESTAMP`]
+  "actualizado_en" TIMESTAMPTZ [default: `CURRENT_TIMESTAMP`]
+
+  Indexes {
+    NoCredencial [name: "IX_Usuarios_NoCredencial"]
+  }
+}
+
+Table "TipoEstaSAT" {
+  "id_estsat" INTEGER [pk, increment]
+  "DescTEstSAT" VARCHAR(100) [not null]
+  "id_usuario" INTEGER [not null]
+  "creado_en" TIMESTAMPTZ [default: `CURRENT_TIMESTAMP`]
+  "actualizado_en" TIMESTAMPTZ [default: `CURRENT_TIMESTAMP`]
+}
+
+Table "TipoNomina" {
+  "id_tiponom" INTEGER [pk, increment]
+  "DescTNomina" VARCHAR(100)
+  "id_usuario" INTEGER [not null]
+  "creado_en" TIMESTAMPTZ [default: `CURRENT_TIMESTAMP`]
+  "actualizado_en" TIMESTAMPTZ [default: `CURRENT_TIMESTAMP`]
+}
+
+Table "TipoDivision" {
+  "id_Division" INTEGER [pk, increment]
+  "DescDivision" VARCHAR(100) [not null]
+  "id_usuario" INTEGER [not null]
+  "creado_en" TIMESTAMPTZ [default: `CURRENT_TIMESTAMP`]
+  "actualizado_en" TIMESTAMPTZ [default: `CURRENT_TIMESTAMP`]
+}
+
+Table "TipoEstNom" {
+  "id_estnom" INTEGER [pk, increment]
+  "DescTEstNom" VARCHAR(100) [not null]
+  "id_usuario" INTEGER [not null]
+  "creado_en" TIMESTAMPTZ [default: `CURRENT_TIMESTAMP`]
+  "actualizado_en" TIMESTAMPTZ [default: `CURRENT_TIMESTAMP`]
+}
+
+Table "TipoParam" {
+  "id_TParam" INTEGER [pk, increment]
+  "DescTParam" VARCHAR(100)
+  "id_usuario" INTEGER [not null]
+  "creado_en" TIMESTAMPTZ [default: `CURRENT_TIMESTAMP`]
+  "actualizado_en" TIMESTAMPTZ [default: `CURRENT_TIMESTAMP`]
+}
+
+Table "TipoPermiso" {
+  "id_tpermiso" INTEGER [pk, increment]
+  "DescTPermiso" VARCHAR(200) [not null]
+  "Acronimo" VARCHAR(20) [not null]
+  "id_usuario" INTEGER [not null]
+  "creado_en" TIMESTAMPTZ [default: `CURRENT_TIMESTAMP`]
+  "actualizado_en" TIMESTAMPTZ [default: `CURRENT_TIMESTAMP`]
+}
+
+Table "TipAlcance" {
+  "id_talcance" INTEGER [pk, increment]
+  "Alcance" VARCHAR(200) [not null]
+  "DescTAlcance" VARCHAR(200) [not null]
+  "id_tpermiso" INTEGER [not null]
+  "id_usuario" INTEGER [not null]
+  "creado_en" TIMESTAMPTZ [default: `CURRENT_TIMESTAMP`]
+  "actualizado_en" TIMESTAMPTZ [default: `CURRENT_TIMESTAMP`]
+
+  Indexes {
+    id_tpermiso [name: "IX_TipAlcance_Permiso"]
+  }
+}
+
+Table "PerUsuario" {
+  "id_PUsuario" INTEGER [pk, increment]
+  "id_talcance" INTEGER [not null]
+  "id_usuariomod" INTEGER [not null]
+  "id_usuario" INTEGER [not null]
+  "creado_en" TIMESTAMPTZ [default: `CURRENT_TIMESTAMP`]
+  "actualizado_en" TIMESTAMPTZ [default: `CURRENT_TIMESTAMP`]
+
+  Indexes {
+    id_usuario [name: "IX_PerUsuario_Usuario"]
+    id_talcance [name: "IX_PerUsuario_Alcance"]
+  }
+}
+
+Table "Nominas" {
+  "id_nomina" INTEGER [pk, increment]
+  "Anio" INTEGER [not null]
+  "mes" INTEGER [not null]
+  "nomina" VARCHAR(100) [not null]
+  "FechaInic" DATE
+  "FechaFin" DATE
+  "id_tiponom" INTEGER [not null]
+  "id_Division" INTEGER [not null]
+  "DireccionArch" VARCHAR(300) [not null]
+  "FechaGenXML" TIMESTAMPTZ
+  "FechaSolTimb" TIMESTAMPTZ
+  "FechaTim" TIMESTAMPTZ
+  "CodigoSegSAT" VARCHAR(100) [not null]
+  "id_usuario" INTEGER [not null]
+  "NoRegistros" INTEGER [not null]
+  "creado_en" TIMESTAMPTZ [default: `CURRENT_TIMESTAMP`]
+  "actualizado_en" TIMESTAMPTZ [default: `CURRENT_TIMESTAMP`]
+
+  Indexes {
+    (Anio, mes) [name: "IX_Nominas_Fecha"]
+    (Anio, mes) [name: "IX_Nominas_Fecha"]
+    (Anio, mes, nomina) [name: "IX_Nominas_Periodo"]
+    id_Division [name: "IX_Nominas_Division"]
+    id_tiponom [name: "IX_Nominas_TipoNom"]
+  }
+}
+
+Table "EstatSATNom" {
+  "id_estatus" INTEGER [pk, increment]
+  "FechaCons" TIMESTAMPTZ [not null]
+  "id_estsat" INTEGER [not null]
+  "id_nomina" INTEGER [not null]
+  "id_usuario" INTEGER [not null]
+  "creado_en" TIMESTAMPTZ [default: `CURRENT_TIMESTAMP`]
+  "actualizado_en" TIMESTAMPTZ [default: `CURRENT_TIMESTAMP`]
+
+  Indexes {
+    id_nomina [name: "IX_EstatSATNom_Nomina"]
+  }
+}
+
+Table "LogProcesos" {
+  "id_log" INTEGER [pk, increment]
+  "Fecha" TIMESTAMPTZ [not null, default: `CURRENT_TIMESTAMP`]
+  "Descripcion" VARCHAR(500) [not null]
+  "id_nomina" INTEGER [not null]
+  "id_usuario" INTEGER [not null]
+  "creado_en" TIMESTAMPTZ [default: `CURRENT_TIMESTAMP`]
+
+  Indexes {
+    id_nomina [name: "IX_LogProcesos_Nomina"]
+    Fecha [name: "IX_LogProcesos_Fecha"]
+  }
+}
+
+Table "UUIDDNom" {
+  "id_uidd" BIGINT [pk, increment]
+  "UIDD" UUID [not null]
+  "RFC" VARCHAR(15) [not null]
+  "id_nomina" INTEGER [not null]
+  "id_estnom" INTEGER [not null]
+  "NoCreden" VARCHAR(20) [not null]
+  "id_usuario" INTEGER [not null]
+  "creado_en" TIMESTAMPTZ [default: `CURRENT_TIMESTAMP`]
+  "actualizado_en" TIMESTAMPTZ [default: `CURRENT_TIMESTAMP`]
+
+  Indexes {
+    RFC [name: "IX_UUIDDNom_RFC"]
+    UIDD [name: "IX_UUIDDNom_UIDD"]
+    NoCreden [name: "IX_UUIDDNom_NoCreden"]
+    id_nomina [name: "IX_UUIDDNom_Nomina"]
+  }
+}
+
+Table "Parametros" {
+  "id_param" INTEGER [pk, increment]
+  "id_TParam" INTEGER [not null]
+  "Clave" VARCHAR(100) [not null]
+  "Valor" VARCHAR(500) [not null]
+  "FechaInic" DATE [not null]
+  "FechaFin" DATE [not null]
+  "DescParametro" VARCHAR(200) [not null]
+  "id_usuario" INTEGER [not null]
+  "id_Division" INTEGER
+  "creado_en" TIMESTAMPTZ [default: `CURRENT_TIMESTAMP`]
+  "actualizado_en" TIMESTAMPTZ [default: `CURRENT_TIMESTAMP`]
+
+  Indexes {
+    (Clave, id_Division) [name: "IX_Parametros_Busqueda"]
+    (FechaInic, FechaFin) [name: "IX_Parametros_Vigencia"]
+  }
+}
+
+Ref "FK_TipoEstaSAT_Usuarios":"Usuarios"."id_usuario" < "TipoEstaSAT"."id_usuario"
+
+Ref "FK_TipoNomina_Usuarios":"Usuarios"."id_usuario" < "TipoNomina"."id_usuario"
+
+Ref "FK_TipoDivision_Usuarios":"Usuarios"."id_usuario" < "TipoDivision"."id_usuario"
+
+Ref "FK_TipoEstNom_Usuarios":"Usuarios"."id_usuario" < "TipoEstNom"."id_usuario"
+
+Ref "FK_TipoParam_Usuarios":"Usuarios"."id_usuario" < "TipoParam"."id_usuario"
+
+Ref "FK_TipoPermiso_Usuarios":"Usuarios"."id_usuario" < "TipoPermiso"."id_usuario"
+
+Ref "FK_TipAlcance_TipoPermiso":"TipoPermiso"."id_tpermiso" < "TipAlcance"."id_tpermiso"
+
+Ref "FK_TipAlcance_Usuarios":"Usuarios"."id_usuario" < "TipAlcance"."id_usuario"
+
+Ref "FK_PerUsuario_TipAlcance":"TipAlcance"."id_talcance" < "PerUsuario"."id_talcance"
+
+Ref "FK_PerUsuario_UsuMod":"Usuarios"."id_usuario" < "PerUsuario"."id_usuariomod"
+
+Ref "FK_PerUsuario_UsuOwner":"Usuarios"."id_usuario" < "PerUsuario"."id_usuario"
+
+Ref "FK_Nominas_TipoNomina":"TipoNomina"."id_tiponom" < "Nominas"."id_tiponom"
+
+Ref "FK_Nominas_TipoDivision":"TipoDivision"."id_Division" < "Nominas"."id_Division"
+
+Ref "FK_Nominas_Usuarios":"Usuarios"."id_usuario" < "Nominas"."id_usuario"
+
+Ref "FK_EstatSAT_TiposEsta":"TipoEstaSAT"."id_estsat" < "EstatSATNom"."id_estsat"
+
+Ref "FK_EstatSAT_Nominas":"Nominas"."id_nomina" < "EstatSATNom"."id_nomina"
+
+Ref "FK_EstatSAT_Usuarios":"Usuarios"."id_usuario" < "EstatSATNom"."id_usuario"
+
+Ref "FK_LogProcesos_Nominas":"Nominas"."id_nomina" < "LogProcesos"."id_nomina"
+
+Ref "FK_LogProcesos_Usuarios":"Usuarios"."id_usuario" < "LogProcesos"."id_usuario"
+
+Ref "FK_UUIDDNom_Nominas":"Nominas"."id_nomina" < "UUIDDNom"."id_nomina"
+
+Ref "FK_UUIDDNom_TipoEstNom":"TipoEstNom"."id_estnom" < "UUIDDNom"."id_estnom"
+
+Ref "FK_UUIDDNom_Usuarios":"Usuarios"."id_usuario" < "UUIDDNom"."id_usuario"
+
+Ref "FK_Parametros_TipoParam":"TipoParam"."id_TParam" < "Parametros"."id_TParam"
+
+Ref "FK_Parametros_Usuarios":"Usuarios"."id_usuario" < "Parametros"."id_usuario"
+
+Ref "FK_Parametros_TipoDivision":"TipoDivision"."id_Division" < "Parametros"."id_Division"

@@ -93,6 +93,10 @@ class PanelPrincipalView(QMainWindow):
         screen = QApplication.primaryScreen().geometry()
         self.resize(min(1500, screen.width() - 80), min(920, screen.height() - 80))
 
+        frame_geometry = self.frameGeometry()
+        frame_geometry.moveCenter(screen.center())
+        self.move(frame_geometry.topLeft())
+
     def load_ui(self):
         """
         Carga la interfaz de usuario desde el archivo `PanelPrincipal.ui`.
@@ -804,24 +808,24 @@ class PanelPrincipalView(QMainWindow):
                 border-color: #181408;
             }
             QPushButton#btn_salir {
-                background-color: #111827;
+                background-color: #0F1825;
                 border: 1px solid #1E2D40;
-                border-top: 2px solid #243550;
+                border-bottom: 2px solid #243550;
                 color: #7A8CA8;
-                font-size: 10pt;
-                padding: 12px 36px;
+                font-size: 9.5pt;
+                padding: 6px 20px;
                 font-weight: 600;
                 letter-spacing: 0.8px;
             }
             QPushButton#btn_salir:hover {
-                background-color: #161E30;
+                background-color: #141E30;
                 border-color: #2A3D58;
-                border-top-color: #B8922A;
+                border-bottom-color: #B8922A;
                 color: #C0CCDC;
             }
             QPushButton#btn_salir:pressed {
-                background-color: #0C1420;
-                border-top-color: #8A6D1A;
+                background-color: #0A1020;
+                border-bottom-color: #8A6D1A;
                 color: #8898A8;
             }
             QGroupBox {

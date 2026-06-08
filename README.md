@@ -68,6 +68,8 @@ A continuación se describe la función de cada archivo y directorio importante:
 
 -   **`diagram_tools.py`**: Un script de utilidad para generar automáticamente los diagramas del proyecto (en formato PNG) a partir de los archivos `.puml`.
 
+-   **`controllers/dbml_erd_previewer.py`**: Convierte un archivo DBML o SQL a PlantUML y opcionalmente renderiza el diagrama ERD.
+
 -   **`diagrama_componentes.puml` / `diagrama_secuencia.puml`**: Archivos de texto con el código en lenguaje PlantUML para describir los diagramas del sistema.
 
 -   **`/ui/`**: Este directorio contiene los archivos de la interfaz de usuario creados con Qt Designer.
@@ -99,6 +101,17 @@ Para entender mejor la arquitectura y el flujo del programa, puedes consultar lo
     python diagram_tools.py
     ```
 4.  Los diagramas actualizados aparecerán como archivos PNG en el directorio `/out/`.
+
+### Generar un ERD desde DBML o SQL
+
+También puedes usar el nuevo script de vista previa de ERD para convertir un archivo `.dbml` o `.sql` a PlantUML y obtener un diagrama ERD:
+
+```bash
+python controllers/dbml_erd_previewer.py ScriptCRUD04.dbml
+python controllers/dbml_erd_previewer.py ScriptCRUD04.dbml --render --outdir out
+```
+
+El script guarda un archivo `.puml` con la misma base de nombre y, si se usa `--render`, genera un PNG en el directorio especificado.
 
 ### Herramientas para la Generación Automática de Diagramas
 

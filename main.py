@@ -83,19 +83,28 @@ class MainWindow(QMainWindow):
                 color: #A88028;
             }
             QPushButton#btn_salida {
-                background-color: transparent;
-                color: #303848;
-                border: 1px solid #111827;
-                border-left: 3px solid #111827;
-                font-size: 9.5pt;
-                font-weight: 400;
+                background-color: #110A0A;
+                color: #C04040;
+                border: 2px solid #5A1A1A;
+                border-left: 4px solid #A02828;
+                border-right: 4px solid #A02828;
+                font-size: 10.5pt;
+                font-weight: 700;
                 text-align: center;
                 margin-top: 10px;
+                letter-spacing: 1.5px;
             }
             QPushButton#btn_salida:hover {
-                border-left-color: #7A2A2A;
-                color: #885050;
-                background-color: #100A0A;
+                background-color: #1C0C0C;
+                border-color: #CC3333;
+                border-left-color: #E04444;
+                border-right-color: #E04444;
+                color: #FF6666;
+            }
+            QPushButton#btn_salida:pressed {
+                background-color: #0A0505;
+                border-color: #8B2222;
+                color: #CC3333;
             }
         """
         self.setStyleSheet(stylesheet)

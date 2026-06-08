@@ -1,0 +1,176 @@
+---
+references:
+  - "File: /Script05.sql"
+generationTime: 2026-06-08T17:52:22.013Z
+---
+erDiagram
+    USUARIOS ||--o{ TIPOESTASAT : creates
+    USUARIOS ||--o{ TIPONOMINA : creates
+    USUARIOS ||--o{ TIPODIVISION : creates
+    USUARIOS ||--o{ TIPOESTNOM : creates
+    USUARIOS ||--o{ TIPOPARAM : creates
+    USUARIOS ||--o{ TIPOPERMISO : creates
+    USUARIOS ||--o{ TIPALCANCE : creates
+    USUARIOS ||--o{ PERUSUARIO : modifies
+    USUARIOS ||--o{ PERUSUARIO : owns_permission
+    USUARIOS ||--o{ NOMINAS : creates
+    USUARIOS ||--o{ ESTATSATNOM : logs
+    USUARIOS ||--o{ LOGPROCESOS : logs
+    USUARIOS ||--o{ UUIDDNOM : creates
+    USUARIOS ||--o{ PARAMETROS : creates
+    
+    TIPOESTASAT ||--o{ ESTATSATNOM : has_status
+    TIPONOMINA ||--o{ NOMINAS : classifies
+    TIPODIVISION ||--o{ NOMINAS : belongs_to
+    TIPODIVISION ||--o{ PARAMETROS : scope
+    TIPOESTNOM ||--o{ UUIDDNOM : classifies
+    TIPOPARAM ||--o{ PARAMETROS : defines_type
+    TIPOPERMISO ||--o{ TIPALCANCE : defines_scope
+    TIPALCANCE ||--o{ PERUSUARIO : grants
+    
+    NOMINAS ||--o{ ESTATSATNOM : has_status
+    NOMINAS ||--o{ LOGPROCESOS : generates_logs
+    NOMINAS ||--o{ UUIDDNOM : contains_employees
+    
+    USUARIOS {
+        int id_usuario PK
+        string Usuario UK
+        string Password
+        string NombreUsuario
+        string NoCredencial
+        timestamptz creado_en
+        timestamptz actualizado_en
+    }
+    
+    TIPOESTASAT {
+        int id_estsat PK
+        string DescTEstSAT
+        int id_usuario FK
+        timestamptz creado_en
+        timestamptz actualizado_en
+    }
+    
+    TIPONOMINA {
+        int id_tiponom PK
+        string DescTNomina
+        int id_usuario FK
+        timestamptz creado_en
+        timestamptz actualizado_en
+    }
+    
+    TIPODIVISION {
+        int id_Division PK
+        string DescDivision
+        int id_usuario FK
+        timestamptz creado_en
+        timestamptz actualizado_en
+    }
+    
+    TIPOESTNOM {
+        int id_estnom PK
+        string DescTEstNom
+        int id_usuario FK
+        timestamptz creado_en
+        timestamptz actualizado_en
+    }
+    
+    TIPOPARAM {
+        int id_TParam PK
+        string DescTParam
+        int id_usuario FK
+        timestamptz creado_en
+        timestamptz actualizado_en
+    }
+    
+    TIPOPERMISO {
+        int id_tpermiso PK
+        string DescTPermiso
+        string Acronimo
+        int id_usuario FK
+        timestamptz creado_en
+        timestamptz actualizado_en
+    }
+    
+    TIPALCANCE {
+        int id_talcance PK
+        string Alcance
+        string DescTAlcance
+        int id_tpermiso FK
+        int id_usuario FK
+        timestamptz creado_en
+        timestamptz actualizado_en
+    }
+    
+    PERUSUARIO {
+        int id_PUsuario PK
+        int id_talcance FK
+        int id_usuariomod FK
+        int id_usuario FK
+        timestamptz creado_en
+        timestamptz actualizado_en
+    }
+    
+    NOMINAS {
+        int id_nomina PK
+        int Anio
+        int mes
+        string nomina
+        date FechaInic
+        date FechaFin
+        int id_tiponom FK
+        int id_Division FK
+        string DireccionArch
+        timestamptz FechaGenXML
+        timestamptz FechaSolTimb
+        timestamptz FechaTim
+        string CodigoSegSAT
+        int id_usuario FK
+        int NoRegistros
+        timestamptz creado_en
+        timestamptz actualizado_en
+    }
+    
+    ESTATSATNOM {
+        int id_estatus PK
+        timestamptz FechaCons
+        int id_estsat FK
+        int id_nomina FK
+        int id_usuario FK
+        timestamptz creado_en
+        timestamptz actualizado_en
+    }
+    
+    LOGPROCESOS {
+        int id_log PK
+        timestamptz Fecha
+        string Descripcion
+        int id_nomina FK
+        int id_usuario FK
+        timestamptz creado_en
+    }
+    
+    UUIDDNOM {
+        bigint id_uidd PK
+        uuid UIDD
+        string RFC
+        int id_nomina FK
+        int id_estnom FK
+        string NoCreden
+        int id_usuario FK
+        timestamptz creado_en
+        timestamptz actualizado_en
+    }
+    
+    PARAMETROS {
+        int id_param PK
+        int id_TParam FK
+        string Clave
+        string Valor
+        date FechaInic
+        date FechaFin
+        string DescParametro
+        int id_usuario FK
+        int id_Division FK
+        timestamptz creado_en
+        timestamptz actualizado_en
+    }

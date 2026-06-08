@@ -2,33 +2,60 @@
 ================================================================================
 SYNC IMPACT REPORT
 ================================================================================
-Version change  : N/A (initial) → 1.0.0
-Bump type       : MINOR — primera ratificación; template vacío reemplazado con
-                  contenido específico del proyecto.
-
-Principles added (5):
-  I.   Arquitectura en Capas
-  II.  Identidad Visual Ejecutiva
-  III. Separación Estricta UI–Negocio
-  IV.  Navegación Controlada
-  V.   Calidad y Persistencia
+Version change  : 1.0.0 → 1.1.0
+Bump type       : MINOR — nueva sección (Identidad y Propósito) añadida;
+                  guía material expandida en tres principios existentes y en
+                  Convenciones de Código.
 
 Sections added:
-  ✅  Stack Técnico Fijo
-  ✅  Convenciones de Código
-  ✅  Governance
+  ✅  Identidad y Propósito (nueva — cubre Sección 1 de constitution.txt)
+
+Principles modified:
+  I.  Arquitectura en Capas    — añadidas claves específicas de ConfInsert.txt
+  II. Identidad Visual Ejecutiva — añadidos patrones de interacción y tamaños
+                                   de ventana (transfer list, min/max sizes)
+  V.  Calidad y Persistencia   — añadida regla de ciclo de vida de señales Qt
+
+Convenciones de Código:
+  ✅  Añadidas convenciones de importación (sys.path, importar solo lo usado)
 
 Templates updated:
-  ✅  .specify/memory/constitution.md     — ratificado v1.0.0
-  ✅  .specify/templates/plan-template.md — añadida Opción 4 (desktop app)
-  ✅  .specify/templates/tasks-template.md— añadida convención de rutas desktop
+  ✅  .specify/memory/constitution.md     — ratificado v1.1.0
+  ✅  .specify/templates/plan-template.md — sin cambios necesarios (5 principios
+                                            y Constitution Check intactos)
+  ✅  .specify/templates/spec-template.md — sin cambios necesarios
+  ✅  .specify/templates/tasks-template.md— sin cambios necesarios
 
 Deferred TODOs:
-  - Ninguno. Todos los campos resueltos desde constitution.txt.
+  - Ninguno. Todos los campos resueltos desde constitution.txt v1.0.
 ================================================================================
 -->
 
 # ProyUtileriasSQL Constitution
+
+## Identidad y Propósito
+
+ProyUtileriasSQL es una aplicación de escritorio para Windows orientada a equipos
+técnicos (DBA, desarrolladores) y clientes ejecutivos que administran bases de
+datos PostgreSQL y datos en Excel. Su objetivo es automatizar tres flujos
+operativos repetitivos:
+
+1. **Crear Inserts** — Convertir hojas de Excel en scripts SQL INSERT listos
+   para ejecutarse en PostgreSQL.
+2. **Ejecutar Querys** — Ejecutar scripts `.sql` directamente sobre una base de
+   datos PostgreSQL desde la interfaz.
+3. **Exportar Tablas** — Exportar tablas de PostgreSQL a hojas de un archivo
+   Excel con formato ejecutivo.
+
+El proyecto contiene también utilidades de desarrollador (no visibles en el
+menú principal):
+- `controllers/sql_to_puml.py` — Genera diagramas PlantUML ER a partir de SQL
+  con `CREATE TABLE`.
+- `diagram_tools.py` — Renderiza archivos `.puml` a PNG usando el servidor
+  público de PlantUML.
+
+El público objetivo valora el profesionalismo visual, la confiabilidad operativa
+y la claridad de la interfaz por encima de la cantidad de funciones.
 
 ## Core Principles
 
@@ -48,7 +75,8 @@ responsabilidades exclusivas y no intercambiables:
 - **`controllers/`** — Scripts CLI que llaman directamente a servicios.
 
 La configuración de usuario se persiste en `ConfInsert.txt` con formato
-`01|Clave|Valor`. Toda nueva configuración DEBE seguir este formato.
+`01|Clave|Valor`. Claves actuales: `ArchExcel`, `DirSal`, `Tablas`, `ArchTodos`.
+Toda nueva configuración DEBE seguir este mismo formato.
 
 **Rationale**: La mezcla de lógica UI con lógica de negocio produce código
 difícil de probar, mantener y extender. La capa `services/` DEBE poder
@@ -83,6 +111,14 @@ Reglas no negociables:
   4. Navegación/regresar → `#111827`, borde superior dorado en hover.
   5. Examinar archivos → gris neutro, dorado en hover.
 
+Patrones de interacción:
+- Selección de tablas: patrón "transfer list" (disponibles | Agregar/Quitar |
+  seleccionadas). Ambas listas DEBEN ser `QListWidget` en la misma fila del
+  grid para alineación perfecta. El botón Agregar DEBE soportar selección
+  múltiple (mover varias filas a la vez).
+- Tamaño de ventana panel principal: `min(1500, pantalla-80) × min(920, pantalla-80)`.
+- Tamaño de ventana menú principal: ~400×520 px adaptativo al monitor.
+
 **Rationale**: El público objetivo incluye clientes ejecutivos que evalúan
 la herramienta visualmente antes de evaluar su funcionalidad. Un tema
 inconsistente transmite falta de cuidado técnico.
@@ -102,7 +138,7 @@ inconsistente transmite falta de cuidado técnico.
   → `_update_button_states()` → `_load_config_file()` (si aplica).
 - Toda conexión de señales Qt DEBE centralizarse en `connect_signals()`.
 
-**Rationale**: Sin esta separación los servicios se vuelven inprobables y
+**Rationale**: Sin esta separación los servicios se vuelven improbables y
 las vistas se convierten en monolitos imposibles de refactorizar.
 
 ### IV. Navegación Controlada
@@ -136,6 +172,9 @@ creyendo que solo cierra una ventana. Esto ya ocurrió durante el desarrollo
   disponibles"), sin instrucciones técnicas largas.
 - Los scripts en `controllers/` DEBEN poder ejecutarse de forma autónoma
   con rutas documentadas.
+- Las señales Qt DEBEN desconectarse si el widget se reutiliza entre
+  aperturas. Si la ventana se recrea en cada apertura (patrón actual),
+  no es necesario desconectar explícitamente.
 
 **Rationale**: Un fallo silencioso en una operación de BD puede corromper
 datos sin que el usuario lo sepa. La claridad en mensajes de error reduce
@@ -165,6 +204,11 @@ Funcionalidades implementadas:
 - **Ejecutar Querys** (reservada): ejecutar `.sql` sobre PostgreSQL.
 - **Exportar Tablas** (reservada): exportar tablas PostgreSQL → Excel.
 
+Pestañas reservadas para implementación futura (estructura `.ui` existente):
+- **Ejecutar Querys**: ejecutar scripts `.sql` sobre PostgreSQL con feedback visual.
+- **Exportar Tablas**: exportar tablas PostgreSQL a Excel con selección mediante
+  el patrón transfer list ya implementado.
+
 Utilidades de desarrollador (sin GUI):
 - `controllers/sql_to_puml.py` — SQL CREATE TABLE → diagrama PlantUML.
 - `diagram_tools.py` — renderiza `.puml` → PNG vía servidor público.
@@ -174,6 +218,10 @@ Utilidades de desarrollador (sin GUI):
 **Idioma**:
 - Comentarios, docstrings y mensajes al usuario: **español**.
 - Identificadores (variables, funciones, clases, archivos): **inglés** (PEP 8).
+
+**Importaciones**:
+- `sys.path.insert(0, ...)` solo en `main.py` para garantizar el directorio raíz.
+- Cada módulo DEBE importar únicamente los símbolos que usa.
 
 **Estructura de directorios para features desktop**:
 ```
@@ -190,6 +238,11 @@ ui/<nombre>.ui                # diseño Qt Designer
 4. Conectar botón en `MainWindow` (`main.py`) siguiendo el patrón de
    `open_panel_principal()`.
 5. La nueva ventana DEBE deshabilitar X y redirigir al menú (Principio IV).
+
+Para nuevas utilidades de desarrollador (sin GUI):
+- Agregar script en `controllers/` o en la raíz del proyecto.
+- Documentar parámetros con docstring en español.
+- Llamar exclusivamente a funciones de `services/`.
 
 **Prohibiciones explícitas**:
 - No agregar lógica SQL directamente en `views/`.
@@ -218,4 +271,4 @@ principio aquí definido DEBE ser corregida o justificada mediante enmienda.
 El incumplimiento de cualquier principio MUST/PROHIBIDO bloquea el avance
 de la feature hasta ser resuelto o justificado con enmienda aprobada.
 
-**Version**: 1.0.0 | **Ratified**: 2026-06-01 | **Last Amended**: 2026-06-01
+**Version**: 1.1.0 | **Ratified**: 2026-06-01 | **Last Amended**: 2026-06-08
