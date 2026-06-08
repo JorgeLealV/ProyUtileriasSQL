@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'main_window.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.10.2
+## Created by: Qt User Interface Compiler version 6.11.1
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -29,10 +29,10 @@ class Ui_Form(object):
         self.verticalLayout.setSpacing(10)
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.verticalLayout.setContentsMargins(10, 10, 10, 10)
-        self.btn_configuracion = QPushButton(Form)
-        self.btn_configuracion.setObjectName(u"btn_configuracion")
+        self.btn_creacion = QPushButton(Form)
+        self.btn_creacion.setObjectName(u"btn_creacion")
 
-        self.verticalLayout.addWidget(self.btn_configuracion)
+        self.verticalLayout.addWidget(self.btn_creacion)
 
         self.btn_ejecucion = QPushButton(Form)
         self.btn_ejecucion.setObjectName(u"btn_ejecucion")
@@ -44,10 +44,10 @@ class Ui_Form(object):
 
         self.verticalLayout.addWidget(self.btn_exportacion)
 
-        self.btn_creacion = QPushButton(Form)
-        self.btn_creacion.setObjectName(u"btn_creacion")
+        self.btn_configuracion = QPushButton(Form)
+        self.btn_configuracion.setObjectName(u"btn_configuracion")
 
-        self.verticalLayout.addWidget(self.btn_creacion)
+        self.verticalLayout.addWidget(self.btn_configuracion)
 
         self.verticalSpacer = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
 
@@ -69,10 +69,10 @@ class Ui_Form(object):
 
     def retranslateUi(self, Form):
         Form.setWindowTitle(QCoreApplication.translate("Form", u"Form", None))
+        self.btn_creacion.setText(QCoreApplication.translate("Form", u"Crear Archivos SQL de Archivo Excel", None))
+        self.btn_ejecucion.setText(QCoreApplication.translate("Form", u"Ejecutar archivos SQL en la base de datos", None))
+        self.btn_exportacion.setText(QCoreApplication.translate("Form", u"Obtener tablas de la base de datos a Excel", None))
         self.btn_configuracion.setText(QCoreApplication.translate("Form", u"Configuraci\u00f3n", None))
-        self.btn_ejecucion.setText(QCoreApplication.translate("Form", u"Ejecuci\u00f3n de scripts", None))
-        self.btn_exportacion.setText(QCoreApplication.translate("Form", u"Exportaci\u00f3n a Excel", None))
-        self.btn_creacion.setText(QCoreApplication.translate("Form", u"Crear Inserts", None))
         self.btn_salida.setText(QCoreApplication.translate("Form", u"Salida", None))
     # retranslateUi
 

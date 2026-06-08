@@ -32,30 +32,30 @@
       <number>10</number>
      </property>
      <item>
-      <widget class="QPushButton" name="btn_configuracion">
+      <widget class="QPushButton" name="btn_creacion">
        <property name="text">
-        <string>Configuración</string>
+        <string>Crear Archivos SQL de Archivo Excel</string>
        </property>
       </widget>
      </item>
      <item>
       <widget class="QPushButton" name="btn_ejecucion">
        <property name="text">
-        <string>Ejecución de scripts</string>
+        <string>Ejecutar archivos SQL en la base de datos</string>
        </property>
       </widget>
      </item>
      <item>
       <widget class="QPushButton" name="btn_exportacion">
        <property name="text">
-        <string>Exportación a Excel</string>
+        <string>Obtener tablas de la base de datos a Excel</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="btn_creacion">
+      <widget class="QPushButton" name="btn_configuracion">
        <property name="text">
-        <string>Creación de scripts</string>
+        <string>Configuración</string>
        </property>
       </widget>
      </item>
