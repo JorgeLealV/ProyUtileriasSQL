@@ -1,0 +1,5 @@
+# Ignorar el entorno virtual
+venv/
+
+# Ignorar configuraciones locales
+# ConfInsert.txt
