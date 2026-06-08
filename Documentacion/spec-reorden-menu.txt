@@ -1,0 +1,34 @@
+Feature: Reordenamiento y renombrado de opciones del menú principal
+
+Contexto
+--------
+La aplicación tiene un menú principal definido en ui/PanelPrincipal.ui con
+cuatro botones QPushButton. El orden y nombres actuales son:
+
+  1. Configuración
+  2. Ejecución de scripts
+  3. Exportación a Excel
+  4. Crear Inserts
+
+El archivo de vista asociado es views/panel_principal_view.py.
+
+Cambio solicitado
+-----------------
+Reordenar los botones y actualizar sus etiquetas de texto así:
+
+  1. Crear Inserts         → "Crear Archivos SQL de Archivo Excel"
+  2. Ejecución de Scripts  → "Ejecutar archivos SQL en la base de datos"
+  3. Exportación a Excel   → "Obtener tablas de la base de datos a Excel"
+  4. Configuración         → "Configuración"
+
+Alcance
+-------
+- Solo cambia el orden visual y el texto de las etiquetas en PanelPrincipal.ui.
+- No se modifica la lógica de navegación ni los métodos en panel_principal_view.py.
+- El tema visual Dark Executive y los estilos de botones se mantienen sin cambios.
+
+Criterio de aceptación
+----------------------
+- Al abrir la aplicación, el primer botón visible es "Crear Archivos SQL de Archivo Excel".
+- Los cuatro botones conservan su funcionalidad (navegan a la misma ventana de siempre).
+- Ningún estilo ni color cambia respecto al estado actual.
