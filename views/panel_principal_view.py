@@ -92,12 +92,16 @@ class PanelPrincipalView(QMainWindow):
         self._update_button_states()  # 5. Ajusta el estado inicial (habilitado/deshabilitado) de los botones.
         self._load_config_file()  # 6. Carga la configuración previa desde "ConfInsert.txt".
 
-        screen = QApplication.primaryScreen().geometry()
-        self.resize(min(1500, screen.width() - 80), min(920, screen.height() - 80))
+        primary_screen = QApplication.primaryScreen()
+        screen = primary_screen.geometry()
+        offset_px = round(primary_screen.logicalDotsPerInchY() / 2.54 * 1.5)
+
+        self.resize(min(1500, screen.width() - 80), min(920, screen.height() - 80) - offset_px)
 
         frame_geometry = self.frameGeometry()
         frame_geometry.moveCenter(screen.center())
-        self.move(frame_geometry.topLeft())
+        top_left = frame_geometry.topLeft()
+        self.move(top_left.x(), top_left.y() - offset_px)
 
     def load_ui(self):
         """
