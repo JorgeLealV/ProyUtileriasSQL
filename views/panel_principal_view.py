@@ -73,7 +73,9 @@ class PanelPrincipalView(QMainWindow):
         self.btn_browse_directorio_salida = None
         self.listWidget_hojas = None
         self.btn_agregar = None
+        self.btn_agregar_todos = None
         self.btn_quitar = None
+        self.btn_quitar_todos = None
         self.listWidget_tablas_seleccionadas = None
         self.btn_salir = None
         self.btn_borrar_config = None
@@ -138,7 +140,9 @@ class PanelPrincipalView(QMainWindow):
         )
         self.listWidget_hojas = self.findChild(QListWidget, "listWidget_hojas")
         self.btn_agregar = self.findChild(QPushButton, "btn_agregar")
+        self.btn_agregar_todos = self.findChild(QPushButton, "btn_agregar_todos")
         self.btn_quitar = self.findChild(QPushButton, "btn_quitar")
+        self.btn_quitar_todos = self.findChild(QPushButton, "btn_quitar_todos")
         self.listWidget_tablas_seleccionadas = self.findChild(
             QListWidget, "listWidget_tablas_seleccionadas"
         )
@@ -196,8 +200,12 @@ class PanelPrincipalView(QMainWindow):
         # Botones para mover tablas entre la lista de disponibles y seleccionadas.
         if self.btn_agregar:
             self.btn_agregar.clicked.connect(self._add_item)
+        if self.btn_agregar_todos:
+            self.btn_agregar_todos.clicked.connect(self._add_all_items)
         if self.btn_quitar:
             self.btn_quitar.clicked.connect(self._remove_item)
+        if self.btn_quitar_todos:
+            self.btn_quitar_todos.clicked.connect(self._remove_all_items)
         if self.btn_salir:
             self.btn_salir.clicked.connect(self._go_to_main_window)
 
@@ -431,13 +439,17 @@ class PanelPrincipalView(QMainWindow):
         self._update_button_states()
 
     def _update_button_states(self):
-        """Habilita o deshabilita los botones 'Agregar' y 'Quitar' según el contexto."""
+        """Habilita o deshabilita los botones 'Agregar', 'Quitar' y sus variantes masivas según el contexto."""
         self.btn_agregar.setEnabled(
             len(self.listWidget_hojas.selectedItems()) > 0
         )
         self.btn_quitar.setEnabled(
             len(self.listWidget_tablas_seleccionadas.selectedItems()) > 0
         )
+        if self.btn_agregar_todos:
+            self.btn_agregar_todos.setEnabled(self.listWidget_hojas.count() > 0)
+        if self.btn_quitar_todos:
+            self.btn_quitar_todos.setEnabled(self.listWidget_tablas_seleccionadas.count() > 0)
 
     def _add_item(self):
         """Mueve una tabla de la lista de disponibles a la de seleccionadas."""
@@ -449,6 +461,14 @@ class PanelPrincipalView(QMainWindow):
             self.listWidget_tablas_seleccionadas.addItem(item.text())
             self.listWidget_hojas.takeItem(self.listWidget_hojas.row(item))
 
+        self._update_button_states()
+        self._save_tables_config()
+
+    def _add_all_items(self):
+        """Mueve todas las tablas de disponibles a seleccionadas."""
+        while self.listWidget_hojas.count() > 0:
+            item = self.listWidget_hojas.takeItem(0)
+            self.listWidget_tablas_seleccionadas.addItem(item.text())
         self._update_button_states()
         self._save_tables_config()
 
@@ -466,6 +486,14 @@ class PanelPrincipalView(QMainWindow):
 
         self._update_button_states()
         self._save_tables_config()  # Guarda el cambio en ConfInsert.txt
+
+    def _remove_all_items(self):
+        """Mueve todas las tablas de seleccionadas a disponibles."""
+        while self.listWidget_tablas_seleccionadas.count() > 0:
+            item = self.listWidget_tablas_seleccionadas.takeItem(0)
+            self.listWidget_hojas.addItem(item.text())
+        self._update_button_states()
+        self._save_tables_config()
 
     def _go_to_main_window(self):
         """Oculta la ventana actual y muestra la ventana principal."""
@@ -774,12 +802,32 @@ class PanelPrincipalView(QMainWindow):
                 border-color: #205840;
                 color: #70B090;
             }
+            QPushButton#btn_agregar_todos {
+                background-color: #0A2018;
+                border: 1px solid #143024;
+                color: #4A9068;
+            }
+            QPushButton#btn_agregar_todos:hover {
+                background-color: #0F2C22;
+                border-color: #205840;
+                color: #70B090;
+            }
             QPushButton#btn_quitar {
                 background-color: #200A0A;
                 border: 1px solid #301010;
                 color: #905858;
             }
             QPushButton#btn_quitar:hover {
+                background-color: #2C1010;
+                border-color: #502020;
+                color: #B07878;
+            }
+            QPushButton#btn_quitar_todos {
+                background-color: #200A0A;
+                border: 1px solid #301010;
+                color: #905858;
+            }
+            QPushButton#btn_quitar_todos:hover {
                 background-color: #2C1010;
                 border-color: #502020;
                 color: #B07878;

@@ -1,3 +1,3 @@
 01|ArchExcel|C:/Users/jleal/Documents/AAAA_Trabajo/CFDI_CSHARP/BaseDatos/ArchivosExcel/DatosCatalogosOriginales.xlsx
 01|DirSal|C:/Users/jleal/Documents/AAAA_Trabajo/CFDI_CSHARP/BaseDatos/ArchivosExcel
-01|Tablas|TipoEstaSAT,TipoParam,Parametros,TipAlcance,PerUsuario
+01|Tablas|Hoja1,Hoja2,Hoja3
