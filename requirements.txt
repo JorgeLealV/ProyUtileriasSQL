@@ -3,3 +3,4 @@ psycopg2-binary
 openpyxl
 PySide6
 plantuml
+xlsxwriter

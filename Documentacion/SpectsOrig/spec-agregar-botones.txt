@@ -1,0 +1,13 @@
+En la opción del botón del archivo principal dice "Crear Archivos SQL de Archivo Excel" nos despliega una pantalla donde preseleccionando el primer elemento del componente Tab denominado "Crear Inserts" 
+en esa pantalla existen dos botones denominados "Agregar" y "Quitar" hay que agregar dos botones mas:
+
+Botón denominado "Agregar Todos" debajo del botón "Agregar" que tenga la siguiente funcionalidad 
+	Tomar todos los elementos del ListBox izquierdo con el titulo "Tablas disponibles" y los mande al ListBox derecho con el titulo "Tablas seleccionadas"
+
+Botón denominado "Quitar Todos" debajo del botón "Quitar" que tenga la siguiente funcionalidad 
+	Tomar todos los elementos del ListBox derecho con el titulo "Tablas seleccionadas" y los mande al ListBox izquierdo con el titulo "Tablas disponibles"
+
+
+1. Casos borde que pasa si ya no hay elementos en el ListBox origen al presionar el boton "Agregar Todos"  y/o  "Quitar Todos", cuando no existan elementos que agregar o quitar entonces deshabilitar dichos botones
+2. Orden de los elementos al mover todos, se reordena alfabeticamente
+3. Estado de los botones existentes los botones Agregar y Quitar Todos deben deshabilitarse cuando no hay nada que mover

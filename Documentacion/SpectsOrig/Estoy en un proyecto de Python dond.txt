@@ -1,0 +1,15 @@
+Estoy en un proyecto de Python donde estoy utilizando speckit como framework para el desarrollo guiado por especificaciones (SDD) ya inicie el proyecto con claude como IA, también inicialice el proceso de constitución 
+
+Actualmente el orden del menú principal es 
+
+configuración
+Ejecución de scripts
+Exportación a Excel
+Crear Inserts
+
+el orden deberá ser el siguiente 
+
+Crear Inserts  		y renombrarlo como "Crear Archivos SQL de Archivo Excel"
+Ejecución de Scripts 	y renombrarlo como "Ejecutar archivos SQL en la base de datos"
+Exportación a Excel 	y renombrarlo como "Obtener tablas de la base de datos a Excel"
+configuración		y renombrarlo como "Configuración"

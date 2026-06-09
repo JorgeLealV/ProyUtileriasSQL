@@ -81,9 +81,23 @@
            </widget>
           </item>
           <item>
+           <widget class="QPushButton" name="btn_agregar_todos">
+            <property name="text">
+             <string>Agregar Todos</string>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QPushButton" name="btn_quitar">
             <property name="text">
              <string>Quitar</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btn_quitar_todos">
+            <property name="text">
+             <string>Quitar Todos</string>
             </property>
            </widget>
           </item>

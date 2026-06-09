@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'PanelPrincipal.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.10.2
+## Created by: Qt User Interface Compiler version 6.11.1
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -15,10 +15,10 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QFont, QFontDatabase, QGradient, QIcon,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
-from PySide6.QtWidgets import (QApplication, QGridLayout, QLabel, QLineEdit,
-    QListWidget, QListWidgetItem, QMainWindow, QPushButton,
-    QSizePolicy, QSpacerItem, QTabWidget, QVBoxLayout,
-    QWidget)
+from PySide6.QtWidgets import (QApplication, QGridLayout, QHBoxLayout, QLabel,
+    QLineEdit, QListWidget, QListWidgetItem, QMainWindow,
+    QPushButton, QSizePolicy, QSpacerItem, QTabWidget,
+    QVBoxLayout, QWidget)
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -28,7 +28,23 @@ class Ui_MainWindow(object):
         self.centralwidget = QWidget(MainWindow)
         self.centralwidget.setObjectName(u"centralwidget")
         self.verticalLayout = QVBoxLayout(self.centralwidget)
+        self.verticalLayout.setSpacing(0)
         self.verticalLayout.setObjectName(u"verticalLayout")
+        self.topBarLayout = QHBoxLayout()
+        self.topBarLayout.setObjectName(u"topBarLayout")
+        self.topBarLayout.setContentsMargins(6)
+        self.horizontalSpacer_top = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+
+        self.topBarLayout.addItem(self.horizontalSpacer_top)
+
+        self.btn_salir = QPushButton(self.centralwidget)
+        self.btn_salir.setObjectName(u"btn_salir")
+
+        self.topBarLayout.addWidget(self.btn_salir)
+
+
+        self.verticalLayout.addLayout(self.topBarLayout)
+
         self.tabWidget = QTabWidget(self.centralwidget)
         self.tabWidget.setObjectName(u"tabWidget")
         self.tab_genera_inserts = QWidget()
@@ -49,10 +65,20 @@ class Ui_MainWindow(object):
 
         self.verticalLayout_2.addWidget(self.btn_agregar)
 
+        self.btn_agregar_todos = QPushButton(self.tab_genera_inserts)
+        self.btn_agregar_todos.setObjectName(u"btn_agregar_todos")
+
+        self.verticalLayout_2.addWidget(self.btn_agregar_todos)
+
         self.btn_quitar = QPushButton(self.tab_genera_inserts)
         self.btn_quitar.setObjectName(u"btn_quitar")
 
         self.verticalLayout_2.addWidget(self.btn_quitar)
+
+        self.btn_quitar_todos = QPushButton(self.tab_genera_inserts)
+        self.btn_quitar_todos.setObjectName(u"btn_quitar_todos")
+
+        self.verticalLayout_2.addWidget(self.btn_quitar_todos)
 
         self.verticalSpacer = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
 
@@ -116,11 +142,6 @@ class Ui_MainWindow(object):
 
         self.verticalLayout.addWidget(self.tabWidget)
 
-        self.btn_salir = QPushButton(self.centralwidget)
-        self.btn_salir.setObjectName(u"btn_salir")
-
-        self.verticalLayout.addWidget(self.btn_salir)
-
         MainWindow.setCentralWidget(self.centralwidget)
 
         self.retranslateUi(MainWindow)
@@ -133,9 +154,12 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"Herramienta de Carga de Datos", None))
+        self.btn_salir.setText(QCoreApplication.translate("MainWindow", u"\u2190  Men\u00fa principal", None))
         self.label_archivo_excel.setText(QCoreApplication.translate("MainWindow", u"Proporciona la direcci\u00f3n del archivo excel que contiene los datos", None))
         self.btn_agregar.setText(QCoreApplication.translate("MainWindow", u"Agregar", None))
+        self.btn_agregar_todos.setText(QCoreApplication.translate("MainWindow", u"Agregar Todos", None))
         self.btn_quitar.setText(QCoreApplication.translate("MainWindow", u"Quitar", None))
+        self.btn_quitar_todos.setText(QCoreApplication.translate("MainWindow", u"Quitar Todos", None))
         self.label_tablas_disponibles.setText(QCoreApplication.translate("MainWindow", u"Tablas disponibles", None))
         self.btn_browse_archivo_excel.setText(QCoreApplication.translate("MainWindow", u"...", None))
         self.label_tablas_seleccionadas.setText(QCoreApplication.translate("MainWindow", u"Tablas seleccionadas", None))
@@ -144,6 +168,5 @@ class Ui_MainWindow(object):
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_genera_inserts), QCoreApplication.translate("MainWindow", u"Crear Inserts", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_ejecuta_querys), QCoreApplication.translate("MainWindow", u"Ejecuta Querys", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_exportar_tablas), QCoreApplication.translate("MainWindow", u"Exportar Tablas", None))
-        self.btn_salir.setText(QCoreApplication.translate("MainWindow", u"\u2190  Men\u00fa principal", None))
     # retranslateUi
 
