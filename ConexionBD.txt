@@ -1,0 +1,6 @@
+# --- Parámetros de Conexión a la Base de Datos ---
+my_db = "CFDI1"
+my_user = "postgres"
+my_pass = "nicol8899"
+my_host = "localhost"
+my_port = "5432"

@@ -1,3 +1,8 @@
 01|ArchExcel|C:/Users/jleal/Documents/AAAA_Trabajo/CFDI_CSHARP/BaseDatos/ArchivosExcel/DatosCatalogosOriginales.xlsx
-01|DirSal|C:/Users/jleal/Documents/AAAA_Trabajo/CFDI_CSHARP/BaseDatos/ArchivosExcel
-01|Tablas|Hoja1,Hoja2,Hoja3
+01|Tablas|Usuarios,TipoNomina,TipoEstaSAT,TipoEstNom,TipoDivision,TipoParam,TipoPermiso,TipAlcance
+01|DirSal|C:/Users/jleal/Documents/AAAA_Trabajo/CFDI_CSHARP/BaseDatos/ArchivosSQL
+02|DirEnt|C:/Users/jleal/Documents/AAAA_Trabajo/CFDI_CSHARP/BaseDatos/ArchivosSQL
+02|Querys|Script05,Usuarios
+02|NomLog|error
+02|ChekLog|Si
+02|ChekOperV|Si
