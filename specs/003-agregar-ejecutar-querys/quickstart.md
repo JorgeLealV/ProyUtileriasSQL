@@ -37,14 +37,14 @@ Abrir el panel principal y seleccionar la pestaña **"Ejecutar Querys"**.
    - La ruta aparece en el text box.
    - `insert_a.sql`, `insert_b.sql`, `insert_c.sql` aparecen en "Querys Disponibles".
    - "Querys Seleccionados" vacío.
-   - `ConfInsert.txt` contiene `02|DirEnt|C:\temp\querys_test`.
+   - `ConfInsert.conf` contiene `02|DirEnt|C:\temp\querys_test`.
 
 ---
 
 ## Test 3 — Gestión de listas
 
 1. Seleccionar `insert_a.sql` en "Querys Disponibles", presionar **Agregar**.
-2. **Esperado**: `insert_a` pasa a "Querys Seleccionados"; `ConfInsert.txt` contiene `02|Querys|insert_a`.
+2. **Esperado**: `insert_a` pasa a "Querys Seleccionados"; `ConfInsert.conf` contiene `02|Querys|insert_a`.
 3. Presionar **Agregar Todos**.
 4. **Esperado**: `insert_b` e `insert_c` también pasan; "Querys Disponibles" vacío; `02|Querys|insert_a, insert_b, insert_c`.
 5. Seleccionar `insert_b` en "Querys Seleccionados", presionar **Quitar**.
@@ -60,7 +60,7 @@ Abrir el panel principal y seleccionar la pestaña **"Ejecutar Querys"**.
 1. Marcar el checkbox **"Crear Log de Operación"**.
 2. **Esperado**: text box "Nombre del archivo log" se habilita.
 3. Escribir `mi_log.txt` en el text box; presionar **Guardar nombre**.
-4. **Esperado**: `ConfInsert.txt` contiene `02|NomLog|mi_log.txt`.
+4. **Esperado**: `ConfInsert.conf` contiene `02|NomLog|mi_log.txt`.
 5. Desmarcar el checkbox.
 6. **Esperado**: text box se deshabilita; botón "Guardar nombre" se deshabilita.
 
@@ -108,16 +108,16 @@ Abrir el panel principal y seleccionar la pestaña **"Ejecutar Querys"**.
 
 ## Test 9 — Directorio guardado eliminado
 
-1. Con `02|DirEnt|C:\temp\querys_test` en ConfInsert.txt, eliminar la carpeta `C:\temp\querys_test`.
+1. Con `02|DirEnt|C:\temp\querys_test` en ConfInsert.conf, eliminar la carpeta `C:\temp\querys_test`.
 2. Cambiar a otra pestaña y volver a "Ejecutar Querys".
-3. **Esperado**: ambas listas vacías, text box de directorio vacío, entradas `02|DirEnt` y `02|Querys` borradas de ConfInsert.txt.
+3. **Esperado**: ambas listas vacías, text box de directorio vacío, entradas `02|DirEnt` y `02|Querys` borradas de ConfInsert.conf.
 
 ---
 
 ## Test 10 — Limpiar configuración
 
 1. Con configuración activa, presionar **Limpiar configuración**.
-2. **Esperado**: text box de directorio vacío, ambas listas vacías, checkboxes desmarcados, text box log vacío y deshabilitado; entradas `02|DirEnt`, `02|Querys`, `02|NomLog` eliminadas de ConfInsert.txt.
+2. **Esperado**: text box de directorio vacío, ambas listas vacías, checkboxes desmarcados, text box log vacío y deshabilitado; entradas `02|DirEnt`, `02|Querys`, `02|NomLog` eliminadas de ConfInsert.conf.
 
 ---
 

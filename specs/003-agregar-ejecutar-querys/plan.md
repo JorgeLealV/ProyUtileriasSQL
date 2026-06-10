@@ -14,7 +14,7 @@ Implementar la funcionalidad completa de la pestaña "Ejecutar Querys" que ya ex
 
 **Primary Dependencies**: PySide6 6.11.1 (Qt 6), psycopg2-binary 2.9.12, QUiLoader
 
-**Storage**: `ConfInsert.txt` (02|Clave|Valor), `ConexionBD.txt` (parámetros BD)
+**Storage**: `ConfInsert.conf` (02|Clave|Valor), `ConexionBD.txt` (parámetros BD)
 
 **Testing**: Manual (ver `quickstart.md`)
 
@@ -315,7 +315,7 @@ def _on_tab_changed(self, index):
         self._load_ejecutar_querys_config()
 
 def _load_ejecutar_querys_config(self):
-    config_path = "ConfInsert.txt"
+    config_path = "ConfInsert.conf"
     config = {}
     if os.path.exists(config_path):
         with open(config_path, "r", encoding="utf-8") as f:
@@ -457,7 +457,7 @@ def _eq_limpiar_configuracion(self):
     if self.lineEdit_nom_log:
         self.lineEdit_nom_log.clear()
 
-    config_path = "ConfInsert.txt"
+    config_path = "ConfInsert.conf"
     if os.path.exists(config_path):
         with open(config_path, "r", encoding="utf-8") as f:
             lines = [l for l in f if not l.startswith("02|")]
@@ -579,7 +579,7 @@ def _resolve_log_path(self, directory: str, filename: str) -> str:
     return os.path.join(directory, f"{name}_{timestamp}{ext}")
 
 def _eq_write_config(self, key: str, value):
-    config_path = "ConfInsert.txt"
+    config_path = "ConfInsert.conf"
     prefix = f"02|{key}|"
     lines = []
     if os.path.exists(config_path):

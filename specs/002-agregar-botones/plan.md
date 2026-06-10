@@ -14,7 +14,7 @@ Añadir dos botones ("Agregar Todos" y "Quitar Todos") en la pestaña "Crear Ins
 
 **Primary Dependencies**: PySide6 6.11.1 (Qt 6), QUiLoader
 
-**Storage**: `ConfInsert.txt` (configuración de usuario, formato `01|Clave|Valor`)
+**Storage**: `ConfInsert.conf` (configuración de usuario, formato `01|Clave|Valor`)
 
 **Testing**: Manual (ver `quickstart.md`)
 

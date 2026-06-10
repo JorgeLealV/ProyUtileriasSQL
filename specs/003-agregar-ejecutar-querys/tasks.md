@@ -50,14 +50,14 @@ description: "Task list for feature 003-agregar-ejecutar-querys"
 
 **Goal**: El usuario puede seleccionar un directorio `.sql`, ver los archivos en "Querys Disponibles", y la configuración se restaura automáticamente al reabrir la pestaña.
 
-**Independent Test**: Ejecutar Tests 1 y 2 del quickstart.md — sin configuración previa y con `02|DirEnt` guardado en `ConfInsert.txt`.
+**Independent Test**: Ejecutar Tests 1 y 2 del quickstart.md — sin configuración previa y con `02|DirEnt` guardado en `ConfInsert.conf`.
 
 ### Implementación US1
 
-- [x] T009 [US1] Implementar método `_eq_write_config(key, value)` en `views/panel_principal_view.py`: escribe/actualiza/elimina entradas `02|key|value` en `ConfInsert.txt` sin afectar entradas `01|` (plan.md Paso 8)
+- [x] T009 [US1] Implementar método `_eq_write_config(key, value)` en `views/panel_principal_view.py`: escribe/actualiza/elimina entradas `02|key|value` en `ConfInsert.conf` sin afectar entradas `01|` (plan.md Paso 8)
 - [x] T010 [US1] Implementar método `_on_tab_changed(index)` en `views/panel_principal_view.py`: llama `_load_ejecutar_querys_config()` cuando `index == 1` (plan.md Paso 8)
-- [x] T011 [US1] Implementar método `_load_ejecutar_querys_config()` en `views/panel_principal_view.py`: lee entradas `02|DirEnt`, `02|Querys`, `02|NomLog` de `ConfInsert.txt`; verifica existencia del directorio; distribuye archivos `.sql` entre ambas listas; limpia entradas inválidas (plan.md Paso 8)
-- [x] T012 [US1] Implementar método `_browse_dir_querys()` en `views/panel_principal_view.py`: abre `QFileDialog.getExistingDirectory`, actualiza `lineEdit_dir_querys`, limpia ambas listas, escribe `02|DirEnt` en `ConfInsert.txt` y escanea archivos `.sql` del nuevo directorio (plan.md Paso 8)
+- [x] T011 [US1] Implementar método `_load_ejecutar_querys_config()` en `views/panel_principal_view.py`: lee entradas `02|DirEnt`, `02|Querys`, `02|NomLog` de `ConfInsert.conf`; verifica existencia del directorio; distribuye archivos `.sql` entre ambas listas; limpia entradas inválidas (plan.md Paso 8)
+- [x] T012 [US1] Implementar método `_browse_dir_querys()` en `views/panel_principal_view.py`: abre `QFileDialog.getExistingDirectory`, actualiza `lineEdit_dir_querys`, limpia ambas listas, escribe `02|DirEnt` en `ConfInsert.conf` y escanea archivos `.sql` del nuevo directorio (plan.md Paso 8)
 
 **Checkpoint**: Test 1 y 2 del quickstart.md pasan. La pestaña restaura directorio y listas correctamente.
 
@@ -65,9 +65,9 @@ description: "Task list for feature 003-agregar-ejecutar-querys"
 
 ## Phase 4: User Story 2 — Gestionar Querys Seleccionados (Priority: P2)
 
-**Goal**: El usuario mueve archivos `.sql` entre "Querys Disponibles" y "Querys Seleccionados" con los cuatro botones; cada operación actualiza `ConfInsert.txt` inmediatamente.
+**Goal**: El usuario mueve archivos `.sql` entre "Querys Disponibles" y "Querys Seleccionados" con los cuatro botones; cada operación actualiza `ConfInsert.conf` inmediatamente.
 
-**Independent Test**: Test 3 del quickstart.md — agregar, agregar todos, quitar, quitar todos, verificar `02|Querys` en `ConfInsert.txt` tras cada operación.
+**Independent Test**: Test 3 del quickstart.md — agregar, agregar todos, quitar, quitar todos, verificar `02|Querys` en `ConfInsert.conf` tras cada operación.
 
 ### Implementación US2
 
@@ -83,16 +83,16 @@ description: "Task list for feature 003-agregar-ejecutar-querys"
 
 ## Phase 5: User Story 3 — Configurar y Guardar Opciones de Ejecución (Priority: P3)
 
-**Goal**: El usuario puede activar/desactivar el log, escribir el nombre del archivo, guardarlo en `ConfInsert.txt` y limpiar toda la configuración con un botón.
+**Goal**: El usuario puede activar/desactivar el log, escribir el nombre del archivo, guardarlo en `ConfInsert.conf` y limpiar toda la configuración con un botón.
 
-**Independent Test**: Test 4 y 10 del quickstart.md — activar checkbox log, guardar nombre, verificar `02|NomLog` en `ConfInsert.txt`; luego limpiar y verificar que las entradas `02|*` desaparecen.
+**Independent Test**: Test 4 y 10 del quickstart.md — activar checkbox log, guardar nombre, verificar `02|NomLog` en `ConfInsert.conf`; luego limpiar y verificar que las entradas `02|*` desaparecen.
 
 ### Implementación US3
 
 - [x] T018 [US3] Implementar método `_on_crear_log_changed()` en `views/panel_principal_view.py`: llama `_update_eq_button_states()` para recalcular estado de `lineEdit_nom_log` y `btn_guardar_nom_log` según estado del checkbox (plan.md Paso 8)
-- [x] T019 [US3] Implementar método `_eq_guardar_nom_log()` en `views/panel_principal_view.py`: guarda `02|NomLog|<texto>` en `ConfInsert.txt` si `lineEdit_nom_log` tiene contenido; muestra confirmación con `_show_message_box()` (plan.md Paso 8)
+- [x] T019 [US3] Implementar método `_eq_guardar_nom_log()` en `views/panel_principal_view.py`: guarda `02|NomLog|<texto>` en `ConfInsert.conf` si `lineEdit_nom_log` tiene contenido; muestra confirmación con `_show_message_box()` (plan.md Paso 8)
 - [x] T020 [US3] Implementar método `_resolve_log_path(directory, filename)` en `views/panel_principal_view.py`: retorna ruta completa; si el archivo ya existe añade sufijo `_YYYYMMDD_HHMMSS` antes de la extensión usando `datetime.datetime.now()` (plan.md Paso 8)
-- [x] T021 [US3] Implementar método `_eq_limpiar_configuracion()` en `views/panel_principal_view.py`: limpia ambas listas, `lineEdit_dir_querys`, `lineEdit_nom_log`; desmarca ambos checkboxes; deshabilita `lineEdit_nom_log`; elimina todas las entradas `02|*` de `ConfInsert.txt` (plan.md Paso 8)
+- [x] T021 [US3] Implementar método `_eq_limpiar_configuracion()` en `views/panel_principal_view.py`: limpia ambas listas, `lineEdit_dir_querys`, `lineEdit_nom_log`; desmarca ambos checkboxes; deshabilita `lineEdit_nom_log`; elimina todas las entradas `02|*` de `ConfInsert.conf` (plan.md Paso 8)
 
 **Checkpoint**: Tests 4 y 10 del quickstart.md pasan.
 

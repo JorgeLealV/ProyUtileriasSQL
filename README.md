@@ -6,7 +6,7 @@ Este proyecto es una aplicación de escritorio desarrollada en Python con la lib
 
 - **Interfaz Gráfica de Usuario (GUI):** Construida con PySide6 (la versión oficial de Qt para Python), permitiendo una interacción amigable.
 - **Generación de Scripts SQL:** Lee hojas de un archivo Excel y convierte sus filas en sentencias `INSERT` de SQL.
-- **Configuración Persistente:** Guarda las rutas y selecciones del usuario en un archivo de texto (`ConfInsert.txt`) para no tener que reconfigurar todo en cada uso.
+- **Configuración Persistente:** Guarda las rutas y selecciones del usuario en un archivo de texto (`ConfInsert.conf`) para no tener que reconfigurar todo en cada uso.
 - **Flexibilidad:** Permite generar un script SQL por cada tabla o consolidar todos los `INSERTs` en un único archivo.
 
 ## Requisitos
@@ -64,7 +64,7 @@ A continuación se describe la función de cada archivo y directorio importante:
 
 -   **`requirements.txt`**: Lista las librerías de Python que el proyecto necesita para funcionar.
 
--   **`ConfInsert.txt`**: Archivo de configuración de texto plano. La aplicación lo usa para guardar y leer las rutas del archivo Excel, el directorio de salida y las tablas seleccionadas, evitando que el usuario tenga que ingresarlas cada vez.
+-   **`ConfInsert.conf`**: Archivo de configuración de texto plano. La aplicación lo usa para guardar y leer las rutas del archivo Excel, el directorio de salida y las tablas seleccionadas, evitando que el usuario tenga que ingresarlas cada vez.
 
 -   **`diagram_tools.py`**: Un script de utilidad para generar automáticamente los diagramas del proyecto (en formato PNG) a partir de los archivos `.puml`.
 

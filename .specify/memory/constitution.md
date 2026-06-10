@@ -11,7 +11,7 @@ Sections added:
   ✅  Identidad y Propósito (nueva — cubre Sección 1 de constitution.txt)
 
 Principles modified:
-  I.  Arquitectura en Capas    — añadidas claves específicas de ConfInsert.txt
+  I.  Arquitectura en Capas    — añadidas claves específicas de ConfInsert.conf
   II. Identidad Visual Ejecutiva — añadidos patrones de interacción y tamaños
                                    de ventana (transfer list, min/max sizes)
   V.  Calidad y Persistencia   — añadida regla de ciclo de vida de señales Qt
@@ -69,12 +69,12 @@ responsabilidades exclusivas y no intercambiables:
 - **`ui/`** — Archivos `.ui` (Qt Designer) y clases generadas. Sin lógica.
 - **`views/`** — Clases `QMainWindow`. Responsabilidades: cargar `.ui` con
   `QUiLoader`, conectar señales, validar input del usuario, mostrar
-  resultados y gestionar configuración persistente (`ConfInsert.txt`).
+  resultados y gestionar configuración persistente (`ConfInsert.conf`).
 - **`services/`** — Funciones de negocio puras. Operan sobre archivos y BD.
   DEBEN ser importables sin efectos secundarios.
 - **`controllers/`** — Scripts CLI que llaman directamente a servicios.
 
-La configuración de usuario se persiste en `ConfInsert.txt` con formato
+La configuración de usuario se persiste en `ConfInsert.conf` con formato
 `01|Clave|Valor`. Claves actuales: `ArchExcel`, `DirSal`, `Tablas`, `ArchTodos`.
 Toda nueva configuración DEBE seguir este mismo formato.
 

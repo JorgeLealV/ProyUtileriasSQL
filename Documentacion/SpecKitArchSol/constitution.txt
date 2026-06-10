@@ -64,7 +64,7 @@ Estructura de directorios y responsabilidades:
                         - Conectar señales Qt a slots (métodos internos).
                         - Validar entradas del usuario antes de llamar servicios.
                         - Mostrar resultados y errores al usuario.
-                        - Gestionar la configuración persistente (ConfInsert.txt).
+                        - Gestionar la configuración persistente (ConfInsert.conf).
                       Prohibido: contener lógica de negocio o consultas SQL.
 
   services/           Funciones de negocio puras.
@@ -84,7 +84,7 @@ Reglas de navegación entre ventanas:
     y llama a _go_to_main_window() para regresar al menú principal.
 
 Persistencia de configuración:
-  - Archivo de texto plano: ConfInsert.txt (en el directorio de trabajo).
+  - Archivo de texto plano: ConfInsert.conf (en el directorio de trabajo).
   - Formato de línea: 01|Clave|Valor
   - Claves actuales: ArchExcel, DirSal, Tablas, ArchTodos.
   - Toda nueva configuración de usuario sigue este mismo formato.

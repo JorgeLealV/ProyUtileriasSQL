@@ -25,7 +25,7 @@ btn_quitar_todos    → enabled = count(listWidget_tablas_seleccionadas) > 0   �
 | Invariante | Descripción |
 |------------|-------------|
 | Partición | Cada nombre de hoja aparece exactamente en uno de los dos ListWidgets, nunca en ambos ni en ninguno. |
-| Persistencia | `ConfInsert.txt[Tablas]` refleja siempre el contenido de `listWidget_tablas_seleccionadas` tras cualquier operación. |
+| Persistencia | `ConfInsert.conf[Tablas]` refleja siempre el contenido de `listWidget_tablas_seleccionadas` tras cualquier operación. |
 | Estado botones | El estado habilitado de los 4 botones se recalcula en `_update_button_states()` tras cualquier cambio en las listas. |
 
 ### Transiciones de Estado

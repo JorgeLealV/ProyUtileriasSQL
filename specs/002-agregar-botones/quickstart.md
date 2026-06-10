@@ -45,7 +45,7 @@ La pantalla se abre en la pestaña "Crear Inserts" por defecto.
 1. Usar "Agregar Todos" para seleccionar todas las hojas.
 2. Regresar al menú principal ("← Menú principal").
 3. Volver a abrir "Crear Archivos SQL de Archivo Excel".
-4. Verificar que las tablas siguen en `Tablas seleccionadas` (persistidas en `ConfInsert.txt`).
+4. Verificar que las tablas siguen en `Tablas seleccionadas` (persistidas en `ConfInsert.conf`).
 
 ### Caso de prueba 5 — Interoperabilidad con Agregar/Quitar individual
 

@@ -15,7 +15,7 @@ import pandas as pd
 
 # Ruta absoluta al archivo de configuración, independiente del CWD de lanzamiento
 _CONF_FILE = os.path.normpath(
-    os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "ConfInsert.txt")
+    os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "ConfInsert.conf")
 )
 from PySide6.QtWidgets import (
     QMainWindow,
@@ -164,7 +164,7 @@ class PanelPrincipalView(QMainWindow):
         self.connect_signals()  # 3. Conecta las "señales" (clics) de los widgets a "slots" (métodos).
         self._apply_styles()  # 4. Aplica una hoja de estilos CSS para dar apariencia a la app.
         self._update_button_states()  # 5. Ajusta el estado inicial (habilitado/deshabilitado) de los botones.
-        self._load_config_file()  # 6. Carga la configuración previa desde "ConfInsert.txt".
+        self._load_config_file()  # 6. Carga la configuración previa desde "ConfInsert.conf".
         self._load_ejecutar_querys_config()  # 7. Carga la configuración previa de la pestaña "Ejecutar Querys".
 
         primary_screen = QApplication.primaryScreen()
@@ -375,7 +375,7 @@ class PanelPrincipalView(QMainWindow):
         if not os.path.exists(config_path):
             self._show_message_box(
                 "Error",
-                "El archivo de configuración 'ConfInsert.txt' no se encuentra.",
+                "El archivo de configuración 'ConfInsert.conf' no se encuentra.",
                 QMessageBox.Icon.Critical,
             )
             return
@@ -406,7 +406,7 @@ class PanelPrincipalView(QMainWindow):
         # 3. Si hay errores, mostrarlos todos juntos y detener la ejecución.
         if errors:
             error_message = (
-                "Se encontraron los siguientes errores en 'ConfInsert.txt':\n\n"
+                "Se encontraron los siguientes errores en 'ConfInsert.conf':\n\n"
                 + "\n".join(f"- {error}" for error in errors)
             )
             self._show_message_box(
@@ -656,7 +656,7 @@ class PanelPrincipalView(QMainWindow):
             )
 
         self._update_button_states()
-        self._save_tables_config()  # Guarda el cambio en ConfInsert.txt
+        self._save_tables_config()  # Guarda el cambio en ConfInsert.conf
 
     def _remove_all_items(self):
         """Mueve todas las tablas de seleccionadas a disponibles."""
@@ -680,15 +680,15 @@ class PanelPrincipalView(QMainWindow):
     # --- Métodos para la gestión del archivo de configuración ---
 
     def _save_config_file(self):
-        """Guarda la ruta del archivo Excel en ConfInsert.txt."""
+        """Guarda la ruta del archivo Excel en ConfInsert.conf."""
         self._write_to_config("01|ArchExcel|", self.lineEdit_archivo_excel.text())
 
     def _save_output_dir_config(self):
-        """Guarda la ruta del directorio de salida en ConfInsert.txt."""
+        """Guarda la ruta del directorio de salida en ConfInsert.conf."""
         self._write_to_config("01|DirSal|", self.lineEdit_directorio_salida.text())
 
     def _save_tables_config(self):
-        """Guarda la lista de tablas seleccionadas en ConfInsert.txt."""
+        """Guarda la lista de tablas seleccionadas en ConfInsert.conf."""
         items = [
             self.listWidget_tablas_seleccionadas.item(i).text()
             for i in range(self.listWidget_tablas_seleccionadas.count())
@@ -697,7 +697,7 @@ class PanelPrincipalView(QMainWindow):
 
     def _write_to_config(self, key, value):
         """
-        Función auxiliar para escribir una clave y valor en ConfInsert.txt.
+        Función auxiliar para escribir una clave y valor en ConfInsert.conf.
         Si la clave ya existe, la actualiza; si no, la añade al final.
         """
         if not value:
@@ -720,7 +720,7 @@ class PanelPrincipalView(QMainWindow):
 
     def _load_config_file(self):
         """
-        Carga la configuración desde ConfInsert.txt al iniciar la aplicación
+        Carga la configuración desde ConfInsert.conf al iniciar la aplicación
         y la aplica a los widgets correspondientes.
         """
         config_path = _CONF_FILE
@@ -1230,7 +1230,7 @@ class PanelPrincipalView(QMainWindow):
     # --- US1: Configurar Directorio ---
 
     def _eq_write_config(self, key: str, value):
-        """Escribe o elimina una entrada 02|key|value en ConfInsert.txt."""
+        """Escribe o elimina una entrada 02|key|value en ConfInsert.conf."""
         config_path = _CONF_FILE
         prefix = f"02|{key}|"
         lines = []
@@ -1249,7 +1249,7 @@ class PanelPrincipalView(QMainWindow):
             self._load_ejecutar_querys_config()
 
     def _load_ejecutar_querys_config(self):
-        """Lee ConfInsert.txt y restaura la configuración 02|* en la pestaña Ejecutar Querys."""
+        """Lee ConfInsert.conf y restaura la configuración 02|* en la pestaña Ejecutar Querys."""
         config_path = _CONF_FILE
         config = {}
         if os.path.exists(config_path):
@@ -1380,7 +1380,7 @@ class PanelPrincipalView(QMainWindow):
         self._eq_save_querys_config()
 
     def _eq_save_querys_config(self):
-        """Persiste la lista de Querys Seleccionados en ConfInsert.txt."""
+        """Persiste la lista de Querys Seleccionados en ConfInsert.conf."""
         items = [
             self.listWidget_querys_seleccionados.item(i).text()
             for i in range(self.listWidget_querys_seleccionados.count())
@@ -1401,7 +1401,7 @@ class PanelPrincipalView(QMainWindow):
         self._eq_write_config("ChekOperV", "Si" if checked else None)
 
     def _eq_guardar_nom_log(self):
-        """Guarda el nombre del archivo de log en ConfInsert.txt."""
+        """Guarda el nombre del archivo de log en ConfInsert.conf."""
         if not self.lineEdit_nom_log:
             return
         texto = self.lineEdit_nom_log.text().strip()
@@ -1417,7 +1417,7 @@ class PanelPrincipalView(QMainWindow):
         return os.path.join(directory, f"{name}_{timestamp}.log")
 
     def _eq_limpiar_configuracion(self):
-        """Borra toda la configuración de Ejecutar Querys de la UI y de ConfInsert.txt."""
+        """Borra toda la configuración de Ejecutar Querys de la UI y de ConfInsert.conf."""
         if self.lineEdit_dir_querys:
             self.lineEdit_dir_querys.clear()
         if self.listWidget_querys_disponibles:

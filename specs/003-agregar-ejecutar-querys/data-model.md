@@ -41,7 +41,7 @@ btn_guardar_nom_log.enabled ← checkBox_crear_log.isChecked()
 
 Estas invariantes se recalculan en `_update_eq_button_states()`, llamado tras cada evento que pueda cambiar el estado.
 
-## Configuración Persistente — ConfInsert.txt (prefijo 02)
+## Configuración Persistente — ConfInsert.conf (prefijo 02)
 
 | Entrada | Formato | Descripción |
 |---------|---------|-------------|
@@ -67,7 +67,7 @@ Clave: texto antes del `=` (stripped). Valor: texto después del `=`, sin comill
 
 ### Archivo SQL
 - Extensión `.sql`, en el directorio seleccionado (escaneo plano, no recursivo).
-- Almacenado en ConfInsert.txt sin la extensión.
+- Almacenado en ConfInsert.conf sin la extensión.
 - Ruta completa: `<directorio> + os.sep + <nombre> + ".sql"`.
 
 ### Archivo de Log
