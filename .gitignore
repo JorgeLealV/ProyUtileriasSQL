@@ -1,5 +1,19 @@
 # Ignorar el entorno virtual
 venv/
+.venv/
+__pycache__/
+*.pyc
+*.pyo
 
 # Ignorar configuraciones locales
 # ConfInsert.txt
+
+# Archivos de sistema
+.DS_Store
+Thumbs.db
+*.tmp
+*.swp
+
+# IDEs
+.vscode/
+.idea/

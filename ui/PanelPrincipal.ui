@@ -167,8 +167,171 @@
       </widget>
       <widget class="QWidget" name="tab_ejecuta_querys">
        <attribute name="title">
-        <string>Ejecuta Querys</string>
+        <string>Ejecutar Querys</string>
        </attribute>
+       <layout class="QGridLayout" name="gridLayout_eq">
+        <item row="0" column="0" colspan="2">
+         <widget class="QLabel" name="label_dir_querys">
+          <property name="text">
+           <string>Directorio seleccionado de Querys</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLineEdit" name="lineEdit_dir_querys"/>
+        </item>
+        <item row="1" column="1">
+         <widget class="QPushButton" name="btn_browse_dir_querys">
+          <property name="text">
+           <string>...</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0">
+         <widget class="QLabel" name="label_querys_disponibles">
+          <property name="text">
+           <string>Querys Disponibles</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="2">
+         <widget class="QLabel" name="label_querys_seleccionados">
+          <property name="text">
+           <string>Querys Seleccionados</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="0">
+         <widget class="QListWidget" name="listWidget_querys_disponibles"/>
+        </item>
+        <item row="3" column="1">
+         <layout class="QVBoxLayout" name="verticalLayout_eq_btns">
+          <property name="spacing">
+           <number>0</number>
+          </property>
+          <item>
+           <widget class="QPushButton" name="btn_eq_agregar">
+            <property name="text">
+             <string>Agregar</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btn_eq_agregar_todos">
+            <property name="text">
+             <string>Agregar Todos</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btn_eq_quitar">
+            <property name="text">
+             <string>Quitar</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btn_eq_quitar_todos">
+            <property name="text">
+             <string>Quitar Todos</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="verticalSpacer_eq">
+            <property name="orientation">
+             <enum>Qt::Orientation::Vertical</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>40</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </item>
+        <item row="3" column="2">
+         <widget class="QListWidget" name="listWidget_querys_seleccionados"/>
+        </item>
+        <item row="0" column="3" rowspan="4">
+         <widget class="QGroupBox" name="groupBox_eq_opciones">
+          <property name="title">
+           <string>OPCIONES DE EJECUCIÓN</string>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout_eq_panel">
+           <property name="contentsMargins">
+            <number>16</number>
+            <number>22</number>
+            <number>16</number>
+            <number>16</number>
+           </property>
+           <property name="spacing">
+            <number>10</number>
+           </property>
+           <item>
+            <widget class="QPushButton" name="btn_limpiar_config_eq">
+             <property name="text">
+              <string>Limpiar configuración</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QCheckBox" name="checkBox_crear_log">
+             <property name="text">
+              <string>Crear Log de Operación</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QCheckBox" name="checkBox_permitir_parcial">
+             <property name="text">
+              <string>Permitir ejecución de Operaciones válidas</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="label_nom_log">
+             <property name="text">
+              <string>Nombre del archivo log</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="lineEdit_nom_log"/>
+           </item>
+           <item>
+            <widget class="QPushButton" name="btn_guardar_nom_log">
+             <property name="text">
+              <string>Guardar nombre</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="verticalSpacer_eq2">
+             <property name="orientation">
+              <enum>Qt::Orientation::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>40</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QPushButton" name="btn_ejecutar_querys">
+             <property name="text">
+              <string>▶   Ejecutar Querys</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+       </layout>
       </widget>
       <widget class="QWidget" name="tab_exportar_tablas">
        <attribute name="title">

@@ -1,13 +1,16 @@
 import sys
 import os
-
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-
 from PySide6.QtWidgets import QApplication, QMainWindow, QWidget
 
 # from PySide6.QtGui import QScreen
 from ui.main_window_ui import Ui_Form
 from views.panel_principal_view import PanelPrincipalView
+
+_project_root = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, _project_root)
+os.chdir(
+    _project_root
+)  # garantiza que los paths relativos resuelvan desde la raíz del proyecto
 
 
 class MainWindow(QMainWindow):
@@ -21,8 +24,9 @@ class MainWindow(QMainWindow):
         self.ui = Ui_Form()
         self.ui.setupUi(central_widget)
 
-        # Conectar el botón a la nueva función
+        # Conectar los botones del menú principal
         self.ui.btn_creacion.clicked.connect(self.open_panel_principal)
+        self.ui.btn_ejecucion.clicked.connect(self.open_panel_ejecucion)
         self.ui.btn_salida.clicked.connect(self.close)
 
         # Establecer el widget central en la ventana principal
@@ -36,7 +40,10 @@ class MainWindow(QMainWindow):
         screen = QApplication.primaryScreen()
         screen_geometry = screen.geometry()
 
-        self.resize(max(400, screen_geometry.width() // 5), max(520, screen_geometry.height() * 3 // 5))
+        self.resize(
+            max(400, screen_geometry.width() // 5),
+            max(520, screen_geometry.height() * 3 // 5),
+        )
 
         # Centrar la ventana en la pantalla
         frame_geometry = self.frameGeometry()
@@ -44,13 +51,15 @@ class MainWindow(QMainWindow):
         frame_geometry.moveCenter(center_point)
         self.move(frame_geometry.topLeft())
 
-    def open_panel_principal(self):
-        # Crear una instancia de la nueva ventana
+    def open_panel_principal(self, tab_index=0):
         self.panel_window = PanelPrincipalView(self)
-        # Mostrar la nueva ventana
+        if tab_index > 0:
+            self.panel_window.set_active_tab(tab_index)
         self.panel_window.show()
-        # Ocultar la ventana actual
         self.hide()
+
+    def open_panel_ejecucion(self):
+        self.open_panel_principal(tab_index=1)
 
     def _apply_styles(self):
         stylesheet = """

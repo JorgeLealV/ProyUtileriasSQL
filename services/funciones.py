@@ -191,45 +191,169 @@ def excel_to_postgres_inserts(excel_file, sheet_name, table_name, output_file, a
                 f.write(insert_sql + "\n")
 
 
-def execute_sql_from_file(db_name, user, password, host, port, sql_file):
+def _split_sql_statements(sql_text: str) -> list:
+    """Divide SQL en sentencias respetando dollar-quotes, strings y comentarios."""
+    statements = []
+    i = 0
+    n = len(sql_text)
+    start = 0
+
+    while i < n:
+        c = sql_text[i]
+
+        # Comentario de línea: avanzar hasta fin de línea
+        if c == '-' and i + 1 < n and sql_text[i + 1] == '-':
+            while i < n and sql_text[i] != '\n':
+                i += 1
+            continue
+
+        # Comentario multilínea /* ... */
+        if c == '/' and i + 1 < n and sql_text[i + 1] == '*':
+            i += 2
+            while i < n - 1:
+                if sql_text[i] == '*' and sql_text[i + 1] == '/':
+                    i += 2
+                    break
+                i += 1
+            continue
+
+        # String con comilla simple: 'texto' (soporta '' como escape)
+        if c == "'":
+            i += 1
+            while i < n:
+                if sql_text[i] == "'" and i + 1 < n and sql_text[i + 1] == "'":
+                    i += 2
+                elif sql_text[i] == "'":
+                    i += 1
+                    break
+                else:
+                    i += 1
+            continue
+
+        # Dollar-quote: $tag$...$tag$ (incluye $$ sin tag)
+        if c == '$':
+            j = i + 1
+            while j < n and sql_text[j] != '$' and sql_text[j] not in (' ', '\t', '\n', '\r'):
+                j += 1
+            if j < n and sql_text[j] == '$':
+                tag = sql_text[i:j + 1]
+                close = sql_text.find(tag, j + 1)
+                if close != -1:
+                    i = close + len(tag)
+                    continue
+
+        # Fin de sentencia
+        if c == ';':
+            stmt = sql_text[start:i].strip()
+            if stmt and not all(
+                not line.strip() or line.strip().startswith('--')
+                for line in stmt.splitlines()
+            ):
+                statements.append(stmt)
+            i += 1
+            start = i
+            continue
+
+        i += 1
+
+    # Texto restante sin ';' final
+    stmt = sql_text[start:].strip()
+    if stmt and not all(
+        not line.strip() or line.strip().startswith('--')
+        for line in stmt.splitlines()
+    ):
+        statements.append(stmt)
+
+    return statements
+
+
+def execute_sql_from_file(
+    db_name, user, password, host, port, sql_file,
+    log_file="", allow_partial=False
+):
     """
-    Se conecta a una BD PostgreSQL y ejecuta un script SQL contenido en un archivo.
+    Se conecta a una BD PostgreSQL y ejecuta un script SQL instrucción por instrucción.
+
+    log_file (str): Ruta completa del archivo de log. "" = sin log.
+    allow_partial (bool): True = continuar aunque falle alguna instrucción;
+                          False (defecto) = rollback completo al primer error.
+    Retorna dict: success, total_stmts, ok_stmts, failed_stmts, errors.
     """
-    # Misma estructura try...except...finally para la seguridad de la conexión.
+    result = {
+        "file": sql_file,
+        "success": False,
+        "total_stmts": 0,
+        "ok_stmts": 0,
+        "failed_stmts": 0,
+        "errors": [],
+    }
+
+    if not os.path.exists(sql_file):
+        result["errors"].append("Archivo no encontrado en disco")
+        _write_log(log_file, sql_file, None, "ARCHIVO NO ENCONTRADO")
+        return result
+
+    with open(sql_file, "r", encoding="utf-8") as f:
+        contenido = f.read()
+
+    stmts = _split_sql_statements(contenido)
+
+    if not stmts:
+        result["success"] = True
+        _write_log(log_file, sql_file, None, "ARCHIVO VACIO - sin instrucciones ejecutables")
+        return result
+
     conn = None
     try:
-        # --- 1. Lectura del Archivo SQL ---
-        with open(sql_file, 'r', encoding='utf-8') as f:
-            sql_script = f.read()
-
-        # --- 2. Conexión y Ejecución ---
         conn = psycopg2.connect(
             dbname=db_name, user=user, password=password, host=host, port=port
         )
-        
-        # Un "cursor" es como un puntero que se mueve por la base de datos y ejecuta comandos.
-        # Usar 'with' para el cursor asegura que se cierre correctamente.
-        with conn.cursor() as cur:
-            # Se ejecuta el contenido completo del archivo .sql.
-            cur.execute(sql_script)
-        
-        # --- 3. Confirmación de Cambios ---
-        # Si el script se ejecutó sin errores, conn.commit() guarda permanentemente
-        # todos los cambios realizados (los INSERTs, UPDATEs, etc.).
-        conn.commit()
-        
-        print(f"Script del archivo '{sql_file}' ejecutado exitosamente.")
+        _write_log(log_file, sql_file, None, f"INICIO - {len(stmts)} instrucciones")
 
-    except (Exception, psycopg2.DatabaseError) as error:
-        print(f"Error al ejecutar el script SQL: {error}")
-        # Si ocurre cualquier error, conn.rollback() deshace todos los cambios
-        # que se hayan intentado hacer durante esta transacción, dejando la BD
-        # en el estado en que estaba antes de empezar.
+        for i, stmt in enumerate(stmts, start=1):
+            result["total_stmts"] += 1
+            try:
+                with conn.cursor() as cur:
+                    cur.execute(stmt)
+                result["ok_stmts"] += 1
+                _write_log(log_file, sql_file, i, "OK")
+            except Exception as err:
+                result["failed_stmts"] += 1
+                result["errors"].append(f"STMT {i}: {err}")
+                _write_log(log_file, sql_file, i, f"ERROR: {err}")
+                if not allow_partial:
+                    conn.rollback()
+                    _write_log(log_file, sql_file, None, "ROLLBACK COMPLETO")
+                    return result
+
+        conn.commit()
+        result["success"] = result["failed_stmts"] == 0
+        estado = "EXITO COMPLETO" if result["success"] else f"PARCIAL ({result['failed_stmts']} errores)"
+        _write_log(log_file, sql_file, None, f"FIN - {estado}")
+
+    except Exception as error:
+        result["errors"].append(f"Error de conexion: {error}")
+        _write_log(log_file, sql_file, None, f"ERROR DE CONEXION: {error}")
         if conn:
             conn.rollback()
-            
     finally:
-        # Cierre final y seguro de la conexión.
         if conn:
             conn.close()
-            print("Conexión a la base de datos cerrada.")
+
+    return result
+
+
+def _write_log(log_file: str, sql_file: str, stmt_num, mensaje: str):
+    """Escribe una línea de log si log_file es no vacío."""
+    if not log_file:
+        return
+    import datetime
+    ts = datetime.datetime.now().strftime("%H:%M:%S")
+    archivo = os.path.basename(sql_file) if sql_file else ""
+    stmt_part = f"[STMT {stmt_num}] " if stmt_num is not None else ""
+    linea = f"[{ts}] [{archivo}] {stmt_part}{mensaje}\n"
+    try:
+        with open(log_file, "a", encoding="utf-8") as f:
+            f.write(linea)
+    except Exception:
+        pass

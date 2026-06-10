@@ -10,7 +10,13 @@ Clase principal:
 """
 
 import os
+import datetime
 import pandas as pd
+
+# Ruta absoluta al archivo de configuración, independiente del CWD de lanzamiento
+_CONF_FILE = os.path.normpath(
+    os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "ConfInsert.txt")
+)
 from PySide6.QtWidgets import (
     QMainWindow,
     QFileDialog,
@@ -27,11 +33,59 @@ from PySide6.QtWidgets import (
     QGridLayout,
     QGroupBox,
     QApplication,
+    QTabWidget,
+    QProgressDialog,
 )
 from PySide6.QtWidgets import QMessageBox as QMB
-from PySide6.QtCore import QFile, QIODeviceBase, Qt
+from PySide6.QtCore import QFile, QIODeviceBase, Qt, QObject, QThread, Signal
 from PySide6.QtUiTools import QUiLoader
 from services.funciones import excel_to_postgres_inserts
+
+
+class EjecutarQuerysWorker(QObject):
+    """Worker que ejecuta archivos .sql en un hilo separado para no bloquear la UI."""
+
+    progress_updated = Signal(str)
+    file_finished = Signal(str, bool)
+    execution_finished = Signal(dict)
+
+    def __init__(self, files, conn_params, log_file, allow_partial):
+        super().__init__()
+        self._files = files
+        self._conn_params = conn_params
+        self._log_file = log_file
+        self._allow_partial = allow_partial
+        self._cancelled = False
+
+    def cancel(self):
+        self._cancelled = True
+
+    def run(self):
+        from services.funciones import execute_sql_from_file
+        summary = {"total": 0, "ok": 0, "failed": 0, "cancelled": False}
+        for sql_file in self._files:
+            if self._cancelled:
+                summary["cancelled"] = True
+                break
+            nombre = os.path.basename(sql_file)
+            self.progress_updated.emit(f"Ejecutando: {nombre}")
+            result = execute_sql_from_file(
+                db_name=self._conn_params["my_db"],
+                user=self._conn_params["my_user"],
+                password=self._conn_params["my_pass"],
+                host=self._conn_params["my_host"],
+                port=self._conn_params["my_port"],
+                sql_file=sql_file,
+                log_file=self._log_file,
+                allow_partial=self._allow_partial,
+            )
+            summary["total"] += 1
+            if result.get("success"):
+                summary["ok"] += 1
+            else:
+                summary["failed"] += 1
+            self.file_finished.emit(nombre, result.get("success", False))
+        self.execution_finished.emit(summary)
 
 
 # --- Clase de la Vista Principal ---
@@ -84,6 +138,26 @@ class PanelPrincipalView(QMainWindow):
         self.btn_guardar_todos = None
         self.btn_ejecutar_creacion = None
 
+        # Widgets tab_ejecuta_querys
+        self.lineEdit_dir_querys = None
+        self.btn_browse_dir_querys = None
+        self.listWidget_querys_disponibles = None
+        self.btn_eq_agregar = None
+        self.btn_eq_agregar_todos = None
+        self.btn_eq_quitar = None
+        self.btn_eq_quitar_todos = None
+        self.listWidget_querys_seleccionados = None
+        self.btn_limpiar_config_eq = None
+        self.checkBox_crear_log = None
+        self.checkBox_permitir_parcial = None
+        self.lineEdit_nom_log = None
+        self.btn_guardar_nom_log = None
+        self.btn_ejecutar_querys = None
+        # Estado de ejecución
+        self._eq_thread = None
+        self._eq_worker = None
+        self._progress_dialog = None
+
         # --- Secuencia de inicialización de la ventana ---
         self.load_ui()  # 1. Carga el archivo .ui y lo convierte en objeto.
         self.setup_ui()  # 2. Busca y asigna los widgets del .ui a variables de la clase.
@@ -91,6 +165,7 @@ class PanelPrincipalView(QMainWindow):
         self._apply_styles()  # 4. Aplica una hoja de estilos CSS para dar apariencia a la app.
         self._update_button_states()  # 5. Ajusta el estado inicial (habilitado/deshabilitado) de los botones.
         self._load_config_file()  # 6. Carga la configuración previa desde "ConfInsert.txt".
+        self._load_ejecutar_querys_config()  # 7. Carga la configuración previa de la pestaña "Ejecutar Querys".
 
         primary_screen = QApplication.primaryScreen()
         screen = primary_screen.geometry()
@@ -165,6 +240,30 @@ class PanelPrincipalView(QMainWindow):
             QPushButton, "btn_ejecutar_creacion"
         )
 
+        # --- Widgets de Ejecutar Querys ---
+        self.lineEdit_dir_querys = self.findChild(QLineEdit, "lineEdit_dir_querys")
+        self.btn_browse_dir_querys = self.findChild(QPushButton, "btn_browse_dir_querys")
+        self.listWidget_querys_disponibles = self.findChild(QListWidget, "listWidget_querys_disponibles")
+        self.btn_eq_agregar = self.findChild(QPushButton, "btn_eq_agregar")
+        self.btn_eq_agregar_todos = self.findChild(QPushButton, "btn_eq_agregar_todos")
+        self.btn_eq_quitar = self.findChild(QPushButton, "btn_eq_quitar")
+        self.btn_eq_quitar_todos = self.findChild(QPushButton, "btn_eq_quitar_todos")
+        self.listWidget_querys_seleccionados = self.findChild(QListWidget, "listWidget_querys_seleccionados")
+        self.btn_limpiar_config_eq = self.findChild(QPushButton, "btn_limpiar_config_eq")
+        self.checkBox_crear_log = self.findChild(QCheckBox, "checkBox_crear_log")
+        self.checkBox_permitir_parcial = self.findChild(QCheckBox, "checkBox_permitir_parcial")
+        self.lineEdit_nom_log = self.findChild(QLineEdit, "lineEdit_nom_log")
+        self.btn_guardar_nom_log = self.findChild(QPushButton, "btn_guardar_nom_log")
+        self.btn_ejecutar_querys = self.findChild(QPushButton, "btn_ejecutar_querys")
+
+        # Estado inicial de Ejecutar Querys
+        if self.lineEdit_nom_log:
+            self.lineEdit_nom_log.setEnabled(False)
+        if self.checkBox_crear_log:
+            self.checkBox_crear_log.setChecked(False)
+        if self.checkBox_permitir_parcial:
+            self.checkBox_permitir_parcial.setChecked(False)
+
         # Si un componente clave no está en el .ui, lo creamos y añadimos a la fuerza.
         # Esto da flexibilidad si se modifica el .ui.
         if not self.btn_borrar_config:
@@ -176,7 +275,7 @@ class PanelPrincipalView(QMainWindow):
 
         # Habilitar o deshabilitar el botón principal basado en si existe el archivo de config.
         if self.btn_ejecutar_creacion:
-            self.btn_ejecutar_creacion.setEnabled(os.path.exists("ConfInsert.txt"))
+            self.btn_ejecutar_creacion.setEnabled(os.path.exists(_CONF_FILE))
 
     def connect_signals(self):
         """
@@ -231,6 +330,40 @@ class PanelPrincipalView(QMainWindow):
         if self.btn_ejecutar_creacion:
             self.btn_ejecutar_creacion.clicked.connect(self._ejecutar_creacion_scripts)
 
+        # --- Señales de Ejecutar Querys ---
+        tab_widget = self.central_widget.findChild(QTabWidget, "tabWidget")
+        if tab_widget:
+            tab_widget.currentChanged.connect(self._on_tab_changed)
+
+        if self.btn_browse_dir_querys:
+            self.btn_browse_dir_querys.clicked.connect(self._browse_dir_querys)
+        if self.btn_eq_agregar:
+            self.btn_eq_agregar.clicked.connect(self._eq_add_item)
+        if self.btn_eq_agregar_todos:
+            self.btn_eq_agregar_todos.clicked.connect(self._eq_add_all_items)
+        if self.btn_eq_quitar:
+            self.btn_eq_quitar.clicked.connect(self._eq_remove_item)
+        if self.btn_eq_quitar_todos:
+            self.btn_eq_quitar_todos.clicked.connect(self._eq_remove_all_items)
+        if self.listWidget_querys_disponibles:
+            self.listWidget_querys_disponibles.itemSelectionChanged.connect(
+                self._update_eq_button_states)
+        if self.listWidget_querys_seleccionados:
+            self.listWidget_querys_seleccionados.itemSelectionChanged.connect(
+                self._update_eq_button_states)
+        if self.btn_limpiar_config_eq:
+            self.btn_limpiar_config_eq.clicked.connect(self._eq_limpiar_configuracion)
+        if self.checkBox_crear_log:
+            self.checkBox_crear_log.stateChanged.connect(self._on_crear_log_changed)
+        if self.checkBox_permitir_parcial:
+            self.checkBox_permitir_parcial.stateChanged.connect(self._on_permitir_parcial_changed)
+        if self.lineEdit_nom_log:
+            self.lineEdit_nom_log.textChanged.connect(self._update_eq_button_states)
+        if self.btn_guardar_nom_log:
+            self.btn_guardar_nom_log.clicked.connect(self._eq_guardar_nom_log)
+        if self.btn_ejecutar_querys:
+            self.btn_ejecutar_querys.clicked.connect(self._eq_ejecutar_querys)
+
     # --- Métodos (Slots) de Lógica de la Aplicación ---
 
     def _ejecutar_creacion_scripts(self):
@@ -238,7 +371,7 @@ class PanelPrincipalView(QMainWindow):
         Slot que se ejecuta al presionar "Ejecutar creación".
         Orquesta la validación y la llamada al servicio de generación de SQL.
         """
-        config_path = "ConfInsert.txt"
+        config_path = _CONF_FILE
         if not os.path.exists(config_path):
             self._show_message_box(
                 "Error",
@@ -455,6 +588,40 @@ class PanelPrincipalView(QMainWindow):
         if self.btn_quitar_todos:
             self.btn_quitar_todos.setEnabled(self.listWidget_tablas_seleccionadas.count() > 0)
 
+    def _update_eq_button_states(self):
+        """Recalcula el estado habilitado/deshabilitado de todos los botones de Ejecutar Querys."""
+        if self.btn_eq_agregar:
+            self.btn_eq_agregar.setEnabled(
+                bool(self.listWidget_querys_disponibles and
+                     self.listWidget_querys_disponibles.selectedItems())
+            )
+        if self.btn_eq_agregar_todos:
+            self.btn_eq_agregar_todos.setEnabled(
+                bool(self.listWidget_querys_disponibles and
+                     self.listWidget_querys_disponibles.count() > 0)
+            )
+        if self.btn_eq_quitar:
+            self.btn_eq_quitar.setEnabled(
+                bool(self.listWidget_querys_seleccionados and
+                     self.listWidget_querys_seleccionados.selectedItems())
+            )
+        if self.btn_eq_quitar_todos:
+            self.btn_eq_quitar_todos.setEnabled(
+                bool(self.listWidget_querys_seleccionados and
+                     self.listWidget_querys_seleccionados.count() > 0)
+            )
+        if self.btn_ejecutar_querys:
+            self.btn_ejecutar_querys.setEnabled(
+                bool(self.listWidget_querys_seleccionados and
+                     self.listWidget_querys_seleccionados.count() > 0)
+            )
+        crear_log = bool(self.checkBox_crear_log and self.checkBox_crear_log.isChecked())
+        nom_log_texto = self.lineEdit_nom_log.text().strip() if self.lineEdit_nom_log else ""
+        if self.lineEdit_nom_log:
+            self.lineEdit_nom_log.setEnabled(crear_log)
+        if self.btn_guardar_nom_log:
+            self.btn_guardar_nom_log.setEnabled(crear_log and bool(nom_log_texto))
+
     def _add_item(self):
         """Mueve una tabla de la lista de disponibles a la de seleccionadas."""
         selected_items = self.listWidget_hojas.selectedItems()
@@ -499,6 +666,12 @@ class PanelPrincipalView(QMainWindow):
         self._update_button_states()
         self._save_tables_config()
 
+    def set_active_tab(self, index: int):
+        """Selecciona la pestaña indicada por índice (0=Crear Inserts, 1=Ejecutar Querys, …)."""
+        tab_widget = self.central_widget.findChild(QTabWidget, "tabWidget")
+        if tab_widget:
+            tab_widget.setCurrentIndex(index)
+
     def _go_to_main_window(self):
         """Oculta la ventana actual y muestra la ventana principal."""
         self.hide()
@@ -529,7 +702,7 @@ class PanelPrincipalView(QMainWindow):
         """
         if not value:
             return
-        config_path = "ConfInsert.txt"
+        config_path = _CONF_FILE
         lines = []
         found = False
         if os.path.exists(config_path):
@@ -550,7 +723,7 @@ class PanelPrincipalView(QMainWindow):
         Carga la configuración desde ConfInsert.txt al iniciar la aplicación
         y la aplica a los widgets correspondientes.
         """
-        config_path = "ConfInsert.txt"
+        config_path = _CONF_FILE
         if not os.path.exists(config_path):
             return
 
@@ -599,7 +772,7 @@ class PanelPrincipalView(QMainWindow):
             self.lineEdit_archivo_todos.clear()
         self.config_tablas = []
 
-        config_path = "ConfInsert.txt"
+        config_path = _CONF_FILE
         if os.path.exists(config_path):
             with open(config_path, "r") as f:
                 lines = [line for line in f if not line.startswith("01|")]
@@ -940,6 +1113,106 @@ class PanelPrincipalView(QMainWindow):
             }
             QScrollBar::add-line:horizontal,
             QScrollBar::sub-line:horizontal { width: 0; border: none; }
+            QPushButton#btn_browse_dir_querys {
+                background-color: #0F1520;
+                border: 1px solid #1A2435;
+                color: #404A5E;
+                padding: 9px 16px;
+                font-size: 11pt;
+                font-weight: 400;
+                letter-spacing: 0;
+            }
+            QPushButton#btn_browse_dir_querys:hover {
+                border-color: #B8922A;
+                color: #D4A848;
+                background-color: #181408;
+            }
+            QPushButton#btn_eq_agregar,
+            QPushButton#btn_eq_agregar_todos {
+                background-color: #0A2018;
+                border: 1px solid #143024;
+                color: #4A9068;
+            }
+            QPushButton#btn_eq_agregar:hover,
+            QPushButton#btn_eq_agregar_todos:hover {
+                background-color: #0F2C22;
+                border-color: #205840;
+                color: #70B090;
+            }
+            QPushButton#btn_eq_agregar:disabled,
+            QPushButton#btn_eq_agregar_todos:disabled {
+                background-color: #0A0F18;
+                color: #1E2638;
+                border-color: #111820;
+            }
+            QPushButton#btn_eq_quitar,
+            QPushButton#btn_eq_quitar_todos {
+                background-color: #200A0A;
+                border: 1px solid #301010;
+                color: #905858;
+            }
+            QPushButton#btn_eq_quitar:hover,
+            QPushButton#btn_eq_quitar_todos:hover {
+                background-color: #2C1010;
+                border-color: #502020;
+                color: #B07878;
+            }
+            QPushButton#btn_eq_quitar:disabled,
+            QPushButton#btn_eq_quitar_todos:disabled {
+                background-color: #0A0F18;
+                color: #1E2638;
+                border-color: #111820;
+            }
+            QPushButton#btn_ejecutar_querys {
+                background-color: #1C1408;
+                border: 1px solid #40300A;
+                color: #C8A03A;
+                font-size: 10.5pt;
+                font-weight: 700;
+                padding: 13px 20px;
+                letter-spacing: 0.5px;
+            }
+            QPushButton#btn_ejecutar_querys:hover {
+                background-color: #281C08;
+                border-color: #6A500E;
+                color: #E0BE58;
+            }
+            QPushButton#btn_ejecutar_querys:pressed {
+                background-color: #120E06;
+                border-color: #4A3808;
+            }
+            QPushButton#btn_ejecutar_querys:disabled {
+                background-color: #0A0A08;
+                color: #2A2010;
+                border-color: #181408;
+            }
+            QPushButton#btn_limpiar_config_eq {
+                background-color: #1C0E08;
+                border: 1px solid #382010;
+                color: #906040;
+                font-size: 9.5pt;
+            }
+            QPushButton#btn_limpiar_config_eq:hover {
+                background-color: #241408;
+                border-color: #584028;
+                color: #B08060;
+            }
+            QPushButton#btn_guardar_nom_log {
+                background-color: #0A1520;
+                border: 1px solid #142030;
+                color: #507090;
+                font-size: 9.5pt;
+            }
+            QPushButton#btn_guardar_nom_log:hover {
+                background-color: #0F1C2C;
+                border-color: #204060;
+                color: #70A0C0;
+            }
+            QPushButton#btn_guardar_nom_log:disabled {
+                background-color: #0A0F18;
+                color: #1E2638;
+                border-color: #111820;
+            }
         """
         self.setStyleSheet(stylesheet)
 
@@ -949,6 +1222,350 @@ class PanelPrincipalView(QMainWindow):
         widget central cargado desde el .ui, simplificando las llamadas.
         """
         return self.central_widget.findChild(type, name)
+
+    # =========================================================================
+    # Métodos de la pestaña "Ejecutar Querys"
+    # =========================================================================
+
+    # --- US1: Configurar Directorio ---
+
+    def _eq_write_config(self, key: str, value):
+        """Escribe o elimina una entrada 02|key|value en ConfInsert.txt."""
+        config_path = _CONF_FILE
+        prefix = f"02|{key}|"
+        lines = []
+        if os.path.exists(config_path):
+            with open(config_path, "r", encoding="utf-8") as f:
+                lines = f.readlines()
+        lines = [l for l in lines if not l.strip().startswith(prefix)]
+        if value is not None:
+            lines.append(f"{prefix}{value}\n")
+        with open(config_path, "w", encoding="utf-8") as f:
+            f.writelines(lines)
+
+    def _on_tab_changed(self, index):
+        """Carga la configuración de Ejecutar Querys al activar la pestaña."""
+        if index == 1:
+            self._load_ejecutar_querys_config()
+
+    def _load_ejecutar_querys_config(self):
+        """Lee ConfInsert.txt y restaura la configuración 02|* en la pestaña Ejecutar Querys."""
+        config_path = _CONF_FILE
+        config = {}
+        if os.path.exists(config_path):
+            with open(config_path, "r", encoding="utf-8") as f:
+                for line in f:
+                    if line.startswith("02|"):
+                        parts = line.strip().split("|", 2)
+                        if len(parts) == 3:
+                            config[parts[1]] = parts[2]
+
+        dir_ent = config.get("DirEnt", "").strip()
+        querys_guardados = [q.strip() for q in config.get("Querys", "").split(",") if q.strip()]
+        nom_log = config.get("NomLog", "").strip()
+        chek_log = config.get("ChekLog", "").strip().upper() == "SI"
+        chek_oper_v = config.get("ChekOperV", "").strip().upper() == "SI"
+
+        # Restaurar checkboxes y nom_log siempre, sin importar el directorio
+        if self.checkBox_crear_log:
+            self.checkBox_crear_log.blockSignals(True)
+            self.checkBox_crear_log.setChecked(chek_log)
+            self.checkBox_crear_log.blockSignals(False)
+        if self.checkBox_permitir_parcial:
+            self.checkBox_permitir_parcial.blockSignals(True)
+            self.checkBox_permitir_parcial.setChecked(chek_oper_v)
+            self.checkBox_permitir_parcial.blockSignals(False)
+        if nom_log and self.lineEdit_nom_log:
+            self.lineEdit_nom_log.setText(nom_log)
+
+        if self.listWidget_querys_disponibles:
+            self.listWidget_querys_disponibles.clear()
+        if self.listWidget_querys_seleccionados:
+            self.listWidget_querys_seleccionados.clear()
+
+        if not dir_ent:
+            self._update_eq_button_states()
+            return
+
+        if not os.path.isdir(dir_ent):
+            self._eq_write_config("DirEnt", None)
+            self._eq_write_config("Querys", None)
+            if self.lineEdit_dir_querys:
+                self.lineEdit_dir_querys.clear()
+            self._update_eq_button_states()
+            return
+
+        if self.lineEdit_dir_querys:
+            self.lineEdit_dir_querys.setText(dir_ent)
+
+        archivos_sql = sorted([
+            f[:-4] for f in os.listdir(dir_ent)
+            if f.lower().endswith(".sql") and os.path.isfile(os.path.join(dir_ent, f))
+        ])
+
+        querys_validos = [q for q in querys_guardados if q in archivos_sql]
+        if set(querys_validos) != set(querys_guardados):
+            self._eq_write_config("Querys", ",".join(querys_validos) if querys_validos else None)
+
+        for nombre in archivos_sql:
+            if nombre in querys_validos:
+                if self.listWidget_querys_seleccionados:
+                    self.listWidget_querys_seleccionados.addItem(nombre)
+            else:
+                if self.listWidget_querys_disponibles:
+                    self.listWidget_querys_disponibles.addItem(nombre)
+
+        self._update_eq_button_states()
+
+    def _browse_dir_querys(self):
+        """Abre diálogo para seleccionar directorio de querys y actualiza la UI."""
+        dirpath = QFileDialog.getExistingDirectory(self, "Seleccionar Directorio de Querys")
+        if not dirpath:
+            return
+        if self.lineEdit_dir_querys:
+            self.lineEdit_dir_querys.setText(dirpath)
+        if self.listWidget_querys_disponibles:
+            self.listWidget_querys_disponibles.clear()
+        if self.listWidget_querys_seleccionados:
+            self.listWidget_querys_seleccionados.clear()
+        self._eq_write_config("DirEnt", dirpath)
+        self._eq_write_config("Querys", None)
+
+        archivos_sql = sorted([
+            f[:-4] for f in os.listdir(dirpath)
+            if f.lower().endswith(".sql") and os.path.isfile(os.path.join(dirpath, f))
+        ])
+        for nombre in archivos_sql:
+            if self.listWidget_querys_disponibles:
+                self.listWidget_querys_disponibles.addItem(nombre)
+
+        self._update_eq_button_states()
+
+    # --- US2: Gestión de Listas ---
+
+    def _eq_add_item(self):
+        """Mueve elementos seleccionados de Disponibles a Seleccionados."""
+        selected = self.listWidget_querys_disponibles.selectedItems()
+        for item in selected:
+            self.listWidget_querys_seleccionados.addItem(item.text())
+            self.listWidget_querys_disponibles.takeItem(
+                self.listWidget_querys_disponibles.row(item))
+        self._update_eq_button_states()
+        self._eq_save_querys_config()
+
+    def _eq_add_all_items(self):
+        """Mueve todos los elementos de Disponibles a Seleccionados."""
+        while self.listWidget_querys_disponibles.count() > 0:
+            item = self.listWidget_querys_disponibles.takeItem(0)
+            self.listWidget_querys_seleccionados.addItem(item.text())
+        self._update_eq_button_states()
+        self._eq_save_querys_config()
+
+    def _eq_remove_item(self):
+        """Mueve elementos seleccionados de Seleccionados a Disponibles."""
+        selected = self.listWidget_querys_seleccionados.selectedItems()
+        for item in selected:
+            self.listWidget_querys_disponibles.addItem(item.text())
+            self.listWidget_querys_seleccionados.takeItem(
+                self.listWidget_querys_seleccionados.row(item))
+        self._update_eq_button_states()
+        self._eq_save_querys_config()
+
+    def _eq_remove_all_items(self):
+        """Mueve todos los elementos de Seleccionados a Disponibles."""
+        while self.listWidget_querys_seleccionados.count() > 0:
+            item = self.listWidget_querys_seleccionados.takeItem(0)
+            self.listWidget_querys_disponibles.addItem(item.text())
+        self._update_eq_button_states()
+        self._eq_save_querys_config()
+
+    def _eq_save_querys_config(self):
+        """Persiste la lista de Querys Seleccionados en ConfInsert.txt."""
+        items = [
+            self.listWidget_querys_seleccionados.item(i).text()
+            for i in range(self.listWidget_querys_seleccionados.count())
+        ]
+        self._eq_write_config("Querys", ",".join(items) if items else None)
+
+    # --- US3: Opciones de Ejecución y Log ---
+
+    def _on_crear_log_changed(self):
+        """Persiste el estado del checkbox Crear Log y recalcula estados de botones."""
+        checked = bool(self.checkBox_crear_log and self.checkBox_crear_log.isChecked())
+        self._eq_write_config("ChekLog", "Si" if checked else None)
+        self._update_eq_button_states()
+
+    def _on_permitir_parcial_changed(self):
+        """Persiste el estado del checkbox Permitir ejecución parcial."""
+        checked = bool(self.checkBox_permitir_parcial and self.checkBox_permitir_parcial.isChecked())
+        self._eq_write_config("ChekOperV", "Si" if checked else None)
+
+    def _eq_guardar_nom_log(self):
+        """Guarda el nombre del archivo de log en ConfInsert.txt."""
+        if not self.lineEdit_nom_log:
+            return
+        texto = self.lineEdit_nom_log.text().strip()
+        if not texto:
+            return
+        self._eq_write_config("NomLog", texto)
+        self._show_message_box("Información", "Nombre de log guardado.", QMessageBox.Icon.Information)
+
+    def _resolve_log_path(self, directory: str, filename: str) -> str:
+        """Retorna la ruta completa del log con sufijo _DDMMYY_HHMMSS.log siempre."""
+        name = os.path.splitext(filename)[0]
+        timestamp = datetime.datetime.now().strftime("%d%m%Y_%H%M%S")
+        return os.path.join(directory, f"{name}_{timestamp}.log")
+
+    def _eq_limpiar_configuracion(self):
+        """Borra toda la configuración de Ejecutar Querys de la UI y de ConfInsert.txt."""
+        if self.lineEdit_dir_querys:
+            self.lineEdit_dir_querys.clear()
+        if self.listWidget_querys_disponibles:
+            self.listWidget_querys_disponibles.clear()
+        if self.listWidget_querys_seleccionados:
+            self.listWidget_querys_seleccionados.clear()
+        if self.checkBox_crear_log:
+            self.checkBox_crear_log.blockSignals(True)
+            self.checkBox_crear_log.setChecked(False)
+            self.checkBox_crear_log.blockSignals(False)
+        if self.checkBox_permitir_parcial:
+            self.checkBox_permitir_parcial.blockSignals(True)
+            self.checkBox_permitir_parcial.setChecked(False)
+            self.checkBox_permitir_parcial.blockSignals(False)
+        if self.lineEdit_nom_log:
+            self.lineEdit_nom_log.clear()
+
+        config_path = _CONF_FILE
+        if os.path.exists(config_path):
+            with open(config_path, "r", encoding="utf-8") as f:
+                lines = [l for l in f if not l.startswith("02|")]
+            with open(config_path, "w", encoding="utf-8") as f:
+                f.writelines(lines)
+
+        self._update_eq_button_states()
+
+    # --- US4: Ejecución de Querys ---
+
+    def _leer_conexion_bd(self) -> dict:
+        """Parsea ConexionBD.txt y retorna dict con my_db, my_user, my_pass, my_host, my_port."""
+        params = {}
+        try:
+            with open("ConexionBD.txt", "r", encoding="utf-8") as f:
+                for line in f:
+                    line = line.strip()
+                    if not line or line.startswith("#"):
+                        continue
+                    if "=" in line:
+                        key, _, val = line.partition("=")
+                        params[key.strip()] = val.strip().strip('"')
+        except Exception as e:
+            self._show_message_box(
+                "Error", f"No se pudo leer ConexionBD.txt:\n{e}", QMessageBox.Icon.Critical)
+            return {}
+
+        required = ["my_db", "my_user", "my_pass", "my_host", "my_port"]
+        missing = [k for k in required if not params.get(k)]
+        if missing:
+            self._show_message_box(
+                "Error",
+                f"ConexionBD.txt no contiene los parámetros: {', '.join(missing)}",
+                QMessageBox.Icon.Critical,
+            )
+            return {}
+        return params
+
+    def _eq_ejecutar_querys(self):
+        """Valida precondiciones y lanza la ejecución de los archivos .sql en un hilo separado."""
+        if not self.listWidget_querys_seleccionados or \
+                self.listWidget_querys_seleccionados.count() == 0:
+            self._show_message_box(
+                "Error", "No hay Querys seleccionados.", QMessageBox.Icon.Warning)
+            return
+
+        if not os.path.exists("ConexionBD.txt"):
+            self._show_message_box(
+                "Error",
+                "No se encontró el archivo 'ConexionBD.txt' en el directorio raíz del proyecto.",
+                QMessageBox.Icon.Critical,
+            )
+            return
+
+        conn_params = self._leer_conexion_bd()
+        if not conn_params:
+            return
+
+        directorio = self.lineEdit_dir_querys.text().strip() if self.lineEdit_dir_querys else ""
+        archivos = [
+            os.path.join(directorio, self.listWidget_querys_seleccionados.item(i).text() + ".sql")
+            for i in range(self.listWidget_querys_seleccionados.count())
+        ]
+
+        log_file = ""
+        crear_log = bool(self.checkBox_crear_log and self.checkBox_crear_log.isChecked())
+        if crear_log:
+            nom_log = self.lineEdit_nom_log.text().strip() if self.lineEdit_nom_log else ""
+            if not nom_log:
+                self._show_message_box(
+                    "Dato requerido",
+                    "Proporciona un nombre de archivo para el Log de Operaciones.",
+                    QMessageBox.Icon.Warning,
+                )
+                return
+            log_file = self._resolve_log_path(directorio, nom_log)
+
+        allow_partial = bool(
+            self.checkBox_permitir_parcial and self.checkBox_permitir_parcial.isChecked())
+
+        if log_file:
+            with open(log_file, "a", encoding="utf-8") as f:
+                f.write(
+                    f"\n=== Ejecución: "
+                    f"{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')} ===\n"
+                )
+
+        self._progress_dialog = QProgressDialog(
+            "Iniciando ejecución...", "Cancelar", 0, 0, self)
+        self._progress_dialog.setWindowTitle("Ejecutar Querys")
+        self._progress_dialog.setWindowModality(Qt.WindowModality.WindowModal)
+        self._progress_dialog.setMinimumDuration(0)
+        self._progress_dialog.setValue(0)
+        self._progress_dialog.show()
+
+        self._eq_thread = QThread(self)
+        self._eq_worker = EjecutarQuerysWorker(archivos, conn_params, log_file, allow_partial)
+        self._eq_worker.moveToThread(self._eq_thread)
+
+        self._eq_thread.started.connect(self._eq_worker.run)
+        self._eq_worker.progress_updated.connect(self._progress_dialog.setLabelText)
+        self._eq_worker.execution_finished.connect(self._on_execution_finished)
+        self._progress_dialog.canceled.connect(self._eq_worker.cancel)
+
+        self._eq_thread.start()
+
+    def _on_execution_finished(self, summary):
+        """Cierra el progreso, detiene el hilo y muestra el resumen al usuario."""
+        if self._progress_dialog:
+            self._progress_dialog.close()
+        if self._eq_thread:
+            self._eq_thread.quit()
+            self._eq_thread.wait()
+
+        total = summary.get("total", 0)
+        ok = summary.get("ok", 0)
+        failed = summary.get("failed", 0)
+        cancelled = summary.get("cancelled", False)
+
+        msg = f"Ejecución {'cancelada' if cancelled else 'finalizada'}.\n\n"
+        msg += f"Archivos ejecutados: {total}\n"
+        msg += f"Exitosos: {ok}\n"
+        msg += f"Fallidos: {failed}\n"
+
+        log_file = self._eq_worker._log_file if self._eq_worker else ""
+        if log_file and os.path.exists(log_file):
+            msg += f"\nLog de detalle:\n{log_file}"
+
+        icono = QMessageBox.Icon.Information if not failed else QMessageBox.Icon.Warning
+        self._show_message_box("Resumen de Ejecución", msg, icono)
 
     def closeEvent(self, event):
         """
