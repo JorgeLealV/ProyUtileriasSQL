@@ -1,0 +1,2565 @@
+ ▐▛███▜▌   Claude Code v2.1.170
+▝▜█████▛▘  Sonnet 4.6 · Claude Pro
+  ▘▘ ▝▝    ~\Documents\AAAA_Trabajo\CFDI_CSHARP\BaseDatos\ProyUtileriasSQL
+
+ ▎ Meet Fable 5, our newest model for complex, long-running work. Try anytime with /model.
+ ▎ Included in your plan limits until Jun 22, then switch to usage credits to continue.
+   +1 more · /status
+
+● T008 ✅. Phase 2 completa. Ahora Phase 3 — User Story 1.
+
+  Phase 3 — T009–T012: User Story 1 (Directorio)
+
+  Añadiendo todos los métodos de US1 antes de closeEvent:
+
+● Update(views\panel_principal_view.py)
+  ⎿  Added 319 lines
+      1109          """
+      1110          return self.central_widget.findChild(type, name)
+      1111  
+      1112 +    # =======================================================
+           +==================                                           
+      1113 +    # Métodos de la pestaña "Ejecutar Querys"                
+      1114 +    # =======================================================
+           +==================                                           
+      1115 +                                                             
+      1116 +    # --- US1: Configurar Directorio ---                     
+      1117 +                                                             
+      1118 +    def _eq_write_config(self, key: str, value):             
+      1119 +        """Escribe o elimina una entrada 02|key|value en Conf
+           +Insert.txt."""                                               
+      1120 +        config_path = "ConfInsert.txt"                       
+      1121 +        prefix = f"02|{key}|"                                
+      1122 +        lines = []                                           
+      1123 +        if os.path.exists(config_path):                      
+      1124 +            with open(config_path, "r", encoding="utf-8") as 
+           +f:                                                           
+      1125 +                lines = f.readlines()                        
+      1126 +        lines = [l for l in lines if not l.strip().startswith
+           +(prefix)]                                                    
+      1127 +        if value is not None:                                
+      1128 +            lines.append(f"{prefix}{value}\n")               
+      1129 +        with open(config_path, "w", encoding="utf-8") as f:  
+      1130 +            f.writelines(lines)                              
+      1131 +                                                             
+      1132 +    def _on_tab_changed(self, index):                        
+      1133 +        """Carga la configuración de Ejecutar Querys al activ
+           +ar la pestaña."""                                            
+      1134 +        if index == 1:                                       
+      1135 +            self._load_ejecutar_querys_config()              
+      1136 +                                                             
+      1137 +    def _load_ejecutar_querys_config(self):                  
+      1138 +        """Lee ConfInsert.txt y restaura la configuración 02|
+           +* en la pestaña Ejecutar Querys."""                          
+      1139 +        config_path = "ConfInsert.txt"                       
+      1140 +        config = {}                                          
+      1141 +        if os.path.exists(config_path):                      
+      1142 +            with open(config_path, "r", encoding="utf-8") as 
+           +f:                                                           
+      1143 +                for line in f:                               
+      1144 +                    if line.startswith("02|"):               
+      1145 +                        parts = line.strip().split("|", 2)   
+      1146 +                        if len(parts) == 3:                  
+      1147 +                            config[parts[1]] = parts[2]      
+      1148 +                                                             
+      1149 +        dir_ent = config.get("DirEnt", "").strip()           
+      1150 +        querys_guardados = [q.strip() for q in config.get("Qu
+           +erys", "").split(",") if q.strip()]                          
+      1151 +        nom_log = config.get("NomLog", "").strip()           
+      1152 +                                                             
+      1153 +        if self.listWidget_querys_disponibles:               
+      1154 +            self.listWidget_querys_disponibles.clear()       
+      1155 +        if self.listWidget_querys_seleccionados:             
+      1156 +            self.listWidget_querys_seleccionados.clear()     
+      1157 +                                                             
+      1158 +        if not dir_ent:                                      
+      1159 +            self._update_eq_button_states()                  
+      1160 +            return                                           
+      1161 +                                                             
+      1162 +        if not os.path.isdir(dir_ent):                       
+      1163 +            self._eq_write_config("DirEnt", None)            
+      1164 +            self._eq_write_config("Querys", None)            
+      1165 +            if self.lineEdit_dir_querys:                     
+      1166 +                self.lineEdit_dir_querys.clear()             
+      1167 +            self._update_eq_button_states()                  
+      1168 +            return                                           
+      1169 +                                                             
+      1170 +        if self.lineEdit_dir_querys:                         
+      1171 +            self.lineEdit_dir_querys.setText(dir_ent)        
+      1172 +                                                             
+      1173 +        archivos_sql = sorted([                              
+      1174 +            f[:-4] for f in os.listdir(dir_ent)              
+      1175 +            if f.lower().endswith(".sql") and os.path.isfile(
+           +os.path.join(dir_ent, f))                                    
+      1176 +        ])                                                   
+      1177 +                                                             
+      1178 +        querys_validos = [q for q in querys_guardados if q in
+           + archivos_sql]                                               
+      1179 +        if set(querys_validos) != set(querys_guardados):     
+      1180 +            self._eq_write_config("Querys", ",".join(querys_v
+           +alidos) if querys_validos else None)                         
+      1181 +                                                             
+      1182 +        for nombre in archivos_sql:                          
+      1183 +            if nombre in querys_validos:                     
+      1184 +                if self.listWidget_querys_seleccionados:     
+      1185 +                    self.listWidget_querys_seleccionados.addI
+           +tem(nombre)                                                  
+      1186 +            else:                                            
+      1187 +                if self.listWidget_querys_disponibles:       
+      1188 +                    self.listWidget_querys_disponibles.addIte
+           +m(nombre)                                                    
+      1189 +                                                             
+      1190 +        if nom_log and self.lineEdit_nom_log:                
+      1191 +            self.lineEdit_nom_log.setText(nom_log)           
+      1192 +                                                             
+      1193 +        self._update_eq_button_states()                      
+      1194 +                                                             
+      1195 +    def _browse_dir_querys(self):                            
+      1196 +        """Abre diálogo para seleccionar directorio de querys
+           + y actualiza la UI."""                                       
+      1197 +        dirpath = QFileDialog.getExistingDirectory(self, "Sel
+           +eccionar Directorio de Querys")                              
+      1198 +        if not dirpath:                                      
+      1199 +            return                                           
+      1200 +        if self.lineEdit_dir_querys:                         
+      1201 +            self.lineEdit_dir_querys.setText(dirpath)        
+      1202 +        if self.listWidget_querys_disponibles:               
+      1203 +            self.listWidget_querys_disponibles.clear()       
+      1204 +        if self.listWidget_querys_seleccionados:             
+      1205 +            self.listWidget_querys_seleccionados.clear()     
+      1206 +        self._eq_write_config("DirEnt", dirpath)             
+      1207 +        self._eq_write_config("Querys", None)                
+      1208 +                                                             
+      1209 +        archivos_sql = sorted([                              
+      1210 +            f[:-4] for f in os.listdir(dirpath)              
+      1211 +            if f.lower().endswith(".sql") and os.path.isfile(
+           +os.path.join(dirpath, f))                                    
+      1212 +        ])                                                   
+      1213 +        for nombre in archivos_sql:                          
+      1214 +            if self.listWidget_querys_disponibles:           
+      1215 +                self.listWidget_querys_disponibles.addItem(no
+           +mbre)                                                        
+      1216 +                                                             
+      1217 +        self._update_eq_button_states()                      
+      1218 +                                                             
+      1219 +    # --- US2: Gestión de Listas ---                         
+      1220 +                                                             
+      1221 +    def _eq_add_item(self):                                  
+      1222 +        """Mueve elementos seleccionados de Disponibles a Sel
+           +eccionados."""                                               
+      1223 +        selected = self.listWidget_querys_disponibles.selecte
+           +dItems()                                                     
+      1224 +        for item in selected:                                
+      1225 +            self.listWidget_querys_seleccionados.addItem(item
+           +.text())                                                     
+      1226 +            self.listWidget_querys_disponibles.takeItem(     
+      1227 +                self.listWidget_querys_disponibles.row(item))
+      1228 +        self._update_eq_button_states()                      
+      1229 +        self._eq_save_querys_config()                        
+      1230 +                                                             
+      1231 +    def _eq_add_all_items(self):                             
+      1232 +        """Mueve todos los elementos de Disponibles a Selecci
+           +onados."""                                                   
+      1233 +        while self.listWidget_querys_disponibles.count() > 0:
+      1234 +            item = self.listWidget_querys_disponibles.takeIte
+           +m(0)                                                         
+      1235 +            self.listWidget_querys_seleccionados.addItem(item
+           +.text())                                                     
+      1236 +        self._update_eq_button_states()                      
+      1237 +        self._eq_save_querys_config()                        
+      1238 +                                                             
+      1239 +    def _eq_remove_item(self):                               
+      1240 +        """Mueve elementos seleccionados de Seleccionados a D
+           +isponibles."""                                               
+      1241 +        selected = self.listWidget_querys_seleccionados.selec
+           +tedItems()                                                   
+      1242 +        for item in selected:                                
+      1243 +            self.listWidget_querys_disponibles.addItem(item.t
+           +ext())                                                       
+      1244 +            self.listWidget_querys_seleccionados.takeItem(   
+      1245 +                self.listWidget_querys_seleccionados.row(item
+           +))                                                           
+      1246 +        self._update_eq_button_states()                      
+      1247 +        self._eq_save_querys_config()                        
+      1248 +                                                             
+      1249 +    def _eq_remove_all_items(self):                          
+      1250 +        """Mueve todos los elementos de Seleccionados a Dispo
+           +nibles."""                                                   
+      1251 +        while self.listWidget_querys_seleccionados.count() > 
+           +0:                                                           
+      1252 +            item = self.listWidget_querys_seleccionados.takeI
+           +tem(0)                                                       
+      1253 +            self.listWidget_querys_disponibles.addItem(item.t
+           +ext())                                                       
+      1254 +        self._update_eq_button_states()                      
+      1255 +        self._eq_save_querys_config()                        
+      1256 +                                                             
+      1257 +    def _eq_save_querys_config(self):                        
+      1258 +        """Persiste la lista de Querys Seleccionados en ConfI
+           +nsert.txt."""                                                
+      1259 +        items = [                                            
+      1260 +            self.listWidget_querys_seleccionados.item(i).text
+           +()                                                           
+      1261 +            for i in range(self.listWidget_querys_seleccionad
+           +os.count())                                                  
+      1262 +        ]                                                    
+      1263 +        self._eq_write_config("Querys", ",".join(items) if it
+           +ems else None)                                               
+      1264 +                                                             
+      1265 +    # --- US3: Opciones de Ejecución y Log ---               
+      1266 +                                                             
+      1267 +    def _on_crear_log_changed(self):                         
+      1268 +        """Recalcula estados al cambiar el checkbox Crear Log
+           +."""                                                         
+      1269 +        self._update_eq_button_states()                      
+      1270 +                                                             
+      1271 +    def _eq_guardar_nom_log(self):                           
+      1272 +        """Guarda el nombre del archivo de log en ConfInsert.
+           +txt."""                                                      
+      1273 +        if not self.lineEdit_nom_log:                        
+      1274 +            return                                           
+      1275 +        texto = self.lineEdit_nom_log.text().strip()         
+      1276 +        if not texto:                                        
+      1277 +            return                                           
+      1278 +        self._eq_write_config("NomLog", texto)               
+      1279 +        self._show_message_box("Información", "Nombre de log 
+           +guardado.", QMessageBox.Icon.Information)                    
+      1280 +                                                             
+      1281 +    def _resolve_log_path(self, directory: str, filename: str
+           +) -> str:                                                    
+      1282 +        """Retorna la ruta completa del log; añade sufijo tim
+           +estamp si ya existe."""                                      
+      1283 +        full_path = os.path.join(directory, filename)        
+      1284 +        if not os.path.exists(full_path):                    
+      1285 +            return full_path                                 
+      1286 +        name, ext = os.path.splitext(filename)               
+      1287 +        timestamp = datetime.datetime.now().strftime("%Y%m%d_
+           +%H%M%S")                                                     
+      1288 +        return os.path.join(directory, f"{name}_{timestamp}{e
+           +xt}")                                                        
+      1289 +                                                             
+      1290 +    def _eq_limpiar_configuracion(self):                     
+      1291 +        """Borra toda la configuración de Ejecutar Querys de 
+           +la UI y de ConfInsert.txt."""                                
+      1292 +        if self.lineEdit_dir_querys:                         
+      1293 +            self.lineEdit_dir_querys.clear()                 
+      1294 +        if self.listWidget_querys_disponibles:               
+      1295 +            self.listWidget_querys_disponibles.clear()       
+      1296 +        if self.listWidget_querys_seleccionados:             
+      1297 +            self.listWidget_querys_seleccionados.clear()     
+      1298 +        if self.checkBox_crear_log:                          
+      1299 +            self.checkBox_crear_log.setChecked(False)        
+      1300 +        if self.checkBox_permitir_parcial:                   
+      1301 +            self.checkBox_permitir_parcial.setChecked(False) 
+      1302 +        if self.lineEdit_nom_log:                            
+      1303 +            self.lineEdit_nom_log.clear()                    
+      1304 +                                                             
+      1305 +        config_path = "ConfInsert.txt"                       
+      1306 +        if os.path.exists(config_path):                      
+      1307 +            with open(config_path, "r", encoding="utf-8") as 
+           +f:                                                           
+      1308 +                lines = [l for l in f if not l.startswith("02
+           +|")]                                                         
+      1309 +            with open(config_path, "w", encoding="utf-8") as 
+           +f:                                                           
+      1310 +                f.writelines(lines)                          
+      1311 +                                                             
+      1312 +        self._update_eq_button_states()                      
+      1313 +                                                             
+      1314 +    # --- US4: Ejecución de Querys ---                       
+      1315 +                                                             
+      1316 +    def _leer_conexion_bd(self) -> dict:                     
+      1317 +        """Parsea ConexionBD.txt y retorna dict con my_db, my
+           +_user, my_pass, my_host, my_port."""                         
+      1318 +        params = {}                                          
+      1319 +        try:                                                 
+      1320 +            with open("ConexionBD.txt", "r", encoding="utf-8"
+           +) as f:                                                      
+      1321 +                for line in f:                               
+      1322 +                    line = line.strip()                      
+      1323 +                    if not line or line.startswith("#"):     
+      1324 +                        continue                             
+      1325 +                    if "=" in line:                          
+      1326 +                        key, _, val = line.partition("=")    
+      1327 +                        params[key.strip()] = val.strip().str
+           +ip('"')                                                      
+      1328 +        except Exception as e:                               
+      1329 +            self._show_message_box(                          
+      1330 +                "Error", f"No se pudo leer ConexionBD.txt:\n{
+           +e}", QMessageBox.Icon.Critical)                              
+      1331 +            return {}                                        
+      1332 +                                                             
+      1333 +        required = ["my_db", "my_user", "my_pass", "my_host",
+           + "my_port"]                                                  
+      1334 +        missing = [k for k in required if not params.get(k)] 
+      1335 +        if missing:                                          
+      1336 +            self._show_message_box(                          
+      1337 +                "Error",                                     
+      1338 +                f"ConexionBD.txt no contiene los parámetros: 
+           +{', '.join(missing)}",                                       
+      1339 +                QMessageBox.Icon.Critical,                   
+      1340 +            )                                                
+      1341 +            return {}                                        
+      1342 +        return params                                        
+      1343 +                                                             
+      1344 +    def _eq_ejecutar_querys(self):                           
+      1345 +        """Valida precondiciones y lanza la ejecución de los 
+           +archivos .sql en un hilo separado."""                        
+      1346 +        if not self.listWidget_querys_seleccionados or \     
+      1347 +                self.listWidget_querys_seleccionados.count() 
+           +== 0:                                                        
+      1348 +            self._show_message_box(                          
+      1349 +                "Error", "No hay Querys seleccionados.", QMes
+           +sageBox.Icon.Warning)                                        
+      1350 +            return                                           
+      1351 +                                                             
+      1352 +        if not os.path.exists("ConexionBD.txt"):             
+      1353 +            self._show_message_box(                          
+      1354 +                "Error",                                     
+      1355 +                "No se encontró el archivo 'ConexionBD.txt' e
+           +n el directorio raíz del proyecto.",                         
+      1356 +                QMessageBox.Icon.Critical,                   
+      1357 +            )                                                
+      1358 +            return                                           
+      1359 +                                                             
+      1360 +        conn_params = self._leer_conexion_bd()               
+      1361 +        if not conn_params:                                  
+      1362 +            return                                           
+      1363 +                                                             
+      1364 +        directorio = self.lineEdit_dir_querys.text().strip() 
+           +if self.lineEdit_dir_querys else ""                          
+      1365 +        archivos = [                                         
+      1366 +            os.path.join(directorio, self.listWidget_querys_s
+           +eleccionados.item(i).text() + ".sql")                        
+      1367 +            for i in range(self.listWidget_querys_seleccionad
+           +os.count())                                                  
+      1368 +        ]                                                    
+      1369 +                                                             
+      1370 +        log_file = ""                                        
+      1371 +        crear_log = bool(self.checkBox_crear_log and self.che
+           +ckBox_crear_log.isChecked())                                 
+      1372 +        if crear_log and self.lineEdit_nom_log:              
+      1373 +            nom_log = self.lineEdit_nom_log.text().strip()   
+      1374 +            if nom_log:                                      
+      1375 +                log_file = self._resolve_log_path(directorio,
+           + nom_log)                                                    
+      1376 +                                                             
+      1377 +        allow_partial = bool(                                
+      1378 +            self.checkBox_permitir_parcial and self.checkBox_
+           +permitir_parcial.isChecked())                                
+      1379 +                                                             
+      1380 +        if log_file:                                         
+      1381 +            with open(log_file, "a", encoding="utf-8") as f: 
+      1382 +                f.write(                                     
+      1383 +                    f"\n=== Ejecución: "                     
+      1384 +                    f"{datetime.datetime.now().strftime('%Y-%
+           +m-%d %H:%M:%S')} ===\n"                                      
+      1385 +                )                                            
+      1386 +                                                             
+      1387 +        self._progress_dialog = QProgressDialog(             
+      1388 +            "Iniciando ejecución...", "Cancelar", 0, 0, self)
+      1389 +        self._progress_dialog.setWindowTitle("Ejecutar Querys
+           +")                                                           
+      1390 +        self._progress_dialog.setWindowModality(Qt.WindowModa
+           +lity.WindowModal)                                            
+      1391 +        self._progress_dialog.setMinimumDuration(0)          
+      1392 +        self._progress_dialog.setValue(0)                    
+      1393 +        self._progress_dialog.show()                         
+      1394 +                                                             
+      1395 +        self._eq_thread = QThread(self)                      
+      1396 +        self._eq_worker = EjecutarQuerysWorker(archivos, conn
+           +_params, log_file, allow_partial)                            
+      1397 +        self._eq_worker.moveToThread(self._eq_thread)        
+      1398 +                                                             
+      1399 +        self._eq_thread.started.connect(self._eq_worker.run) 
+      1400 +        self._eq_worker.progress_updated.connect(self._progre
+           +ss_dialog.setLabelText)                                      
+      1401 +        self._eq_worker.execution_finished.connect(self._on_e
+           +xecution_finished)                                           
+      1402 +        self._progress_dialog.canceled.connect(self._eq_worke
+           +r.cancel)                                                    
+      1403 +                                                             
+      1404 +        self._eq_thread.start()                              
+      1405 +                                                             
+      1406 +    def _on_execution_finished(self, summary):               
+      1407 +        """Cierra el progreso, detiene el hilo y muestra el r
+           +esumen al usuario."""                                        
+      1408 +        if self._progress_dialog:                            
+      1409 +            self._progress_dialog.close()                    
+      1410 +        if self._eq_thread:                                  
+      1411 +            self._eq_thread.quit()                           
+      1412 +            self._eq_thread.wait()                           
+      1413 +                                                             
+      1414 +        total = summary.get("total", 0)                      
+      1415 +        ok = summary.get("ok", 0)                            
+      1416 +        failed = summary.get("failed", 0)                    
+      1417 +        cancelled = summary.get("cancelled", False)          
+      1418 +                                                             
+      1419 +        msg = f"Ejecución {'cancelada' if cancelled else 'fin
+           +alizada'}.\n\n"                                              
+      1420 +        msg += f"Archivos ejecutados: {total}\n"             
+      1421 +        msg += f"Exitosos: {ok}\n"                           
+      1422 +        msg += f"Fallidos: {failed}\n"                       
+      1423 +                                                             
+      1424 +        log_file = self._eq_worker._log_file if self._eq_work
+           +er else ""                                                   
+      1425 +        if log_file and os.path.exists(log_file):            
+      1426 +            msg += f"\nLog de detalle:\n{log_file}"          
+      1427 +                                                             
+      1428 +        icono = QMessageBox.Icon.Information if not failed el
+           +se QMessageBox.Icon.Warning                                  
+      1429 +        self._show_message_box("Resumen de Ejecución", msg, i
+           +cono)                                                        
+      1430 +                                                             
+      1431      def closeEvent(self, event):
+      1432          """
+      1433          Intercepta el intento de cierre de ventana (botón X d
+            el SO).
+  ⎿  Referenced file views\panel_principal_view.py
+  ⎿  Read services\funciones.py (285 lines)
+  ⎿  Read ui\PanelPrincipal.ui (349 lines)
+  ⎿  Read .gitignore (20 lines)
+  ⎿  Referenced file specs\003-agregar-ejecutar-querys\tasks.md
+  ⎿  Skills restored (speckit-implement, speckit-tasks, speckit-analyze, speckit-plan, speckit-clarify, speckit-git-feature, speckit-specify)
+
+● Ahora verifico que todas las importaciones necesarias (os, QFileDialog, Qt)
+  estén presentes en el archivo.
+
+  Searched for 1 pattern (ctrl+o to expand)
+
+● Todas las importaciones están correctas. Ahora verifico el Worker para
+  asegurar que el método run() emite las señales correctamente.
+
+  Searched for 1 pattern, read 1 file (ctrl+o to expand)
+
+● Todos los métodos T009–T024 implementados en una sola edición. Ahora verifico
+  el estado de las tareas y aplico estilos CSS para T025.
+
+  Searched for 1 pattern, read 1 file (ctrl+o to expand)
+
+● Leo el método _apply_styles para conocer el estilo existente:
+
+  Read 1 file (ctrl+o to expand)
+
+● Añado los estilos CSS para los botones EQ justo antes del cierre del
+  stylesheet:
+
+● Update(views\panel_principal_view.py)
+  ⎿  Added 100 lines
+      1099              }
+      1100              QScrollBar::add-line:horizontal,
+      1101              QScrollBar::sub-line:horizontal { width: 0; borde
+            r: none; }
+      1102 +            QPushButton#btn_browse_dir_querys {              
+      1103 +                background-color: #0F1520;                   
+      1104 +                border: 1px solid #1A2435;                   
+      1105 +                color: #404A5E;                              
+      1106 +                padding: 9px 16px;                           
+      1107 +                font-size: 11pt;                             
+      1108 +                font-weight: 400;                            
+      1109 +                letter-spacing: 0;                           
+      1110 +            }                                                
+      1111 +            QPushButton#btn_browse_dir_querys:hover {        
+      1112 +                border-color: #B8922A;                       
+      1113 +                color: #D4A848;                              
+      1114 +                background-color: #181408;                   
+      1115 +            }                                                
+      1116 +            QPushButton#btn_eq_agregar,                      
+      1117 +            QPushButton#btn_eq_agregar_todos {               
+      1118 +                background-color: #0A2018;                   
+      1119 +                border: 1px solid #143024;                   
+      1120 +                color: #4A9068;                              
+      1121 +            }                                                
+      1122 +            QPushButton#btn_eq_agregar:hover,                
+      1123 +            QPushButton#btn_eq_agregar_todos:hover {         
+      1124 +                background-color: #0F2C22;                   
+      1125 +                border-color: #205840;                       
+      1126 +                color: #70B090;                              
+      1127 +            }                                                
+      1128 +            QPushButton#btn_eq_agregar:disabled,             
+      1129 +            QPushButton#btn_eq_agregar_todos:disabled {      
+      1130 +                background-color: #0A0F18;                   
+      1131 +                color: #1E2638;                              
+      1132 +                border-color: #111820;                       
+      1133 +            }                                                
+      1134 +            QPushButton#btn_eq_quitar,                       
+      1135 +            QPushButton#btn_eq_quitar_todos {                
+      1136 +                background-color: #200A0A;                   
+      1137 +                border: 1px solid #301010;                   
+      1138 +                color: #905858;                              
+      1139 +            }                                                
+      1140 +            QPushButton#btn_eq_quitar:hover,                 
+      1141 +            QPushButton#btn_eq_quitar_todos:hover {          
+      1142 +                background-color: #2C1010;                   
+      1143 +                border-color: #502020;                       
+      1144 +                color: #B07878;                              
+      1145 +            }                                                
+      1146 +            QPushButton#btn_eq_quitar:disabled,              
+      1147 +            QPushButton#btn_eq_quitar_todos:disabled {       
+      1148 +                background-color: #0A0F18;                   
+      1149 +                color: #1E2638;                              
+      1150 +                border-color: #111820;                       
+      1151 +            }                                                
+      1152 +            QPushButton#btn_ejecutar_querys {                
+      1153 +                background-color: #1C1408;                   
+      1154 +                border: 1px solid #40300A;                   
+      1155 +                color: #C8A03A;                              
+      1156 +                font-size: 10.5pt;                           
+      1157 +                font-weight: 700;                            
+      1158 +                padding: 13px 20px;                          
+      1159 +                letter-spacing: 0.5px;                       
+      1160 +            }                                                
+      1161 +            QPushButton#btn_ejecutar_querys:hover {          
+      1162 +                background-color: #281C08;                   
+      1163 +                border-color: #6A500E;                       
+      1164 +                color: #E0BE58;                              
+      1165 +            }                                                
+      1166 +            QPushButton#btn_ejecutar_querys:pressed {        
+      1167 +                background-color: #120E06;                   
+      1168 +                border-color: #4A3808;                       
+      1169 +            }                                                
+      1170 +            QPushButton#btn_ejecutar_querys:disabled {       
+      1171 +                background-color: #0A0A08;                   
+      1172 +                color: #2A2010;                              
+      1173 +                border-color: #181408;                       
+      1174 +            }                                                
+      1175 +            QPushButton#btn_limpiar_config_eq {              
+      1176 +                background-color: #1C0E08;                   
+      1177 +                border: 1px solid #382010;                   
+      1178 +                color: #906040;                              
+      1179 +                font-size: 9.5pt;                            
+      1180 +            }                                                
+      1181 +            QPushButton#btn_limpiar_config_eq:hover {        
+      1182 +                background-color: #241408;                   
+      1183 +                border-color: #584028;                       
+      1184 +                color: #B08060;                              
+      1185 +            }                                                
+      1186 +            QPushButton#btn_guardar_nom_log {                
+      1187 +                background-color: #0A1520;                   
+      1188 +                border: 1px solid #142030;                   
+      1189 +                color: #507090;                              
+      1190 +                font-size: 9.5pt;                            
+      1191 +            }                                                
+      1192 +            QPushButton#btn_guardar_nom_log:hover {          
+      1193 +                background-color: #0F1C2C;                   
+      1194 +                border-color: #204060;                       
+      1195 +                color: #70A0C0;                              
+      1196 +            }                                                
+      1197 +            QPushButton#btn_guardar_nom_log:disabled {       
+      1198 +                background-color: #0A0F18;                   
+      1199 +                color: #1E2638;                              
+      1200 +                border-color: #111820;                       
+      1201 +            }                                                
+      1202          """
+      1203          self.setStyleSheet(stylesheet)
+      1204  
+
+● T025 ✅. Ahora marco todas las tareas completadas en tasks.md:
+
+● Update(specs\003-agregar-ejecutar-querys\tasks.md)
+  ⎿  Added 1 line, removed 1 line
+      24  
+      25  **Purpose**: Agregar el layout de la pestaña "Ejecutar Querys" 
+          al archivo .ui existente. Este es el punto de partida obligator
+          io: sin los widgets en el .ui, ningún `findChild()` puede funci
+          onar.
+      26  
+      27 -- [ ] T001 Reemplazar el widget vacío `tab_ejecuta_querys` en `
+         -ui/PanelPrincipal.ui` con `QGridLayout` (`gridLayout_eq`) conte
+         -niendo los 17 widgets documentados en plan.md Paso 1 (objectNam
+         -es: `lineEdit_dir_querys`, `btn_browse_dir_querys`, `listWidget
+         -_querys_disponibles`, `btn_eq_agregar`, `btn_eq_agregar_todos`,
+         - `btn_eq_quitar`, `btn_eq_quitar_todos`, `listWidget_querys_sel
+         -eccionados`, `btn_limpiar_config_eq`, `checkBox_crear_log`, `ch
+         -eckBox_permitir_parcial`, `label_nom_log`, `lineEdit_nom_log`, 
+         -`btn_guardar_nom_log`, `btn_ejecutar_querys` dentro de `groupBo
+         -x_eq_opciones`)                                                
+      27 +- [x] T001 Reemplazar el widget vacío `tab_ejecuta_querys` en `
+         +ui/PanelPrincipal.ui` con `QGridLayout` (`gridLayout_eq`) conte
+         +niendo los 17 widgets documentados en plan.md Paso 1 (objectNam
+         +es: `lineEdit_dir_querys`, `btn_browse_dir_querys`, `listWidget
+         +_querys_disponibles`, `btn_eq_agregar`, `btn_eq_agregar_todos`,
+         + `btn_eq_quitar`, `btn_eq_quitar_todos`, `listWidget_querys_sel
+         +eccionados`, `btn_limpiar_config_eq`, `checkBox_crear_log`, `ch
+         +eckBox_permitir_parcial`, `label_nom_log`, `lineEdit_nom_log`, 
+         +`btn_guardar_nom_log`, `btn_ejecutar_querys` dentro de `groupBo
+         +x_eq_opciones`)                                                
+      28  
+      29  ---
+      30  
+
+● Update(specs\003-agregar-ejecutar-querys\tasks.md)
+  ⎿  Error editing file
+
+  Read 1 file (ctrl+o to expand)
+
+● Update(specs\003-agregar-ejecutar-querys\tasks.md)
+  ⎿  Added 1 line, removed 1 line
+      34  
+      35  **⚠️ CRÍTICO**: Ninguna user story puede comenzar hasta que est
+          a fase esté completa.
+      36  
+      37 -- [ ] T002 [P] Extender `execute_sql_from_file()` en `services/
+         -funciones.py` para aceptar `log_file=""` y `allow_partial=False
+         -`; implementar ejecución instrucción-por-instrucción (split por
+         - `;`), control de rollback y retorno de dict `{success, total_s
+         -tmts, ok_stmts, failed_stmts, errors}`; agregar función auxilia
+         -r privada `_write_log()` debajo (plan.md Paso 10)              
+      37 +- [x] T002 [P] Extender `execute_sql_from_file()` en `services/
+         +funciones.py` para aceptar `log_file=""` y `allow_partial=False
+         +`; implementar ejecución instrucción-por-instrucción (split por
+         + `;`), control de rollback y retorno de dict `{success, total_s
+         +tmts, ok_stmts, failed_stmts, errors}`; agregar función auxilia
+         +r privada `_write_log()` debajo (plan.md Paso 10)              
+      38  - [ ] T003 Agregar imports nuevos al bloque de imports de `view
+          s/panel_principal_view.py`: `datetime`, `QTabWidget`, `QProgres
+          sDialog` (a la lista de `QWidgets`), `QObject`, `QThread`, `Sig
+          nal` (a la línea de `PySide6.QtCore`) (plan.md Paso 2)
+      39  - [ ] T004 Insertar clase `EjecutarQuerysWorker(QObject)` con s
+          eñales `progress_updated`, `file_finished`, `execution_finished
+          ` y método `run()` inmediatamente antes de `class PanelPrincipa
+          lView` en `views/panel_principal_view.py` (plan.md Paso 3)
+      40  - [ ] T005 Declarar los 17 nuevos atributos de widgets EQ (`sel
+          f.lineEdit_dir_querys`, `self.btn_browse_dir_querys`, etc.) más
+           `self._eq_thread`, `self._eq_worker`, `self._progress_dialog` 
+          en el bloque `__init__` de `PanelPrincipalView` en `views/panel
+          _principal_view.py` (plan.md Paso 4)
+
+● Update(specs\003-agregar-ejecutar-querys\tasks.md)
+  ⎿  Added 1 line, removed 1 line
+      35  **⚠️ CRÍTICO**: Ninguna user story puede comenzar hasta que est
+          a fase esté completa.
+      36  
+      37  - [x] T002 [P] Extender `execute_sql_from_file()` en `services/
+          funciones.py` para aceptar `log_file=""` y `allow_partial=False
+          `; implementar ejecución instrucción-por-instrucción (split por
+           `;`), control de rollback y retorno de dict `{success, total_s
+          tmts, ok_stmts, failed_stmts, errors}`; agregar función auxilia
+          r privada `_write_log()` debajo (plan.md Paso 10)
+      38 -- [ ] T003 Agregar imports nuevos al bloque de imports de `view
+         -s/panel_principal_view.py`: `datetime`, `QTabWidget`, `QProgres
+         -sDialog` (a la lista de `QWidgets`), `QObject`, `QThread`, `Sig
+         -nal` (a la línea de `PySide6.QtCore`) (plan.md Paso 2)         
+      38 +- [x] T003 Agregar imports nuevos al bloque de imports de `view
+         +s/panel_principal_view.py`: `datetime`, `QTabWidget`, `QProgres
+         +sDialog` (a la lista de `QWidgets`), `QObject`, `QThread`, `Sig
+         +nal` (a la línea de `PySide6.QtCore`) (plan.md Paso 2)         
+      39  - [ ] T004 Insertar clase `EjecutarQuerysWorker(QObject)` con s
+          eñales `progress_updated`, `file_finished`, `execution_finished
+          ` y método `run()` inmediatamente antes de `class PanelPrincipa
+          lView` en `views/panel_principal_view.py` (plan.md Paso 3)
+      40  - [ ] T005 Declarar los 17 nuevos atributos de widgets EQ (`sel
+          f.lineEdit_dir_querys`, `self.btn_browse_dir_querys`, etc.) más
+           `self._eq_thread`, `self._eq_worker`, `self._progress_dialog` 
+          en el bloque `__init__` de `PanelPrincipalView` en `views/panel
+          _principal_view.py` (plan.md Paso 4)
+      41  - [ ] T006 Agregar llamadas `self.findChild()` para los 15 nuev
+          os widgets EQ al final de `setup_ui()`, más los estados inicial
+          es (`lineEdit_nom_log.setEnabled(False)`, checkboxes en `False`
+          ) en `views/panel_principal_view.py` (plan.md Paso 5)
+
+● Update(specs\003-agregar-ejecutar-querys\tasks.md)
+  ⎿  Added 1 line, removed 1 line
+      36  
+      37  - [x] T002 [P] Extender `execute_sql_from_file()` en `services/
+          funciones.py` para aceptar `log_file=""` y `allow_partial=False
+          `; implementar ejecución instrucción-por-instrucción (split por
+           `;`), control de rollback y retorno de dict `{success, total_s
+          tmts, ok_stmts, failed_stmts, errors}`; agregar función auxilia
+          r privada `_write_log()` debajo (plan.md Paso 10)
+      38  - [x] T003 Agregar imports nuevos al bloque de imports de `view
+          s/panel_principal_view.py`: `datetime`, `QTabWidget`, `QProgres
+          sDialog` (a la lista de `QWidgets`), `QObject`, `QThread`, `Sig
+          nal` (a la línea de `PySide6.QtCore`) (plan.md Paso 2)
+      39 -- [ ] T004 Insertar clase `EjecutarQuerysWorker(QObject)` con s
+         -eñales `progress_updated`, `file_finished`, `execution_finished
+         -` y método `run()` inmediatamente antes de `class PanelPrincipa
+         -lView` en `views/panel_principal_view.py` (plan.md Paso 3)     
+      39 +- [x] T004 Insertar clase `EjecutarQuerysWorker(QObject)` con s
+         +eñales `progress_updated`, `file_finished`, `execution_finished
+         +` y método `run()` inmediatamente antes de `class PanelPrincipa
+         +lView` en `views/panel_principal_view.py` (plan.md Paso 3)     
+      40  - [ ] T005 Declarar los 17 nuevos atributos de widgets EQ (`sel
+          f.lineEdit_dir_querys`, `self.btn_browse_dir_querys`, etc.) más
+           `self._eq_thread`, `self._eq_worker`, `self._progress_dialog` 
+          en el bloque `__init__` de `PanelPrincipalView` en `views/panel
+          _principal_view.py` (plan.md Paso 4)
+      41  - [ ] T006 Agregar llamadas `self.findChild()` para los 15 nuev
+          os widgets EQ al final de `setup_ui()`, más los estados inicial
+          es (`lineEdit_nom_log.setEnabled(False)`, checkboxes en `False`
+          ) en `views/panel_principal_view.py` (plan.md Paso 5)
+      42  - [ ] T007 Implementar método `_update_eq_button_states()` en `
+          PanelPrincipalView` con las invariantes de estado de los 7 boto
+          nes y los 2 widgets condicionales (plan.md Paso 7) en `views/pa
+          nel_principal_view.py`
+
+● Update(specs\003-agregar-ejecutar-querys\tasks.md)
+  ⎿  Added 1 line, removed 1 line
+      37  - [x] T002 [P] Extender `execute_sql_from_file()` en `services/
+          funciones.py` para aceptar `log_file=""` y `allow_partial=False
+          `; implementar ejecución instrucción-por-instrucción (split por
+           `;`), control de rollback y retorno de dict `{success, total_s
+          tmts, ok_stmts, failed_stmts, errors}`; agregar función auxilia
+          r privada `_write_log()` debajo (plan.md Paso 10)
+      38  - [x] T003 Agregar imports nuevos al bloque de imports de `view
+          s/panel_principal_view.py`: `datetime`, `QTabWidget`, `QProgres
+          sDialog` (a la lista de `QWidgets`), `QObject`, `QThread`, `Sig
+          nal` (a la línea de `PySide6.QtCore`) (plan.md Paso 2)
+      39  - [x] T004 Insertar clase `EjecutarQuerysWorker(QObject)` con s
+          eñales `progress_updated`, `file_finished`, `execution_finished
+          ` y método `run()` inmediatamente antes de `class PanelPrincipa
+          lView` en `views/panel_principal_view.py` (plan.md Paso 3)
+      40 -- [ ] T005 Declarar los 17 nuevos atributos de widgets EQ (`sel
+         -f.lineEdit_dir_querys`, `self.btn_browse_dir_querys`, etc.) más
+         - `self._eq_thread`, `self._eq_worker`, `self._progress_dialog` 
+         -en el bloque `__init__` de `PanelPrincipalView` en `views/panel
+         -_principal_view.py` (plan.md Paso 4)                           
+      40 +- [x] T005 Declarar los 17 nuevos atributos de widgets EQ (`sel
+         +f.lineEdit_dir_querys`, `self.btn_browse_dir_querys`, etc.) más
+         + `self._eq_thread`, `self._eq_worker`, `self._progress_dialog` 
+         +en el bloque `__init__` de `PanelPrincipalView` en `views/panel
+         +_principal_view.py` (plan.md Paso 4)                           
+      41  - [ ] T006 Agregar llamadas `self.findChild()` para los 15 nuev
+          os widgets EQ al final de `setup_ui()`, más los estados inicial
+          es (`lineEdit_nom_log.setEnabled(False)`, checkboxes en `False`
+          ) en `views/panel_principal_view.py` (plan.md Paso 5)
+      42  - [ ] T007 Implementar método `_update_eq_button_states()` en `
+          PanelPrincipalView` con las invariantes de estado de los 7 boto
+          nes y los 2 widgets condicionales (plan.md Paso 7) en `views/pa
+          nel_principal_view.py`
+      43  - [ ] T008 Agregar conexiones de señales EQ al final de `connec
+          t_signals()`: `tabWidget.currentChanged`, clicks de los 7 boton
+          es EQ, `itemSelectionChanged` de las 2 listas EQ, `stateChanged
+          ` de `checkBox_crear_log` y `textChanged` de `lineEdit_nom_log`
+           en `views/panel_principal_view.py` (plan.md Paso 6)
+● Update(specs\003-agregar-ejecutar-querys\tasks.md)
+  ⎿  Added 1 line, removed 1 line
+      38  - [x] T003 Agregar imports nuevos al bloque de imports de `view
+          s/panel_principal_view.py`: `datetime`, `QTabWidget`, `QProgres
+          sDialog` (a la lista de `QWidgets`), `QObject`, `QThread`, `Sig
+          nal` (a la línea de `PySide6.QtCore`) (plan.md Paso 2)
+      39  - [x] T004 Insertar clase `EjecutarQuerysWorker(QObject)` con s
+          eñales `progress_updated`, `file_finished`, `execution_finished
+          ` y método `run()` inmediatamente antes de `class PanelPrincipa
+          lView` en `views/panel_principal_view.py` (plan.md Paso 3)
+      40  - [x] T005 Declarar los 17 nuevos atributos de widgets EQ (`sel
+          f.lineEdit_dir_querys`, `self.btn_browse_dir_querys`, etc.) más
+           `self._eq_thread`, `self._eq_worker`, `self._progress_dialog` 
+          en el bloque `__init__` de `PanelPrincipalView` en `views/panel
+          _principal_view.py` (plan.md Paso 4)
+      41 -- [ ] T006 Agregar llamadas `self.findChild()` para los 15 nuev
+         -os widgets EQ al final de `setup_ui()`, más los estados inicial
+         -es (`lineEdit_nom_log.setEnabled(False)`, checkboxes en `False`
+         -) en `views/panel_principal_view.py` (plan.md Paso 5)          
+      41 +- [x] T006 Agregar llamadas `self.findChild()` para los 15 nuev
+         +os widgets EQ al final de `setup_ui()`, más los estados inicial
+         +es (`lineEdit_nom_log.setEnabled(False)`, checkboxes en `False`
+         +) en `views/panel_principal_view.py` (plan.md Paso 5)          
+      42  - [ ] T007 Implementar método `_update_eq_button_states()` en `
+          PanelPrincipalView` con las invariantes de estado de los 7 boto
+          nes y los 2 widgets condicionales (plan.md Paso 7) en `views/pa
+          nel_principal_view.py`
+      43  - [ ] T008 Agregar conexiones de señales EQ al final de `connec
+          t_signals()`: `tabWidget.currentChanged`, clicks de los 7 boton
+          es EQ, `itemSelectionChanged` de las 2 listas EQ, `stateChanged
+          ` de `checkBox_crear_log` y `textChanged` de `lineEdit_nom_log`
+           en `views/panel_principal_view.py` (plan.md Paso 6)
+      44  
+
+● Update(specs\003-agregar-ejecutar-querys\tasks.md)
+  ⎿  Added 1 line, removed 1 line
+      39  - [x] T004 Insertar clase `EjecutarQuerysWorker(QObject)` con s
+          eñales `progress_updated`, `file_finished`, `execution_finished
+          ` y método `run()` inmediatamente antes de `class PanelPrincipa
+          lView` en `views/panel_principal_view.py` (plan.md Paso 3)
+      40  - [x] T005 Declarar los 17 nuevos atributos de widgets EQ (`sel
+          f.lineEdit_dir_querys`, `self.btn_browse_dir_querys`, etc.) más
+           `self._eq_thread`, `self._eq_worker`, `self._progress_dialog` 
+          en el bloque `__init__` de `PanelPrincipalView` en `views/panel
+          _principal_view.py` (plan.md Paso 4)
+      41  - [x] T006 Agregar llamadas `self.findChild()` para los 15 nuev
+          os widgets EQ al final de `setup_ui()`, más los estados inicial
+          es (`lineEdit_nom_log.setEnabled(False)`, checkboxes en `False`
+          ) en `views/panel_principal_view.py` (plan.md Paso 5)
+      42 -- [ ] T007 Implementar método `_update_eq_button_states()` en `
+         -PanelPrincipalView` con las invariantes de estado de los 7 boto
+         -nes y los 2 widgets condicionales (plan.md Paso 7) en `views/pa
+         -nel_principal_view.py`                                         
+      42 +- [x] T007 Implementar método `_update_eq_button_states()` en `
+         +PanelPrincipalView` con las invariantes de estado de los 7 boto
+         +nes y los 2 widgets condicionales (plan.md Paso 7) en `views/pa
+         +nel_principal_view.py`                                         
+      43  - [ ] T008 Agregar conexiones de señales EQ al final de `connec
+          t_signals()`: `tabWidget.currentChanged`, clicks de los 7 boton
+          es EQ, `itemSelectionChanged` de las 2 listas EQ, `stateChanged
+          ` de `checkBox_crear_log` y `textChanged` de `lineEdit_nom_log`
+           en `views/panel_principal_view.py` (plan.md Paso 6)
+      44  
+      45  **Checkpoint**: Con T001–T008 completos, la pestaña "Ejecutar Q
+          uerys" carga sin errores y todos los botones arrancan deshabili
+          tados. Las user stories pueden comenzar.
+
+● Update(specs\003-agregar-ejecutar-querys\tasks.md)
+  ⎿  Added 1 line, removed 1 line
+      40  - [x] T005 Declarar los 17 nuevos atributos de widgets EQ (`sel
+          f.lineEdit_dir_querys`, `self.btn_browse_dir_querys`, etc.) más
+           `self._eq_thread`, `self._eq_worker`, `self._progress_dialog` 
+          en el bloque `__init__` de `PanelPrincipalView` en `views/panel
+          _principal_view.py` (plan.md Paso 4)
+      41  - [x] T006 Agregar llamadas `self.findChild()` para los 15 nuev
+          os widgets EQ al final de `setup_ui()`, más los estados inicial
+          es (`lineEdit_nom_log.setEnabled(False)`, checkboxes en `False`
+          ) en `views/panel_principal_view.py` (plan.md Paso 5)
+      42  - [x] T007 Implementar método `_update_eq_button_states()` en `
+          PanelPrincipalView` con las invariantes de estado de los 7 boto
+          nes y los 2 widgets condicionales (plan.md Paso 7) en `views/pa
+          nel_principal_view.py`
+      43 -- [ ] T008 Agregar conexiones de señales EQ al final de `connec
+         -t_signals()`: `tabWidget.currentChanged`, clicks de los 7 boton
+         -es EQ, `itemSelectionChanged` de las 2 listas EQ, `stateChanged
+         -` de `checkBox_crear_log` y `textChanged` de `lineEdit_nom_log`
+         - en `views/panel_principal_view.py` (plan.md Paso 6)           
+      43 +- [x] T008 Agregar conexiones de señales EQ al final de `connec
+         +t_signals()`: `tabWidget.currentChanged`, clicks de los 7 boton
+         +es EQ, `itemSelectionChanged` de las 2 listas EQ, `stateChanged
+         +` de `checkBox_crear_log` y `textChanged` de `lineEdit_nom_log`
+         + en `views/panel_principal_view.py` (plan.md Paso 6)           
+      44  
+      45  **Checkpoint**: Con T001–T008 completos, la pestaña "Ejecutar Q
+          uerys" carga sin errores y todos los botones arrancan deshabili
+          tados. Las user stories pueden comenzar.
+      46  
+
+● Update(specs\003-agregar-ejecutar-querys\tasks.md)
+  ⎿  Added 1 line, removed 1 line
+      54  
+      55  ### Implementación US1
+      56  
+      57 -- [ ] T009 [US1] Implementar método `_eq_write_config(key, valu
+         -e)` en `views/panel_principal_view.py`: escribe/actualiza/elimi
+         -na entradas `02|key|value` en `ConfInsert.txt` sin afectar entr
+         -adas `01|` (plan.md Paso 8)                                    
+      57 +- [x] T009 [US1] Implementar método `_eq_write_config(key, valu
+         +e)` en `views/panel_principal_view.py`: escribe/actualiza/elimi
+         +na entradas `02|key|value` en `ConfInsert.txt` sin afectar entr
+         +adas `01|` (plan.md Paso 8)                                    
+      58  - [ ] T010 [US1] Implementar método `_on_tab_changed(index)` en
+           `views/panel_principal_view.py`: llama `_load_ejecutar_querys_
+          config()` cuando `index == 1` (plan.md Paso 8)
+      59  - [ ] T011 [US1] Implementar método `_load_ejecutar_querys_conf
+          ig()` en `views/panel_principal_view.py`: lee entradas `02|DirE
+          nt`, `02|Querys`, `02|NomLog` de `ConfInsert.txt`; verifica exi
+          stencia del directorio; distribuye archivos `.sql` entre ambas 
+          listas; limpia entradas inválidas (plan.md Paso 8)
+      60  - [ ] T012 [US1] Implementar método `_browse_dir_querys()` en `
+          views/panel_principal_view.py`: abre `QFileDialog.getExistingDi
+          rectory`, actualiza `lineEdit_dir_querys`, limpia ambas listas,
+           escribe `02|DirEnt` en `ConfInsert.txt` y escanea archivos `.s
+          ql` del nuevo directorio (plan.md Paso 8)
+
+● Update(specs\003-agregar-ejecutar-querys\tasks.md)
+  ⎿  Added 1 line, removed 1 line
+      55  ### Implementación US1
+      56  
+      57  - [x] T009 [US1] Implementar método `_eq_write_config(key, valu
+          e)` en `views/panel_principal_view.py`: escribe/actualiza/elimi
+          na entradas `02|key|value` en `ConfInsert.txt` sin afectar entr
+          adas `01|` (plan.md Paso 8)
+      58 -- [ ] T010 [US1] Implementar método `_on_tab_changed(index)` en
+         - `views/panel_principal_view.py`: llama `_load_ejecutar_querys_
+         -config()` cuando `index == 1` (plan.md Paso 8)                 
+      58 +- [x] T010 [US1] Implementar método `_on_tab_changed(index)` en
+         + `views/panel_principal_view.py`: llama `_load_ejecutar_querys_
+         +config()` cuando `index == 1` (plan.md Paso 8)                 
+      59  - [ ] T011 [US1] Implementar método `_load_ejecutar_querys_conf
+          ig()` en `views/panel_principal_view.py`: lee entradas `02|DirE
+          nt`, `02|Querys`, `02|NomLog` de `ConfInsert.txt`; verifica exi
+          stencia del directorio; distribuye archivos `.sql` entre ambas 
+          listas; limpia entradas inválidas (plan.md Paso 8)
+      60  - [ ] T012 [US1] Implementar método `_browse_dir_querys()` en `
+          views/panel_principal_view.py`: abre `QFileDialog.getExistingDi
+          rectory`, actualiza `lineEdit_dir_querys`, limpia ambas listas,
+           escribe `02|DirEnt` en `ConfInsert.txt` y escanea archivos `.s
+          ql` del nuevo directorio (plan.md Paso 8)
+      61  
+
+● Update(specs\003-agregar-ejecutar-querys\tasks.md)
+  ⎿  Added 1 line, removed 1 line
+      56  
+      57  - [x] T009 [US1] Implementar método `_eq_write_config(key, valu
+          e)` en `views/panel_principal_view.py`: escribe/actualiza/elimi
+          na entradas `02|key|value` en `ConfInsert.txt` sin afectar entr
+          adas `01|` (plan.md Paso 8)
+      58  - [x] T010 [US1] Implementar método `_on_tab_changed(index)` en
+           `views/panel_principal_view.py`: llama `_load_ejecutar_querys_
+          config()` cuando `index == 1` (plan.md Paso 8)
+      59 -- [ ] T011 [US1] Implementar método `_load_ejecutar_querys_conf
+         -ig()` en `views/panel_principal_view.py`: lee entradas `02|DirE
+         -nt`, `02|Querys`, `02|NomLog` de `ConfInsert.txt`; verifica exi
+         -stencia del directorio; distribuye archivos `.sql` entre ambas 
+         -listas; limpia entradas inválidas (plan.md Paso 8)             
+      59 +- [x] T011 [US1] Implementar método `_load_ejecutar_querys_conf
+         +ig()` en `views/panel_principal_view.py`: lee entradas `02|DirE
+         +nt`, `02|Querys`, `02|NomLog` de `ConfInsert.txt`; verifica exi
+         +stencia del directorio; distribuye archivos `.sql` entre ambas 
+         +listas; limpia entradas inválidas (plan.md Paso 8)             
+      60  - [ ] T012 [US1] Implementar método `_browse_dir_querys()` en `
+          views/panel_principal_view.py`: abre `QFileDialog.getExistingDi
+          rectory`, actualiza `lineEdit_dir_querys`, limpia ambas listas,
+           escribe `02|DirEnt` en `ConfInsert.txt` y escanea archivos `.s
+          ql` del nuevo directorio (plan.md Paso 8)
+      61  
+      62  **Checkpoint**: Test 1 y 2 del quickstart.md pasan. La pestaña 
+          restaura directorio y listas correctamente.
+
+● Update(specs\003-agregar-ejecutar-querys\tasks.md)
+  ⎿  Added 1 line, removed 1 line
+      57  - [x] T009 [US1] Implementar método `_eq_write_config(key, valu
+          e)` en `views/panel_principal_view.py`: escribe/actualiza/elimi
+          na entradas `02|key|value` en `ConfInsert.txt` sin afectar entr
+          adas `01|` (plan.md Paso 8)
+      58  - [x] T010 [US1] Implementar método `_on_tab_changed(index)` en
+           `views/panel_principal_view.py`: llama `_load_ejecutar_querys_
+          config()` cuando `index == 1` (plan.md Paso 8)
+      59  - [x] T011 [US1] Implementar método `_load_ejecutar_querys_conf
+          ig()` en `views/panel_principal_view.py`: lee entradas `02|DirE
+          nt`, `02|Querys`, `02|NomLog` de `ConfInsert.txt`; verifica exi
+          stencia del directorio; distribuye archivos `.sql` entre ambas 
+          listas; limpia entradas inválidas (plan.md Paso 8)
+      60 -- [ ] T012 [US1] Implementar método `_browse_dir_querys()` en `
+         -views/panel_principal_view.py`: abre `QFileDialog.getExistingDi
+         -rectory`, actualiza `lineEdit_dir_querys`, limpia ambas listas,
+         - escribe `02|DirEnt` en `ConfInsert.txt` y escanea archivos `.s
+         -ql` del nuevo directorio (plan.md Paso 8)                      
+      60 +- [x] T012 [US1] Implementar método `_browse_dir_querys()` en `
+         +views/panel_principal_view.py`: abre `QFileDialog.getExistingDi
+         +rectory`, actualiza `lineEdit_dir_querys`, limpia ambas listas,
+         + escribe `02|DirEnt` en `ConfInsert.txt` y escanea archivos `.s
+         +ql` del nuevo directorio (plan.md Paso 8)                      
+      61  
+      62  **Checkpoint**: Test 1 y 2 del quickstart.md pasan. La pestaña 
+          restaura directorio y listas correctamente.
+      63  
+
+● Update(specs\003-agregar-ejecutar-querys\tasks.md)
+  ⎿  Added 1 line, removed 1 line
+      71  
+      72  ### Implementación US2
+      73  
+      74 -- [ ] T013 [US2] Implementar método `_eq_add_item()` en `views/
+         -panel_principal_view.py`: mueve elementos seleccionados de `lis
+         -tWidget_querys_disponibles` a `listWidget_querys_seleccionados`
+         - y llama `_eq_save_querys_config()` (plan.md Paso 8)           
+      74 +- [x] T013 [US2] Implementar método `_eq_add_item()` en `views/
+         +panel_principal_view.py`: mueve elementos seleccionados de `lis
+         +tWidget_querys_disponibles` a `listWidget_querys_seleccionados`
+         + y llama `_eq_save_querys_config()` (plan.md Paso 8)           
+      75  - [ ] T014 [US2] Implementar método `_eq_add_all_items()` en `v
+          iews/panel_principal_view.py`: mueve todos los elementos de dis
+          ponibles a seleccionados y llama `_eq_save_querys_config()` (pl
+          an.md Paso 8)
+      76  - [ ] T015 [US2] Implementar método `_eq_remove_item()` en `vie
+          ws/panel_principal_view.py`: mueve elementos seleccionados de `
+          listWidget_querys_seleccionados` a `listWidget_querys_disponibl
+          es` y llama `_eq_save_querys_config()` (plan.md Paso 8)
+      77  - [ ] T016 [US2] Implementar método `_eq_remove_all_items()` en
+           `views/panel_principal_view.py`: mueve todos los elementos de 
+          seleccionados a disponibles y llama `_eq_save_querys_config()` 
+          (plan.md Paso 8)
+
+● Update(specs\003-agregar-ejecutar-querys\tasks.md)
+  ⎿  Added 1 line, removed 1 line
+      72  ### Implementación US2
+      73  
+      74  - [x] T013 [US2] Implementar método `_eq_add_item()` en `views/
+          panel_principal_view.py`: mueve elementos seleccionados de `lis
+          tWidget_querys_disponibles` a `listWidget_querys_seleccionados`
+           y llama `_eq_save_querys_config()` (plan.md Paso 8)
+      75 -- [ ] T014 [US2] Implementar método `_eq_add_all_items()` en `v
+         -iews/panel_principal_view.py`: mueve todos los elementos de dis
+         -ponibles a seleccionados y llama `_eq_save_querys_config()` (pl
+         -an.md Paso 8)                                                  
+      75 +- [x] T014 [US2] Implementar método `_eq_add_all_items()` en `v
+         +iews/panel_principal_view.py`: mueve todos los elementos de dis
+         +ponibles a seleccionados y llama `_eq_save_querys_config()` (pl
+         +an.md Paso 8)                                                  
+      76  - [ ] T015 [US2] Implementar método `_eq_remove_item()` en `vie
+          ws/panel_principal_view.py`: mueve elementos seleccionados de `
+          listWidget_querys_seleccionados` a `listWidget_querys_disponibl
+          es` y llama `_eq_save_querys_config()` (plan.md Paso 8)
+      77  - [ ] T016 [US2] Implementar método `_eq_remove_all_items()` en
+           `views/panel_principal_view.py`: mueve todos los elementos de 
+          seleccionados a disponibles y llama `_eq_save_querys_config()` 
+          (plan.md Paso 8)
+      78  - [ ] T017 [US2] Implementar método `_eq_save_querys_config()` 
+          en `views/panel_principal_view.py`: serializa el contenido de `
+          listWidget_querys_seleccionados` como lista separada por comas 
+          y llama `_eq_write_config("Querys", ...)` (plan.md Paso 8)
+
+● Update(specs\003-agregar-ejecutar-querys\tasks.md)
+  ⎿  Added 1 line, removed 1 line
+      73  
+      74  - [x] T013 [US2] Implementar método `_eq_add_item()` en `views/
+          panel_principal_view.py`: mueve elementos seleccionados de `lis
+          tWidget_querys_disponibles` a `listWidget_querys_seleccionados`
+           y llama `_eq_save_querys_config()` (plan.md Paso 8)
+      75  - [x] T014 [US2] Implementar método `_eq_add_all_items()` en `v
+          iews/panel_principal_view.py`: mueve todos los elementos de dis
+          ponibles a seleccionados y llama `_eq_save_querys_config()` (pl
+          an.md Paso 8)
+      76 -- [ ] T015 [US2] Implementar método `_eq_remove_item()` en `vie
+         -ws/panel_principal_view.py`: mueve elementos seleccionados de `
+         -listWidget_querys_seleccionados` a `listWidget_querys_disponibl
+         -es` y llama `_eq_save_querys_config()` (plan.md Paso 8)        
+      76 +- [x] T015 [US2] Implementar método `_eq_remove_item()` en `vie
+         +ws/panel_principal_view.py`: mueve elementos seleccionados de `
+         +listWidget_querys_seleccionados` a `listWidget_querys_disponibl
+         +es` y llama `_eq_save_querys_config()` (plan.md Paso 8)        
+      77  - [ ] T016 [US2] Implementar método `_eq_remove_all_items()` en
+           `views/panel_principal_view.py`: mueve todos los elementos de 
+          seleccionados a disponibles y llama `_eq_save_querys_config()` 
+          (plan.md Paso 8)
+      78  - [ ] T017 [US2] Implementar método `_eq_save_querys_config()` 
+          en `views/panel_principal_view.py`: serializa el contenido de `
+          listWidget_querys_seleccionados` como lista separada por comas 
+          y llama `_eq_write_config("Querys", ...)` (plan.md Paso 8)
+      79  
+
+● Update(specs\003-agregar-ejecutar-querys\tasks.md)
+  ⎿  Added 1 line, removed 1 line
+      74  - [x] T013 [US2] Implementar método `_eq_add_item()` en `views/
+          panel_principal_view.py`: mueve elementos seleccionados de `lis
+          tWidget_querys_disponibles` a `listWidget_querys_seleccionados`
+           y llama `_eq_save_querys_config()` (plan.md Paso 8)
+      75  - [x] T014 [US2] Implementar método `_eq_add_all_items()` en `v
+          iews/panel_principal_view.py`: mueve todos los elementos de dis
+          ponibles a seleccionados y llama `_eq_save_querys_config()` (pl
+          an.md Paso 8)
+      76  - [x] T015 [US2] Implementar método `_eq_remove_item()` en `vie
+          ws/panel_principal_view.py`: mueve elementos seleccionados de `
+          listWidget_querys_seleccionados` a `listWidget_querys_disponibl
+          es` y llama `_eq_save_querys_config()` (plan.md Paso 8)
+      77 -- [ ] T016 [US2] Implementar método `_eq_remove_all_items()` en
+         - `views/panel_principal_view.py`: mueve todos los elementos de 
+         -seleccionados a disponibles y llama `_eq_save_querys_config()` 
+         -(plan.md Paso 8)                                               
+      77 +- [x] T016 [US2] Implementar método `_eq_remove_all_items()` en
+         + `views/panel_principal_view.py`: mueve todos los elementos de 
+         +seleccionados a disponibles y llama `_eq_save_querys_config()` 
+         +(plan.md Paso 8)                                               
+      78  - [ ] T017 [US2] Implementar método `_eq_save_querys_config()` 
+          en `views/panel_principal_view.py`: serializa el contenido de `
+          listWidget_querys_seleccionados` como lista separada por comas 
+          y llama `_eq_write_config("Querys", ...)` (plan.md Paso 8)
+      79  
+      80  **Checkpoint**: Test 3 del quickstart.md pasa. Botón "Ejecutar 
+          Querys" se habilita/deshabilita según contenido de la lista der
+          echa.
+
+● Update(specs\003-agregar-ejecutar-querys\tasks.md)
+  ⎿  Added 1 line, removed 1 line
+      75  - [x] T014 [US2] Implementar método `_eq_add_all_items()` en `v
+          iews/panel_principal_view.py`: mueve todos los elementos de dis
+          ponibles a seleccionados y llama `_eq_save_querys_config()` (pl
+          an.md Paso 8)
+      76  - [x] T015 [US2] Implementar método `_eq_remove_item()` en `vie
+          ws/panel_principal_view.py`: mueve elementos seleccionados de `
+          listWidget_querys_seleccionados` a `listWidget_querys_disponibl
+          es` y llama `_eq_save_querys_config()` (plan.md Paso 8)
+      77  - [x] T016 [US2] Implementar método `_eq_remove_all_items()` en
+           `views/panel_principal_view.py`: mueve todos los elementos de 
+          seleccionados a disponibles y llama `_eq_save_querys_config()` 
+          (plan.md Paso 8)
+      78 -- [ ] T017 [US2] Implementar método `_eq_save_querys_config()` 
+         -en `views/panel_principal_view.py`: serializa el contenido de `
+         -listWidget_querys_seleccionados` como lista separada por comas 
+         -y llama `_eq_write_config("Querys", ...)` (plan.md Paso 8)     
+      78 +- [x] T017 [US2] Implementar método `_eq_save_querys_config()` 
+         +en `views/panel_principal_view.py`: serializa el contenido de `
+         +listWidget_querys_seleccionados` como lista separada por comas 
+         +y llama `_eq_write_config("Querys", ...)` (plan.md Paso 8)     
+      79  
+      80  **Checkpoint**: Test 3 del quickstart.md pasa. Botón "Ejecutar 
+          Querys" se habilita/deshabilita según contenido de la lista der
+          echa.
+      81  
+
+● Update(specs\003-agregar-ejecutar-querys\tasks.md)
+  ⎿  Added 1 line, removed 1 line
+      89  
+      90  ### Implementación US3
+      91  
+      92 -- [ ] T018 [US3] Implementar método `_on_crear_log_changed()` e
+         -n `views/panel_principal_view.py`: llama `_update_eq_button_sta
+         -tes()` para recalcular estado de `lineEdit_nom_log` y `btn_guar
+         -dar_nom_log` según estado del checkbox (plan.md Paso 8)        
+      92 +- [x] T018 [US3] Implementar método `_on_crear_log_changed()` e
+         +n `views/panel_principal_view.py`: llama `_update_eq_button_sta
+         +tes()` para recalcular estado de `lineEdit_nom_log` y `btn_guar
+         +dar_nom_log` según estado del checkbox (plan.md Paso 8)        
+      93  - [ ] T019 [US3] Implementar método `_eq_guardar_nom_log()` en 
+          `views/panel_principal_view.py`: guarda `02|NomLog|<texto>` en 
+          `ConfInsert.txt` si `lineEdit_nom_log` tiene contenido; muestra
+           confirmación con `_show_message_box()` (plan.md Paso 8)
+      94  - [ ] T020 [US3] Implementar método `_resolve_log_path(director
+          y, filename)` en `views/panel_principal_view.py`: retorna ruta 
+          completa; si el archivo ya existe añade sufijo `_YYYYMMDD_HHMMS
+          S` antes de la extensión usando `datetime.datetime.now()` (plan
+          .md Paso 8)
+      95  - [ ] T021 [US3] Implementar método `_eq_limpiar_configuracion(
+          )` en `views/panel_principal_view.py`: limpia ambas listas, `li
+          neEdit_dir_querys`, `lineEdit_nom_log`; desmarca ambos checkbox
+          es; deshabilita `lineEdit_nom_log`; elimina todas las entradas 
+          `02|*` de `ConfInsert.txt` (plan.md Paso 8)
+
+● Update(specs\003-agregar-ejecutar-querys\tasks.md)
+  ⎿  Added 1 line, removed 1 line
+      90  ### Implementación US3
+      91  
+      92  - [x] T018 [US3] Implementar método `_on_crear_log_changed()` e
+          n `views/panel_principal_view.py`: llama `_update_eq_button_sta
+          tes()` para recalcular estado de `lineEdit_nom_log` y `btn_guar
+          dar_nom_log` según estado del checkbox (plan.md Paso 8)
+      93 -- [ ] T019 [US3] Implementar método `_eq_guardar_nom_log()` en 
+         -`views/panel_principal_view.py`: guarda `02|NomLog|<texto>` en 
+         -`ConfInsert.txt` si `lineEdit_nom_log` tiene contenido; muestra
+         - confirmación con `_show_message_box()` (plan.md Paso 8)       
+      93 +- [x] T019 [US3] Implementar método `_eq_guardar_nom_log()` en 
+         +`views/panel_principal_view.py`: guarda `02|NomLog|<texto>` en 
+         +`ConfInsert.txt` si `lineEdit_nom_log` tiene contenido; muestra
+         + confirmación con `_show_message_box()` (plan.md Paso 8)       
+      94  - [ ] T020 [US3] Implementar método `_resolve_log_path(director
+          y, filename)` en `views/panel_principal_view.py`: retorna ruta 
+          completa; si el archivo ya existe añade sufijo `_YYYYMMDD_HHMMS
+          S` antes de la extensión usando `datetime.datetime.now()` (plan
+          .md Paso 8)
+      95  - [ ] T021 [US3] Implementar método `_eq_limpiar_configuracion(
+          )` en `views/panel_principal_view.py`: limpia ambas listas, `li
+          neEdit_dir_querys`, `lineEdit_nom_log`; desmarca ambos checkbox
+          es; deshabilita `lineEdit_nom_log`; elimina todas las entradas 
+          `02|*` de `ConfInsert.txt` (plan.md Paso 8)
+      96  
+
+● Update(specs\003-agregar-ejecutar-querys\tasks.md)
+  ⎿  Added 1 line, removed 1 line
+      91  
+      92  - [x] T018 [US3] Implementar método `_on_crear_log_changed()` e
+          n `views/panel_principal_view.py`: llama `_update_eq_button_sta
+          tes()` para recalcular estado de `lineEdit_nom_log` y `btn_guar
+          dar_nom_log` según estado del checkbox (plan.md Paso 8)
+      93  - [x] T019 [US3] Implementar método `_eq_guardar_nom_log()` en 
+          `views/panel_principal_view.py`: guarda `02|NomLog|<texto>` en 
+          `ConfInsert.txt` si `lineEdit_nom_log` tiene contenido; muestra
+           confirmación con `_show_message_box()` (plan.md Paso 8)
+      94 -- [ ] T020 [US3] Implementar método `_resolve_log_path(director
+         -y, filename)` en `views/panel_principal_view.py`: retorna ruta 
+         -completa; si el archivo ya existe añade sufijo `_YYYYMMDD_HHMMS
+         -S` antes de la extensión usando `datetime.datetime.now()` (plan
+         -.md Paso 8)                                                    
+      94 +- [x] T020 [US3] Implementar método `_resolve_log_path(director
+         +y, filename)` en `views/panel_principal_view.py`: retorna ruta 
+         +completa; si el archivo ya existe añade sufijo `_YYYYMMDD_HHMMS
+         +S` antes de la extensión usando `datetime.datetime.now()` (plan
+         +.md Paso 8)                                                    
+      95  - [ ] T021 [US3] Implementar método `_eq_limpiar_configuracion(
+          )` en `views/panel_principal_view.py`: limpia ambas listas, `li
+          neEdit_dir_querys`, `lineEdit_nom_log`; desmarca ambos checkbox
+          es; deshabilita `lineEdit_nom_log`; elimina todas las entradas 
+          `02|*` de `ConfInsert.txt` (plan.md Paso 8)
+      96  
+      97  **Checkpoint**: Tests 4 y 10 del quickstart.md pasan.
+
+● Update(specs\003-agregar-ejecutar-querys\tasks.md)
+  ⎿  Added 1 line, removed 1 line
+      92  - [x] T018 [US3] Implementar método `_on_crear_log_changed()` e
+          n `views/panel_principal_view.py`: llama `_update_eq_button_sta
+          tes()` para recalcular estado de `lineEdit_nom_log` y `btn_guar
+          dar_nom_log` según estado del checkbox (plan.md Paso 8)
+      93  - [x] T019 [US3] Implementar método `_eq_guardar_nom_log()` en 
+          `views/panel_principal_view.py`: guarda `02|NomLog|<texto>` en 
+          `ConfInsert.txt` si `lineEdit_nom_log` tiene contenido; muestra
+           confirmación con `_show_message_box()` (plan.md Paso 8)
+      94  - [x] T020 [US3] Implementar método `_resolve_log_path(director
+          y, filename)` en `views/panel_principal_view.py`: retorna ruta 
+          completa; si el archivo ya existe añade sufijo `_YYYYMMDD_HHMMS
+          S` antes de la extensión usando `datetime.datetime.now()` (plan
+          .md Paso 8)
+      95 -- [ ] T021 [US3] Implementar método `_eq_limpiar_configuracion(
+         -)` en `views/panel_principal_view.py`: limpia ambas listas, `li
+         -neEdit_dir_querys`, `lineEdit_nom_log`; desmarca ambos checkbox
+         -es; deshabilita `lineEdit_nom_log`; elimina todas las entradas 
+         -`02|*` de `ConfInsert.txt` (plan.md Paso 8)                    
+      95 +- [x] T021 [US3] Implementar método `_eq_limpiar_configuracion(
+         +)` en `views/panel_principal_view.py`: limpia ambas listas, `li
+         +neEdit_dir_querys`, `lineEdit_nom_log`; desmarca ambos checkbox
+         +es; deshabilita `lineEdit_nom_log`; elimina todas las entradas 
+         +`02|*` de `ConfInsert.txt` (plan.md Paso 8)                    
+      96  
+      97  **Checkpoint**: Tests 4 y 10 del quickstart.md pasan.
+      98  
+
+● Update(specs\003-agregar-ejecutar-querys\tasks.md)
+  ⎿  Added 1 line, removed 1 line
+      106  
+      107  ### Implementación US4
+      108  
+      109 -- [ ] T022 [US4] Implementar método `_leer_conexion_bd()` en `
+          -views/panel_principal_view.py`: parsea `ConexionBD.txt` (línea
+          -s `clave = "valor"`, ignorando `#`); valida que existen `my_db
+          -`, `my_user`, `my_pass`, `my_host`, `my_port`; muestra error e
+          -specífico con `_show_message_box()` si faltan (plan.md Paso 8)
+      109 +- [x] T022 [US4] Implementar método `_leer_conexion_bd()` en `
+          +views/panel_principal_view.py`: parsea `ConexionBD.txt` (línea
+          +s `clave = "valor"`, ignorando `#`); valida que existen `my_db
+          +`, `my_user`, `my_pass`, `my_host`, `my_port`; muestra error e
+          +specífico con `_show_message_box()` si faltan (plan.md Paso 8)
+      110  - [ ] T023 [US4] Implementar método `_eq_ejecutar_querys()` en
+            `views/panel_principal_view.py`: verificaciones previas (list
+           a vacía, `ConexionBD.txt` faltante); llama `_leer_conexion_bd(
+           )` y `_resolve_log_path()`; escribe encabezado en log si aplic
+           a; crea `QProgressDialog` modal; instancia `EjecutarQuerysWork
+           er` y `QThread`; conecta señales; inicia ejecución (plan.md Pa
+           so 8)
+      111  - [ ] T024 [US4] Implementar método `_on_execution_finished(su
+           mmary)` en `views/panel_principal_view.py`: cierra `QProgressD
+           ialog`; detiene y espera `QThread`; construye mensaje de resum
+           en (total/exitosos/fallidos/cancelado + ruta del log si existe
+           ); muestra con `_show_message_box()` (plan.md Paso 8)
+      112  
+
+● Update(specs\003-agregar-ejecutar-querys\tasks.md)
+  ⎿  Added 1 line, removed 1 line
+      107  ### Implementación US4
+      108  
+      109  - [x] T022 [US4] Implementar método `_leer_conexion_bd()` en `
+           views/panel_principal_view.py`: parsea `ConexionBD.txt` (línea
+           s `clave = "valor"`, ignorando `#`); valida que existen `my_db
+           `, `my_user`, `my_pass`, `my_host`, `my_port`; muestra error e
+           specífico con `_show_message_box()` si faltan (plan.md Paso 8)
+      110 -- [ ] T023 [US4] Implementar método `_eq_ejecutar_querys()` en
+          - `views/panel_principal_view.py`: verificaciones previas (list
+          -a vacía, `ConexionBD.txt` faltante); llama `_leer_conexion_bd(
+          -)` y `_resolve_log_path()`; escribe encabezado en log si aplic
+          -a; crea `QProgressDialog` modal; instancia `EjecutarQuerysWork
+          -er` y `QThread`; conecta señales; inicia ejecución (plan.md Pa
+          -so 8)                                                         
+      110 +- [x] T023 [US4] Implementar método `_eq_ejecutar_querys()` en
+          + `views/panel_principal_view.py`: verificaciones previas (list
+          +a vacía, `ConexionBD.txt` faltante); llama `_leer_conexion_bd(
+          +)` y `_resolve_log_path()`; escribe encabezado en log si aplic
+          +a; crea `QProgressDialog` modal; instancia `EjecutarQuerysWork
+          +er` y `QThread`; conecta señales; inicia ejecución (plan.md Pa
+          +so 8)                                                         
+      111  - [ ] T024 [US4] Implementar método `_on_execution_finished(su
+           mmary)` en `views/panel_principal_view.py`: cierra `QProgressD
+           ialog`; detiene y espera `QThread`; construye mensaje de resum
+           en (total/exitosos/fallidos/cancelado + ruta del log si existe
+           ); muestra con `_show_message_box()` (plan.md Paso 8)
+      112  
+      113  **Checkpoint**: Tests 5, 6, 7 y 11 del quickstart.md pasan. La
+            ejecución no bloquea la UI.
+
+● Update(specs\003-agregar-ejecutar-querys\tasks.md)
+  ⎿  Added 1 line, removed 1 line
+      108  
+      109  - [x] T022 [US4] Implementar método `_leer_conexion_bd()` en `
+           views/panel_principal_view.py`: parsea `ConexionBD.txt` (línea
+           s `clave = "valor"`, ignorando `#`); valida que existen `my_db
+           `, `my_user`, `my_pass`, `my_host`, `my_port`; muestra error e
+           specífico con `_show_message_box()` si faltan (plan.md Paso 8)
+      110  - [x] T023 [US4] Implementar método `_eq_ejecutar_querys()` en
+            `views/panel_principal_view.py`: verificaciones previas (list
+           a vacía, `ConexionBD.txt` faltante); llama `_leer_conexion_bd(
+           )` y `_resolve_log_path()`; escribe encabezado en log si aplic
+           a; crea `QProgressDialog` modal; instancia `EjecutarQuerysWork
+           er` y `QThread`; conecta señales; inicia ejecución (plan.md Pa
+           so 8)
+      111 -- [ ] T024 [US4] Implementar método `_on_execution_finished(su
+          -mmary)` en `views/panel_principal_view.py`: cierra `QProgressD
+          -ialog`; detiene y espera `QThread`; construye mensaje de resum
+          -en (total/exitosos/fallidos/cancelado + ruta del log si existe
+          -); muestra con `_show_message_box()` (plan.md Paso 8)         
+      111 +- [x] T024 [US4] Implementar método `_on_execution_finished(su
+          +mmary)` en `views/panel_principal_view.py`: cierra `QProgressD
+          +ialog`; detiene y espera `QThread`; construye mensaje de resum
+          +en (total/exitosos/fallidos/cancelado + ruta del log si existe
+          +); muestra con `_show_message_box()` (plan.md Paso 8)         
+      112  
+      113  **Checkpoint**: Tests 5, 6, 7 y 11 del quickstart.md pasan. La
+            ejecución no bloquea la UI.
+      114  
+
+● Update(specs\003-agregar-ejecutar-querys\tasks.md)
+  ⎿  Added 1 line, removed 1 line
+      118  
+      119  **Purpose**: Estilos visuales y validación integral mediante q
+           uickstart.md completo.
+      120  
+      121 -- [ ] T025 [P] Agregar reglas CSS para los 9 nuevos selectores
+          - de widgets EQ (`btn_browse_dir_querys`, `btn_eq_agregar`, `bt
+          -n_eq_agregar_todos`, `btn_eq_quitar`, `btn_eq_quitar_todos`, `
+          -btn_ejecutar_querys` con sus variantes `:hover`, `:disabled`) 
+          -al final del stylesheet de `_apply_styles()` en `views/panel_p
+          -rincipal_view.py` (plan.md Paso 9)                            
+      121 +- [x] T025 [P] Agregar reglas CSS para los 9 nuevos selectores
+          + de widgets EQ (`btn_browse_dir_querys`, `btn_eq_agregar`, `bt
+          +n_eq_agregar_todos`, `btn_eq_quitar`, `btn_eq_quitar_todos`, `
+          +btn_ejecutar_querys` con sus variantes `:hover`, `:disabled`) 
+          +al final del stylesheet de `_apply_styles()` en `views/panel_p
+          +rincipal_view.py` (plan.md Paso 9)                            
+      122  - [ ] T026 Ejecutar Tests 1–4 del `quickstart.md`: directorio 
+           sin configuración previa, selección de directorio nuevo, gesti
+           ón de listas (agregar/quitar/todos), configuración de log
+      123  - [ ] T027 Ejecutar Tests 5–7 del `quickstart.md`: ejecución c
+           on rollback (modo seguro), ejecución sin rollback (modo parcia
+           l), cancelación durante ejecución
+      124  - [ ] T028 Ejecutar Tests 8–11 del `quickstart.md`: restauraci
+           ón al reabrir pestaña, directorio guardado eliminado, limpiar 
+           configuración, `ConexionBD.txt` faltante
+● T001–T025 ✅ todos marcados. La implementación de código está completa. Ahora
+  queda la validación manual (T026–T028).
+
+  Resumen de lo implementado en esta sesión
+
+  Todos los métodos de negocio añadidos a views/panel_principal_view.py en una
+  sola edición:
+
+  ┌─────────────┬───────────┬───────────────────────────────────────────────┐
+  │    Fase     │  Tareas   │                    Métodos                    │
+  ├─────────────┼───────────┼───────────────────────────────────────────────┤
+  │ US1 —       │           │ _eq_write_config, _on_tab_changed,            │
+  │ Directorio  │ T009–T012 │ _load_ejecutar_querys_config,                 │
+  │             │           │ _browse_dir_querys                            │
+  ├─────────────┼───────────┼───────────────────────────────────────────────┤
+  │ US2 —       │           │ _eq_add_item, _eq_add_all_items,              │
+  │ Listas      │ T013–T017 │ _eq_remove_item, _eq_remove_all_items,        │
+  │             │           │ _eq_save_querys_config                        │
+  ├─────────────┼───────────┼───────────────────────────────────────────────┤
+  │ US3 —       │           │ _on_crear_log_changed, _eq_guardar_nom_log,   │
+  │ Opciones    │ T018–T021 │ _resolve_log_path, _eq_limpiar_configuracion  │
+  │ Log         │           │                                               │
+  ├─────────────┼───────────┼───────────────────────────────────────────────┤
+  │ US4 —       │ T022–T024 │ _leer_conexion_bd, _eq_ejecutar_querys,       │
+  │ Ejecución   │           │ _on_execution_finished                        │
+  ├─────────────┼───────────┼───────────────────────────────────────────────┤
+  │ Polish      │ T025      │ CSS para 8 botones EQ con estados :hover,     │
+  │             │           │ :pressed, :disabled                           │
+  └─────────────┴───────────┴───────────────────────────────────────────────┘
+
+  Próximo paso: Ejecutar la aplicación y validar con los Tests 1–11 del
+  quickstart.md (T026–T028). Puedes iniciarla con python main.py desde el
+  directorio raíz.
+
+✻ Cogitated for 8m 53s
+
+※ recap: Implementation of the "Ejecutar Querys" tab is complete — all 25 coding tasks done. Next: run the app with `python main.py` and validate manually using the 11 tests in `quickstart.md`. (disable recaps in /config)
+
+❯ al parecer no solicite que la nueva funcionalidad para ejecutar querys debera 
+  esta asociada al boton denominado "Ejecutar archivos SQL en la base de        
+  datos" podrias vincular la ejecución del boton a la de la pestaña del         
+  componente Tab "Ejecutar query"                                               
+
+● Primero ubico el botón y la estructura de navegación existente.
+
+  Searched for 3 patterns, read 1 file (ctrl+o to expand)
+
+● Entiendo: el botón btn_ejecucion del menú principal debe abrir
+  PanelPrincipalView con la pestaña "Ejecutar Querys" (índice 1) ya
+  seleccionada.
+
+  Voy a:
+  1. Añadir set_active_tab(index) a PanelPrincipalView
+  2. Conectar btn_ejecucion en main.py
+
+  Searched for 1 pattern, read 1 file (ctrl+o to expand)
+
+● Añado el método set_active_tab a PanelPrincipalView y conecto btn_ejecucion en
+  main.py:
+
+● Update(views\panel_principal_view.py)
+  ⎿  Added 6 lines
+      658          self._update_button_states()
+      659          self._save_tables_config()
+      660  
+      661 +    def set_active_tab(self, index: int):                     
+      662 +        """Selecciona la pestaña indicada por índice (0=Crear 
+          +Inserts, 1=Ejecutar Querys, …)."""                            
+      663 +        tab_widget = self.central_widget.findChild(QTabWidget,
+          + "tabWidget")                                                 
+      664 +        if tab_widget:                                        
+      665 +            tab_widget.setCurrentIndex(index)                 
+      666 +                                                              
+      667      def _go_to_main_window(self):
+      668          """Oculta la ventana actual y muestra la ventana princ
+           ipal."""
+      669          self.hide()
+
+● Ahora conecto btn_ejecucion en main.py:
+
+● Update(main.py)
+  ⎿  Added 2 lines, removed 1 line
+      21          self.ui = Ui_Form()
+      22          self.ui.setupUi(central_widget)
+      23  
+      24 -        # Conectar el botón a la nueva función                 
+      24 +        # Conectar los botones del menú principal              
+      25          self.ui.btn_creacion.clicked.connect(self.open_panel_pr
+          incipal)
+      26 +        self.ui.btn_ejecucion.clicked.connect(self.open_panel_e
+         +jecucion)                                                      
+      27          self.ui.btn_salida.clicked.connect(self.close)
+      28  
+      29          # Establecer el widget central en la ventana principal
+
+● Update(main.py)
+  ⎿  Added 6 lines, removed 4 lines
+      45          frame_geometry.moveCenter(center_point)
+      46          self.move(frame_geometry.topLeft())
+      47  
+      48 -    def open_panel_principal(self):                            
+      49 -        # Crear una instancia de la nueva ventana              
+      48 +    def open_panel_principal(self, tab_index=0):               
+      49          self.panel_window = PanelPrincipalView(self)
+      51 -        # Mostrar la nueva ventana                             
+      50 +        if tab_index > 0:                                      
+      51 +            self.panel_window.set_active_tab(tab_index)        
+      52          self.panel_window.show()
+      53 -        # Ocultar la ventana actual                            
+      53          self.hide()
+      54  
+      55 +    def open_panel_ejecucion(self):                            
+      56 +        self.open_panel_principal(tab_index=1)                 
+      57 +                                                               
+      58      def _apply_styles(self):
+      59          stylesheet = """
+      60              QWidget {
+
+● Verifico el resultado final:
+
+  Read 1 file (ctrl+o to expand)
+
+● Listo. Los cambios realizados:
+
+  views/panel_principal_view.py — nuevo método set_active_tab(index):
+  - Busca el tabWidget dentro de central_widget y llama setCurrentIndex(index)
+  - Al cambiar a índice 1, la señal currentChanged dispara _on_tab_changed(1) →
+  _load_ejecutar_querys_config(), restaurando la configuración guardada
+  automáticamente
+
+  main.py:
+  - btn_ejecucion conectado a open_panel_ejecucion()
+  - open_panel_ejecucion() llama open_panel_principal(tab_index=1)
+  - open_panel_principal ahora acepta tab_index y aplica set_active_tab antes de
+  mostrar la ventana
+
+✻ Crunched for 1m 28s
+
+※ recap: Implementing the "Ejecutar Querys" tab for SQL file execution against PostgreSQL. All 25 code tasks are complete; next step is manual validation using the 11 tests in specs/003-agregar-ejecutar-querys/quickstart.md. (disable recaps in /config)
+
+❯ del archivo @C:\Users\jleal\Documents\AAAA_Trabajo\CFDI_CSHARP\BaseDatos\Arch 
+  ivosSQL\Script05.sql al momento de ejecutarlo contra la base de datos         
+  postgres me manda un error en la instruccion  "RETURN NEW" el error es "      
+  ERROR: error de sintaxis en o cerca de «RETURN»" como se puede arreglar       
+  ⎿  Read ..\ArchivosSQL\Script05.sql (276 lines)
+
+● El problema es que execute_sql_from_file divide el SQL por ; de forma simple,
+  rompiendo los bloques PL/pgSQL que contienen sus propios ; dentro de $$...$$.
+  El RETURN NEW; se ejecuta como sentencia independiente.
+
+  La solución es un parser que ignore los ; dentro de bloques dollar-quoted.
+  Modifico services/funciones.py:
+
+  Read 1 file (ctrl+o to expand)
+
+● Reemplazo la línea de split simple por una llamada al nuevo parser, y añado la
+  función _split_sql_statements antes de execute_sql_from_file:
+
+● Update(services\funciones.py)
+  ⎿  Added 76 lines
+      191                  f.write(insert_sql + "\n")
+      192  
+      193  
+      194 +def _split_sql_statements(sql_text: str) -> list:             
+      195 +    """Divide SQL en sentencias respetando dollar-quotes, stri
+          +ngs y comentarios."""                                         
+      196 +    statements = []                                           
+      197 +    i = 0                                                     
+      198 +    n = len(sql_text)                                         
+      199 +    start = 0                                                 
+      200 +                                                              
+      201 +    while i < n:                                              
+      202 +        c = sql_text[i]                                       
+      203 +                                                              
+      204 +        # Comentario de línea: avanzar hasta fin de línea     
+      205 +        if c == '-' and i + 1 < n and sql_text[i + 1] == '-': 
+      206 +            while i < n and sql_text[i] != '\n':              
+      207 +                i += 1                                        
+      208 +            continue                                          
+      209 +                                                              
+      210 +        # Comentario multilínea /* ... */                     
+      211 +        if c == '/' and i + 1 < n and sql_text[i + 1] == '*': 
+      212 +            i += 2                                            
+      213 +            while i < n - 1:                                  
+      214 +                if sql_text[i] == '*' and sql_text[i + 1] == '
+          +/':                                                           
+      215 +                    i += 2                                    
+      216 +                    break                                     
+      217 +                i += 1                                        
+      218 +            continue                                          
+      219 +                                                              
+      220 +        # String con comilla simple: 'texto' (soporta '' como 
+          +escape)                                                       
+      221 +        if c == "'":                                          
+      222 +            i += 1                                            
+      223 +            while i < n:                                      
+      224 +                if sql_text[i] == "'" and i + 1 < n and sql_te
+          +xt[i + 1] == "'":                                             
+      225 +                    i += 2                                    
+      226 +                elif sql_text[i] == "'":                      
+      227 +                    i += 1                                    
+      228 +                    break                                     
+      229 +                else:                                         
+      230 +                    i += 1                                    
+      231 +            continue                                          
+      232 +                                                              
+      233 +        # Dollar-quote: $tag$...$tag$ (incluye $$ sin tag)    
+      234 +        if c == '$':                                          
+      235 +            j = i + 1                                         
+      236 +            while j < n and sql_text[j] != '$' and sql_text[j]
+          + not in (' ', '\t', '\n', '\r'):                              
+      237 +                j += 1                                        
+      238 +            if j < n and sql_text[j] == '$':                  
+      239 +                tag = sql_text[i:j + 1]                       
+      240 +                close = sql_text.find(tag, j + 1)             
+      241 +                if close != -1:                               
+      242 +                    i = close + len(tag)                      
+      243 +                    continue                                  
+      244 +                                                              
+      245 +        # Fin de sentencia                                    
+      246 +        if c == ';':                                          
+      247 +            stmt = sql_text[start:i].strip()                  
+      248 +            if stmt and not all(                              
+      249 +                not line.strip() or line.strip().startswith('-
+          +-')                                                           
+      250 +                for line in stmt.splitlines()                 
+      251 +            ):                                                
+      252 +                statements.append(stmt)                       
+      253 +            i += 1                                            
+      254 +            start = i                                         
+      255 +            continue                                          
+      256 +                                                              
+      257 +        i += 1                                                
+      258 +                                                              
+      259 +    # Texto restante sin ';' final                            
+      260 +    stmt = sql_text[start:].strip()                           
+      261 +    if stmt and not all(                                      
+      262 +        not line.strip() or line.strip().startswith('--')     
+      263 +        for line in stmt.splitlines()                         
+      264 +    ):                                                        
+      265 +        statements.append(stmt)                               
+      266 +                                                              
+      267 +    return statements                                         
+      268 +                                                              
+      269 +                                                              
+      270  def execute_sql_from_file(
+      271      db_name, user, password, host, port, sql_file,
+      272      log_file="", allow_partial=False
+
+● Ahora reemplazo el split simple dentro de execute_sql_from_file:
+
+● Update(services\funciones.py)
+  ⎿  Added 1 line, removed 2 lines
+      296      with open(sql_file, "r", encoding="utf-8") as f:
+      297          contenido = f.read()
+      298  
+      299 -    stmts = [s.strip() for s in contenido.split(";")          
+      300 -             if s.strip() and not s.strip().startswith("--")] 
+      299 +    stmts = _split_sql_statements(contenido)                  
+      300  
+      301      if not stmts:
+      302          result["success"] = True
+
+● Verifico que el resultado sea correcto:
+
+  Read 1 file (ctrl+o to expand)
+
+● El fix está en su lugar. Aquí el análisis del problema y la solución:
+
+  Causa del error
+
+  El script Script05.sql contiene bloques PL/pgSQL delimitados por $$:
+
+  CREATE OR REPLACE FUNCTION actualizar_fecha_modificacion()
+  RETURNS TRIGGER AS $$
+  BEGIN
+      NEW.actualizado_en = CURRENT_TIMESTAMP;   -- ← ';' interno
+      RETURN NEW;                                -- ← ';' interno
+  END;
+  $$ LANGUAGE plpgsql;                          -- ← ';' real del fin
+
+  El parser anterior dividía por ; sin distinción, convirtiendo RETURN NEW en
+  una sentencia independiente — lo que PostgreSQL rechaza.
+
+  Lo que hace _split_sql_statements ahora
+
+  ┌─────────────────────┬───────────────────────────────────────────────────┐
+  │      Situación      │                      Acción                       │
+  ├─────────────────────┼───────────────────────────────────────────────────┤
+  │ -- comentario       │ Salta hasta fin de línea, no parte sentencias     │
+  ├─────────────────────┼───────────────────────────────────────────────────┤
+  │ /* comentario */    │ Salta el bloque completo                          │
+  ├─────────────────────┼───────────────────────────────────────────────────┤
+  │ 'string'            │ Salta el contenido entre comillas (incluye ''     │
+  │                     │ escaped)                                          │
+  ├─────────────────────┼───────────────────────────────────────────────────┤
+  │ $$...$$ o           │ Encuentra el cierre correspondiente y salta todo  │
+  │ $tag$...$tag$       │ el bloque incluyendo sus ; internos               │
+  ├─────────────────────┼───────────────────────────────────────────────────┤
+  │ ; fuera de todo lo  │ Corte de sentencia real                           │
+  │ anterior            │                                                   │
+  └─────────────────────┴───────────────────────────────────────────────────┘
+
+  El bloque DO $$ ... END $$; del final del script también queda protegido por
+  el mismo mecanismo.
+
+✻ Baked for 1m 18s
+
+※ recap: Implementando la pestaña "Ejecutar Querys" completa. Toda la lógica está lista (T001–T025). El siguiente paso es validar manualmente ejecutando la app con `python main.py` y probando los 11 tests del quickstart.md.
+❯ podrias corregirlo                                                            
+
+● La corrección ya fue aplicada en el turno anterior — services/funciones.py ya
+  tiene el nuevo parser. Verifico que esté en su lugar:
+
+  Searched for 1 pattern, read 1 file (ctrl+o to expand)
+
+● El fix está aplicado correctamente. Ahora hago una prueba rápida del parser
+  contra el contenido problemático del script para confirmar que funciona:
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● El parser funciona correctamente. 47 sentencias detectadas — lo importante es
+  verificar que los bloques $$ quedaron intactos:
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● El fix está confirmado y funcionando. Esto es lo que cambió:
+
+  Antes — split por ; simple. El CREATE FUNCTION se partía en 4 fragmentos:
+  1. CREATE OR REPLACE FUNCTION ... AS $$\nBEGIN\n    NEW.actualizado_en = ...
+  2. RETURN NEW             ← ERROR: sentencia independiente inválida
+  3. END
+  4. $$ LANGUAGE plpgsql
+
+  Ahora — _split_sql_statements reconoce el bloque $$...$$ completo:
+  - Sentencia [15]: todo el CREATE OR REPLACE FUNCTION ... END;\n$$ LANGUAGE 
+  plpgsql como una sola sentencia
+  - Sentencia [47]: todo el bloque DO $$...END $$ como una sola sentencia
+
+  Puedes ejecutar el Script05.sql desde la pestaña "Ejecutar Querys" de la
+  aplicación y ya no aparecerá el error «RETURN».
+
+✻ Baked for 2m 21s
+
+※ recap: Implementando la pestaña "Ejecutar Querys" completa. Todo el código está terminado (T001–T025). El siguiente paso es ejecutar la app con `python main.py` y validar los Tests 1–11 del quickstart.md.
+
+❯ me sigue apareciendo el mismo error lo que tengo en el archivo Script05.sql   
+  es lo siguiente en cuanto a la function es : --                               
+  ==========================================================                    
+  -- 2. FUNCIÓN DE AUDITORÍA                                                    
+  -- ==========================================================                 
+  CREATE OR REPLACE FUNCTION actualizar_fecha_modificacion()                    
+  RETURNS TRIGGER AS $$                                                         
+  BEGIN                                                                         
+      NEW.actualizado_en = CURRENT_TIMESTAMP;                                   
+      RETURN NEW;                                                               
+  END;                                                                          
+  $$ LANGUAGE plpgsql;                                                          
+  ⎿  ⧉ Selected 10 lines from ..\ArchivosSQL\Script05.sql in Visual Studio Code
+
+● El parser está correcto — el test lo confirma. El problema más probable es que
+  la aplicación no fue reiniciada después de aplicar el cambio. Verifico el
+  archivo y limpio el cache de Python:
+
+  Searched for 1 pattern, ran 2 shell commands (ctrl+o to expand)
+
+● El código está correcto (línea 299 usa _split_sql_statements), pero el
+  problema era el caché de Python. Ahora hago una prueba de ejecución directa
+  contra la lógica del parser para confirmarlo:
+
+  Ran 1 shell command (ctrl+o to expand)
+
+❯ lo curioso es que cuando lo ejecuto en pgadmin de posgres si funciona 
+
+● Exacto — eso confirma que el SQL es correcto. El problema estaba únicamente en
+  que nuestra aplicación dividía el script por ; sin entender los bloques $$,
+  lo que rompía la función. pgAdmin envía el archivo completo a PostgreSQL de
+  una sola vez, por eso allá funciona.
+
+  El fix ya está aplicado y el caché limpiado. El parser ahora detecta
+  correctamente los dos bloques $$ del script:
+
+  - Sentencia 15 → CREATE OR REPLACE FUNCTION ... $$ LANGUAGE plpgsql (completo)
+  - Sentencia 47 → DO $$ ... END $$ (completo)
+
+  Para que el cambio tome efecto necesitas cerrar y volver a abrir la 
+  aplicación. Si ya la tenías corriendo cuando hice el fix, sigue usando el
+  código viejo en memoria aunque el archivo haya cambiado.
+
+  Cierra la app, ábrela de nuevo con python main.py y ejecuta el script desde la
+  pestaña "Ejecutar Querys" — ahora debe ejecutarse sin el error «RETURN».
+
+✻ Worked for 3m 8s
+
+❯ No esta realizando la carga de los parametros de configuración que estan en   
+  el archivo ConfInsert.txt para la pestaña "Ejecutar Querys" del componente    
+  Tab como se habia especificado el el ultimo specify podrias revisarlo y en su 
+  caso corregirlo                                                               
+  ⎿  ⧉ Selected 3 lines from ConfInsert.txt in Visual Studio Code
+
+● Leo el código relevante para diagnosticar el problema.
+
+  Searched for 2 patterns, read 1 file (ctrl+o to expand)
+
+● Veo la lógica pero necesito examinar el método findChild personalizado y el
+  setup_ui de los widgets EQ:
+
+  Searched for 1 pattern, read 1 file (ctrl+o to expand)
+
+● Ahora veo el findChild override y la causa raíz:
+
+  Read 1 file (ctrl+o to expand)
+
+● Encontré el problema. La _load_ejecutar_querys_config() solo se llama cuando
+  currentChanged dispara (cuando el usuario cambia de pestaña), pero nunca se 
+  llama al abrir el panel. Al contrario, _load_config_file() (para "Crear
+  Inserts") sí se llama directamente en __init__. La segunda pestaña no tiene
+  ese llamado directo inicial.
+
+  La solución: añadir la llamada en __init__ igual que la primera pestaña:
+
+● Update(views\panel_principal_view.py)
+  ⎿  Added 1 line
+      160          self._apply_styles()  # 4. Aplica una hoja de estilos 
+           CSS para dar apariencia a la app.
+      161          self._update_button_states()  # 5. Ajusta el estado in
+           icial (habilitado/deshabilitado) de los botones.
+      162          self._load_config_file()  # 6. Carga la configuración 
+           previa desde "ConfInsert.txt".
+      163 +        self._load_ejecutar_querys_config()  # 7. Carga la con
+          +figuración previa de la pestaña "Ejecutar Querys".            
+      164  
+      165          primary_screen = QApplication.primaryScreen()
+      166          screen = primary_screen.geometry()
+● Verifico que la línea quedó en el lugar correcto:
+
+  Read 1 file (ctrl+o to expand)
+
+● Correcto. La causa raíz y la solución:
+
+  Causa: _load_config_file() (pestaña "Crear Inserts") se llama directamente en
+  __init__ y siempre carga al abrir el panel. _load_ejecutar_querys_config()
+  solo se disparaba via currentChanged — es decir, únicamente si el usuario ya
+  estaba en otra pestaña y hacía clic en "Ejecutar Querys". Al abrir el panel
+  directamente en esa pestaña (o al abrirlo en la pestaña 0 y nunca cambiar), el
+  config nunca se cargaba.
+
+  Solución: Agregar _load_ejecutar_querys_config() como paso 7 en __init__,
+  igual que _load_config_file(). Ahora la configuración se restaura siempre al
+  abrir el panel, independientemente de qué pestaña esté activa. La señal
+  currentChanged sigue siendo útil para recargar si el usuario navega a otra
+  pestaña y regresa.
+
+  Reinicia la aplicación y verás que el directorio, los querys seleccionados y
+  el nombre del log se restauran automáticamente al abrir el panel.
+
+✻ Brewed for 4m 17s
+
+※ recap: Implementando la pestaña "Ejecutar Querys" para ejecutar archivos SQL contra PostgreSQL. El código está completo y funcional — el siguiente paso es que el usuario pruebe la aplicación con `python main.py` y valide los flujos del quickstart.md.
+
+❯ Sigue sin cargar el archivo el mismo existe en la ruta del proyecto           
+  "C:\Users\jleal\Documents\AAAA_Trabajo\CFDI_CSHARP\BaseDatos\ProyUtileriasSQL 
+  \ConfInsert.txt"  con las siguientes entradas:                                
+                                                                                
+  01|ArchExcel|C:/Users/jleal/Documents/AAAA_Trabajo/CFDI_CSHARP/BaseDatos/Arch 
+  ivosExcel/DatosCatalogosOriginales.xlsx                                       
+  01|Tablas|Usuarios,TipoNomina,TipoEstaSAT,TipoEstNom,TipoDivision,TipoParam,T 
+  ipoPermiso,TipAlcance                                                         
+  01|DirSal|C:/Users/jleal/Documents/AAAA_Trabajo/CFDI_CSHARP/BaseDatos/Archivo 
+  sSQL                                                                          
+  02|DirEnt|C:/Users/jleal/Documents/AAAA_Trabajo/CFDI_CSHARP/BaseDatos/Archivo 
+  sSQL                                                                          
+  02|Querys|Script05                                                            
+  02|NomLog|salida                                                              
+                                                                                
+  Las que interesan para este paso son las que empiezan con 02|                 
+                                                                                
+  Podrias verificar para ver que sucedio y corregirlo                           
+                                                                                
+                                                                                
+  ⎿  ⧉ Selected 6 lines from ConfInsert.txt in Visual Studio Code
+
+● Primero verifico si el problema es el CWD (directorio de trabajo) ejecutando
+  un diagnóstico real:
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● La lógica del archivo funciona correctamente. El problema está en el runtime
+  de la app. Busco si btn_ejecutar_querys está declarado y si hay alguna
+  excepción silenciosa en _update_eq_button_states:
+
+  Searched for 1 pattern (ctrl+o to expand)
+
+● Necesito ver el método _update_eq_button_states completo para verificar si hay
+  una excepción silenciosa:
+
+  Read 1 file (ctrl+o to expand)
+
+● Necesito agregar diagnóstico directo en el código para ver exactamente dónde
+  falla. Añado prints temporales y un try-except:
+
+  Read 1 file (ctrl+o to expand)
+  ⎿  Read services\funciones.py (360 lines)
+  ⎿  Read main.py (121 lines)
+  ⎿  Referenced file specs\003-agregar-ejecutar-querys\tasks.md
+  ⎿  Read ui\PanelPrincipal.ui (349 lines)
+  ⎿  Read .gitignore (20 lines)
+  ⎿  Skills restored (speckit-implement, speckit-tasks, speckit-analyze, speckit-plan, speckit-clarify, speckit-git-feature, speckit-specify)
+
+● Necesito revisar la sección setup_ui() del view principal para diagnosticar
+  por qué los widgets de EQ no se encuentran.
+
+  Searched for 3 patterns, read 1 file (ctrl+o to expand)
+
+● Necesito ver _load_config_file() para verificar si interfiere con el estado de
+  EQ:
+
+  Searched for 2 patterns, read 1 file (ctrl+o to expand)
+
+● Voy a hacer un diagnóstico directo. Necesito ver cuántos lugares usan
+  "ConfInsert.txt" y verificar si el problema es el CWD:
+  Searched for 1 pattern (ctrl+o to expand)
+
+● Identifico el problema más probable: el CWD puede no ser el directorio raíz
+  del proyecto cuando se lanza la app, haciendo que "ConfInsert.txt" no se
+  encuentre. Voy a implementar la corrección definitiva usando la ruta absoluta
+  basada en __file__ en panel_principal_view.py, y también añado prints de
+  diagnóstico:
+
+  Read 1 file (ctrl+o to expand)
+
+● Agrego la constante de ruta absoluta al inicio del módulo, después de los
+  imports existentes:
+
+● Update(views\panel_principal_view.py)
+  ⎿  Added 6 lines
+      10  """
+      11  
+      12  import os
+      13 +import sys                                                     
+      14  import datetime
+      15  import pandas as pd
+      16 +                                                               
+      17 +# Ruta absoluta al archivo de configuración, independiente del 
+         +CWD de lanzamiento                                             
+      18 +_CONF_FILE = os.path.normpath(                                 
+      19 +    os.path.join(os.path.dirname(os.path.abspath(__file__)), ".
+         +.", "ConfInsert.txt")                                          
+      20 +)                                                              
+      21  from PySide6.QtWidgets import (
+      22      QMainWindow,
+      23      QFileDialog,
+
+● Ahora reemplazo TODAS las ocurrencias de "ConfInsert.txt" como ruta de archivo
+  (no comentarios/docstrings) con _CONF_FILE. Primero veo exactamente qué
+  líneas tienen el path real:
+
+  Read 1 file (ctrl+o to expand)
+
+● Ahora hago todos los reemplazos de rutas reales. Primero los que usan
+  os.path.exists("ConfInsert.txt"):
+
+● Update(views\panel_principal_view.py)
+  ⎿  Added 1 line, removed 1 line
+      276  
+      277          # Habilitar o deshabilitar el botón principal basado e
+           n si existe el archivo de config.
+      278          if self.btn_ejecutar_creacion:
+      279 -            self.btn_ejecutar_creacion.setEnabled(os.path.exis
+          -ts("ConfInsert.txt"))                                         
+      279 +            self.btn_ejecutar_creacion.setEnabled(os.path.exis
+          +ts(_CONF_FILE))                                               
+      280  
+      281      def connect_signals(self):
+      282          """
+
+  Read 1 file (ctrl+o to expand)
+
+● Update(views\panel_principal_view.py)
+  ⎿  Added 1 line, removed 1 line
+      370          Slot que se ejecuta al presionar "Ejecutar creación".
+      371          Orquesta la validación y la llamada al servicio de gen
+           eración de SQL.
+      372          """
+      373 -        config_path = "ConfInsert.txt"                        
+      373 +        config_path = _CONF_FILE                              
+      374          if not os.path.exists(config_path):
+      375              self._show_message_box(
+      376                  "Error",
+
+  Read 1 file (ctrl+o to expand)
+
+● Update(views\panel_principal_view.py)
+  ⎿  Added 1 line, removed 1 line
+      701          """
+      702          if not value:
+      703              return
+      704 -        config_path = "ConfInsert.txt"                        
+      704 +        config_path = _CONF_FILE                              
+      705          lines = []
+      706          found = False
+      707          if os.path.exists(config_path):
+
+  Read 1 file (ctrl+o to expand)
+
+● Update(views\panel_principal_view.py)
+  ⎿  Added 1 line, removed 1 line
+      722          Carga la configuración desde ConfInsert.txt al iniciar
+            la aplicación
+      723          y la aplica a los widgets correspondientes.
+      724          """
+      725 -        config_path = "ConfInsert.txt"                        
+      725 +        config_path = _CONF_FILE                              
+      726          if not os.path.exists(config_path):
+      727              return
+      728  
+
+  Read 1 file (ctrl+o to expand)
+
+● Update(views\panel_principal_view.py)
+  ⎿  Added 1 line, removed 1 line
+      771              self.lineEdit_archivo_todos.clear()
+      772          self.config_tablas = []
+      773  
+      774 -        config_path = "ConfInsert.txt"                        
+      774 +        config_path = _CONF_FILE                              
+      775          if os.path.exists(config_path):
+      776              with open(config_path, "r") as f:
+      777                  lines = [line for line in f if not line.starts
+           with("01|")]
+
+  Read 1 file (ctrl+o to expand)
+
+● Update(views\panel_principal_view.py)
+  ⎿  Added 1 line, removed 1 line
+      1230  
+      1231      def _eq_write_config(self, key: str, value):
+      1232          """Escribe o elimina una entrada 02|key|value en Conf
+            Insert.txt."""
+      1233 -        config_path = "ConfInsert.txt"                       
+      1233 +        config_path = _CONF_FILE                             
+      1234          prefix = f"02|{key}|"
+      1235          lines = []
+      1236          if os.path.exists(config_path):
+
+  Read 1 file (ctrl+o to expand)
+
+● Ahora también añado prints de diagnóstico a _load_ejecutar_querys_config()
+  para que el usuario vea exactamente qué sucede:
+
+● Update(views\panel_principal_view.py)
+  ⎿  Added 5 lines, removed 1 line
+      1249  
+      1250      def _load_ejecutar_querys_config(self):
+      1251          """Lee ConfInsert.txt y restaura la configuración 02|
+            * en la pestaña Ejecutar Querys."""
+      1252 -        config_path = "ConfInsert.txt"                       
+      1252 +        config_path = _CONF_FILE                             
+      1253 +        print(f"[EQ] Cargando config desde: {config_path}", f
+           +ile=sys.stderr)                                              
+      1254 +        print(f"[EQ] Archivo existe: {os.path.exists(config_p
+           +ath)}", file=sys.stderr)                                     
+      1255 +        print(f"[EQ] lineEdit_dir_querys: {self.lineEdit_dir_
+           +querys}", file=sys.stderr)                                   
+      1256 +        print(f"[EQ] listWidget_querys_disponibles: {self.lis
+           +tWidget_querys_disponibles}", file=sys.stderr)               
+      1257          config = {}
+      1258          if os.path.exists(config_path):
+      1259              with open(config_path, "r", encoding="utf-8") as 
+            f:
+
+● Ahora agrego un print después de leer el config para ver qué se encontró:
+
+  Read 1 file (ctrl+o to expand)
+
+● Update(views\panel_principal_view.py)
+  ⎿  Added 2 lines
+      1266          dir_ent = config.get("DirEnt", "").strip()
+      1267          querys_guardados = [q.strip() for q in config.get("Qu
+            erys", "").split(",") if q.strip()]
+      1268          nom_log = config.get("NomLog", "").strip()
+      1269 +        print(f"[EQ] config leído: {config}", file=sys.stderr
+           +)                                                            
+      1270 +        print(f"[EQ] dir_ent='{dir_ent}' querys={querys_guard
+           +ados} nom_log='{nom_log}'", file=sys.stderr)                 
+      1271  
+      1272          if self.listWidget_querys_disponibles:
+      1273              self.listWidget_querys_disponibles.clear()
+
+● Ahora busco y reemplazo el último config_path = "ConfInsert.txt" en
+  _eq_limpiar_configuracion:
+
+  Read 1 file (ctrl+o to expand)
+
+● Update(views\panel_principal_view.py)
+  ⎿  Added 1 line, removed 1 line
+      1421          if self.lineEdit_nom_log:
+      1422              self.lineEdit_nom_log.clear()
+      1423  
+      1424 -        config_path = "ConfInsert.txt"                       
+      1424 +        config_path = _CONF_FILE                             
+      1425          if os.path.exists(config_path):
+      1426              with open(config_path, "r", encoding="utf-8") as 
+            f:
+      1427                  lines = [l for l in f if not l.startswith("02
+            |")]
+● Ahora agrego el os.chdir() en main.py como capa de seguridad adicional:
+
+● Update(main.py)
+  ⎿  Added 3 lines, removed 1 line
+      1  import sys
+      2  import os
+      3  
+      4 -sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))  
+      4 +_project_root = os.path.dirname(os.path.abspath(__file__))      
+      5 +sys.path.insert(0, _project_root)                               
+      6 +os.chdir(_project_root)  # garantiza que los paths relativos res
+        +uelvan desde la raíz del proyecto                               
+      7  
+      8  from PySide6.QtWidgets import QApplication, QMainWindow, QWidget
+      9  
+
+● Verifico que no quede ningún "ConfInsert.txt" como ruta real en el código
+  (excluyendo comentarios y mensajes de usuario):
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● No quedaron asignaciones de ruta relativa. Ahora limpio el caché de Python
+  para que los cambios se apliquen:
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+● Verifico la estructura final de _load_ejecutar_querys_config() con las
+  modificaciones:
+
+  Read 1 file (ctrl+o to expand)
+
+● Los cambios están en orden. Ahora ejecuto la app desde la terminal para ver el
+  output de diagnóstico:
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● La salida de diagnóstico confirma todo está funcionando:
+  - El archivo se encuentra (ruta absoluta correcta)
+  - Los widgets NO son None (están correctamente inicializados)
+  - El config se lee bien: {'DirEnt': '...ArchivosSQL', 'Querys': 'Script05', 
+  'NomLog': 'salida'}
+
+  La raíz del problema era el CWD — al lanzar desde VS Code u otro IDE, el
+  directorio de trabajo era diferente al raíz del proyecto, por lo que
+  "ConfInsert.txt" como ruta relativa no se encontraba. Ahora está corregido con
+  la ruta absoluta _CONF_FILE + os.chdir() en main.py.
+
+  Elimino los prints de diagnóstico ya que confirmamos que funciona:
+
+● Update(views\panel_principal_view.py)
+  ⎿  Removed 6 lines
+      1250      def _load_ejecutar_querys_config(self):
+      1251          """Lee ConfInsert.txt y restaura la configuración 02|
+            * en la pestaña Ejecutar Querys."""
+      1252          config_path = _CONF_FILE
+      1253 -        print(f"[EQ] Cargando config desde: {config_path}", f
+           -ile=sys.stderr)                                              
+      1254 -        print(f"[EQ] Archivo existe: {os.path.exists(config_p
+           -ath)}", file=sys.stderr)                                     
+      1255 -        print(f"[EQ] lineEdit_dir_querys: {self.lineEdit_dir_
+           -querys}", file=sys.stderr)                                   
+      1256 -        print(f"[EQ] listWidget_querys_disponibles: {self.lis
+           -tWidget_querys_disponibles}", file=sys.stderr)               
+      1253          config = {}
+      1254          if os.path.exists(config_path):
+      1255              with open(config_path, "r", encoding="utf-8") as 
+            f:
+     ...
+      1262          dir_ent = config.get("DirEnt", "").strip()
+      1263          querys_guardados = [q.strip() for q in config.get("Qu
+            erys", "").split(",") if q.strip()]
+      1264          nom_log = config.get("NomLog", "").strip()
+      1269 -        print(f"[EQ] config leído: {config}", file=sys.stderr
+           -)                                                            
+      1270 -        print(f"[EQ] dir_ent='{dir_ent}' querys={querys_guard
+           -ados} nom_log='{nom_log}'", file=sys.stderr)                 
+      1265  
+      1266          if self.listWidget_querys_disponibles:
+      1267              self.listWidget_querys_disponibles.clear()
+
+● También elimino el import sys que ya no necesitamos (sólo fue para los
+  prints):
+
+  Read 1 file (ctrl+o to expand)
+
+● Update(views\panel_principal_view.py)
+  ⎿  Removed 1 line
+      10  """
+      11  
+      12  import os
+      13 -import sys                                                     
+      13  import datetime
+      14  import pandas as pd
+      15  
+
+● Verificación final — confirmo que los cambios clave quedaron correctos:
+
+  Read 2 files (ctrl+o to expand)
+
+● Todo correcto. Resumen de los cambios aplicados:
+
+  Problema confirmado: ConfInsert.txt se buscaba con ruta relativa
+  ("ConfInsert.txt"), pero el directorio de trabajo (CWD) podía ser diferente al
+  raíz del proyecto según cómo se lanzara la app (VS Code, doble clic, etc.).
+
+  Correcciones en dos archivos:
+
+  1. main.py — se agrega os.chdir(_project_root) para garantizar que el CWD
+  siempre sea el directorio raíz del proyecto al lanzar la app.
+  2. views/panel_principal_view.py — se define la constante _CONF_FILE con ruta
+  absoluta calculada desde __file__, y se reemplaza todos los usos de
+  "ConfInsert.txt" como path real por _CONF_FILE. Con esto, sin importar desde
+  dónde se lance la app, el archivo de configuración siempre se encuentra
+  correctamente.
+
+  El diagnóstico de ejecución confirmó que los widgets EQ (lineEdit_dir_querys,
+  listWidget_querys_disponibles, etc.) SÍ se encuentran correctamente y el
+  config SÍ se lee bien — ahora la pestaña "Ejecutar Querys" debería cargar
+  automáticamente los parámetros al abrir el panel.
+
+✻ Worked for 19m 29s
+
+※ recap: Implementando la pestaña "Ejecutar Querys". Se corrigió que la configuración no cargaba al inicio (problema de CWD al lanzar la app). Próximo paso: probar la app y confirmar que los datos del ConfInsert.txt aparecen en la pestaña.
+
+❯ Ok ya funciono                                                                
+
+● La carga de configuración en la pestaña "Ejecutar Querys" ya funciona
+  correctamente.
+
+  Recalled 1 memory, wrote 2 memories (ctrl+o to expand)
+  ⎿  Interrupted · What should Claude do instead?
+
+※ recap: Se corrigió la carga automática de config 02| en la pestaña "Ejecutar Querys" usando rutas absolutas para ConfInsert.txt. El siguiente paso es que el usuario pruebe la app y confirme que los campos se cargan al abrir el panel.
+
+❯ en la pestaña "Ejecutar Querys" cuando se selecciona el check box con la      
+  etiqueta "Crear Log de Operacion" y en el Text Box con la etiqueta "Nombre de 
+  archivo log" no tiene nada, entonces mandar un mensaje cuando se presione el  
+  boton "Ejecutar Querys" que diga "Proporciona un nombre de archivo para el    
+  Log de Operaciones                                                            
+
+  Searched for 1 pattern, read 1 file (ctrl+o to expand)
+
+● Veo el flujo: si crear_log es True pero nom_log está vacío, simplemente queda
+  log_file = "" y sigue sin avisar. Agrego la validación justo después de
+  determinar crear_log:
+
+● Update(views\panel_principal_view.py)
+  ⎿  Added 10 lines, removed 4 lines
+      1481  
+      1482          log_file = ""
+      1483          crear_log = bool(self.checkBox_crear_log and self.che
+            ckBox_crear_log.isChecked())
+      1484 -        if crear_log and self.lineEdit_nom_log:              
+      1485 -            nom_log = self.lineEdit_nom_log.text().strip()   
+      1486 -            if nom_log:                                      
+      1487 -                log_file = self._resolve_log_path(directorio,
+           - nom_log)                                                    
+      1484 +        if crear_log:                                        
+      1485 +            nom_log = self.lineEdit_nom_log.text().strip() if
+           + self.lineEdit_nom_log else ""                               
+      1486 +            if not nom_log:                                  
+      1487 +                self._show_message_box(                      
+      1488 +                    "Dato requerido",                        
+      1489 +                    "Proporciona un nombre de archivo para el
+           + Log de Operaciones.",                                       
+      1490 +                    QMessageBox.Icon.Warning,                
+      1491 +                )                                            
+      1492 +                return                                       
+      1493 +            log_file = self._resolve_log_path(directorio, nom
+           +_log)                                                        
+      1494  
+      1495          allow_partial = bool(
+      1496              self.checkBox_permitir_parcial and self.checkBox_
+            permitir_parcial.isChecked())
+
+● Listo. Ahora cuando el checkbox "Crear Log de Operación" está marcado y el
+  campo de nombre de log está vacío, al presionar "Ejecutar Querys" aparece el
+  mensaje "Proporciona un nombre de archivo para el Log de Operaciones." y la
+  ejecución se detiene hasta que el usuario llene ese campo.
+
+✻ Sautéed for 22s
+
+❯ Con el nombre del archivo que se proporciona para dejar el log de operaciones 
+  cuando se cree este con los mensajes de la base de datos y se guarde ponle    
+  al nombre la fecha y hora separadas por un guion bajo con el siguiente        
+  formato "_DDMMYY_HHMMSS" y despues agregale una extencion ".log" al archivo   
+  creado                                                                        
+  Searched for 1 pattern, read 1 file (ctrl+o to expand)
+
+● El método actual sólo añade timestamp si ya existe el archivo. Ahora debe
+  aplicar siempre el sufijo de fecha/hora con la extensión .log:
+
+● Update(views\panel_principal_view.py)
+  ⎿  Added 4 lines, removed 7 lines
+      1391          self._show_message_box("Información", "Nombre de log 
+            guardado.", QMessageBox.Icon.Information)
+      1392  
+      1393      def _resolve_log_path(self, directory: str, filename: str
+            ) -> str:
+      1394 -        """Retorna la ruta completa del log; añade sufijo tim
+           -estamp si ya existe."""                                      
+      1395 -        full_path = os.path.join(directory, filename)        
+      1396 -        if not os.path.exists(full_path):                    
+      1397 -            return full_path                                 
+      1398 -        name, ext = os.path.splitext(filename)               
+      1399 -        timestamp = datetime.datetime.now().strftime("%Y%m%d_
+           -%H%M%S")                                                     
+      1400 -        return os.path.join(directory, f"{name}_{timestamp}{e
+           -xt}")                                                        
+      1394 +        """Retorna la ruta completa del log con sufijo _DDMMY
+           +Y_HHMMSS.log siempre."""                                     
+      1395 +        name = os.path.splitext(filename)[0]                 
+      1396 +        timestamp = datetime.datetime.now().strftime("%d%m%y_
+           +%H%M%S")                                                     
+      1397 +        return os.path.join(directory, f"{name}_{timestamp}.l
+           +og")                                                         
+      1398  
+      1399      def _eq_limpiar_configuracion(self):
+      1400          """Borra toda la configuración de Ejecutar Querys de 
+            la UI y de ConfInsert.txt."""
+
+● Listo. Ahora el archivo de log siempre se genera con el formato
+  <nombre>_DDMMYY_HHMMSS.log.
+
+  Por ejemplo, si el usuario escribe salida y ejecuta el 10 de junio de 2026 a
+  las 14:30:22, el archivo se llamará:
+  salida_100626_143022.log
+
+✻ Brewed for 24s
+
+❯ una correccion adicional al paso anterior el año en vez del formato corto     
+  "YY" pon formato largo "YYYY"                                                 
+
+● Update(views\panel_principal_view.py)
+  ⎿  Added 1 line, removed 1 line
+      1393      def _resolve_log_path(self, directory: str, filename: str
+            ) -> str:
+      1394          """Retorna la ruta completa del log con sufijo _DDMMY
+            Y_HHMMSS.log siempre."""
+      1395          name = os.path.splitext(filename)[0]
+      1396 -        timestamp = datetime.datetime.now().strftime("%d%m%y_
+           -%H%M%S")                                                     
+      1396 +        timestamp = datetime.datetime.now().strftime("%d%m%Y_
+           +%H%M%S")                                                     
+      1397          return os.path.join(directory, f"{name}_{timestamp}.l
+            og")
+      1398  
+      1399      def _eq_limpiar_configuracion(self):
+
+● Corregido. Ahora el formato será salida_10062026_143022.log.
+
+✻ Crunched for 8s
+
+※ recap: Implementando la funcionalidad "Ejecutar Querys" para ProyUtileriasSQL. El último cambio fue el formato del nombre del archivo log a DDMMYYYY_HHMMSS.log. Siguiente paso: confirmar con el usuario que todo funciona o continuar con pruebas pendientes.
+
+❯ De la pantalla del componente Tab en la pestaña "Ejecutar Querys" si el check 
+  box de la pantalla con el texto "Crear Log de Operaciones" esta seleccionado  
+  entonces guardarlo en el archivo de configuración ConfInserts.txt con la      
+  siguiente entrada                                                             
+                                                                                
+  02|ChekLog|Si                                                                 
+                                                                                
+  Y al momento de cargar el archivo de configuración si existe esta entrada     
+  entonces poner el check box como seleccionado                                 
+  En caso de que se deseleccione este check box entonces quitar la entrada      
+                                                                                
+  02|ChekLog|Si                                                                 
+                                                                                
+  del archivo de configuración ConfInserts.txt                                  
+
+  Searched for 1 pattern, read 1 file (ctrl+o to expand)
+
+● Ahora veo la carga de config para saber dónde insertar la lectura de ChekLog:
+
+  Read 1 file (ctrl+o to expand)
+
+● Necesito modificar _load_ejecutar_querys_config() para restaurar el checkbox,
+  y _on_crear_log_changed() para persistirlo:
+
+  Read 1 file (ctrl+o to expand)
+
+● Reorganizo la carga para que el checkbox y nom_log se restauren siempre
+  (incluso cuando no hay directorio válido), usando blockSignals para evitar que
+  el set del checkbox dispare la escritura al archivo durante la carga:
+
+● Update(views\panel_principal_view.py)
+  ⎿  Added 9 lines, removed 3 lines
+      1261          dir_ent = config.get("DirEnt", "").strip()
+      1262          querys_guardados = [q.strip() for q in config.get("Qu
+            erys", "").split(",") if q.strip()]
+      1263          nom_log = config.get("NomLog", "").strip()
+      1264 +        chek_log = config.get("ChekLog", "").strip().upper() 
+           +== "SI"                                                      
+      1265  
+      1266 +        # Restaurar checkbox y nom_log siempre, sin importar 
+           +el directorio                                                
+      1267 +        if self.checkBox_crear_log:                          
+      1268 +            self.checkBox_crear_log.blockSignals(True)       
+      1269 +            self.checkBox_crear_log.setChecked(chek_log)     
+      1270 +            self.checkBox_crear_log.blockSignals(False)      
+      1271 +        if nom_log and self.lineEdit_nom_log:                
+      1272 +            self.lineEdit_nom_log.setText(nom_log)           
+      1273 +                                                             
+      1274          if self.listWidget_querys_disponibles:
+      1275              self.listWidget_querys_disponibles.clear()
+      1276          if self.listWidget_querys_seleccionados:
+     ...
+      1308                  if self.listWidget_querys_disponibles:
+      1309                      self.listWidget_querys_disponibles.addIte
+            m(nombre)
+      1310  
+      1302 -        if nom_log and self.lineEdit_nom_log:                
+      1303 -            self.lineEdit_nom_log.setText(nom_log)           
+      1304 -                                                             
+      1311          self._update_eq_button_states()
+      1312  
+      1313      def _browse_dir_querys(self):
+
+● Ahora modifico _on_crear_log_changed() para persistir el estado del checkbox:
+
+● Update(views\panel_principal_view.py)
+  ⎿  Added 3 lines, removed 1 line
+      1383      # --- US3: Opciones de Ejecución y Log ---
+      1384  
+      1385      def _on_crear_log_changed(self):
+      1386 -        """Recalcula estados al cambiar el checkbox Crear Log
+           -."""                                                         
+      1386 +        """Persiste el estado del checkbox Crear Log y recalc
+           +ula estados de botones."""                                   
+      1387 +        checked = bool(self.checkBox_crear_log and self.check
+           +Box_crear_log.isChecked())                                   
+      1388 +        self._eq_write_config("ChekLog", "Si" if checked else
+           + None)                                                       
+      1389          self._update_eq_button_states()
+      1390  
+      1391      def _eq_guardar_nom_log(self):
+
+● También hay que limpiar esa entrada en _eq_limpiar_configuracion() junto con
+  las demás:
+
+  Read 1 file (ctrl+o to expand)
+
+● En _eq_limpiar_configuracion() el setChecked(False) disparará
+  _on_crear_log_changed innecesariamente (ya que la limpieza borra todos los 02|
+  al final). Agrego blockSignals para evitar la doble escritura:
+
+● Update(views\panel_principal_view.py)
+  ⎿  Added 2 lines
+      1413          if self.listWidget_querys_seleccionados:
+      1414              self.listWidget_querys_seleccionados.clear()
+      1415          if self.checkBox_crear_log:
+      1416 +            self.checkBox_crear_log.blockSignals(True)       
+      1417              self.checkBox_crear_log.setChecked(False)
+      1418 +            self.checkBox_crear_log.blockSignals(False)      
+      1419          if self.checkBox_permitir_parcial:
+      1420              self.checkBox_permitir_parcial.setChecked(False)
+      1421          if self.lineEdit_nom_log:
+
+● Listo. Los cambios implementados son:
+
+  1. _load_ejecutar_querys_config() — lee 02|ChekLog|Si del archivo y, si
+  existe, marca el checkbox usando blockSignals(True/False) para que el set
+  programático no dispare la escritura al archivo.
+  2. _on_crear_log_changed() — al marcar el checkbox escribe 02|ChekLog|Si; al
+  desmarcarlo elimina la entrada (pasando None a _eq_write_config).
+  3. _eq_limpiar_configuracion() — usa blockSignals al desmarcar el checkbox
+  para evitar una escritura redundante, ya que la limpieza borra todos los 02|
+  directamente.
+
+✻ Worked for 1m 40s
+
+❯                                                                               
+  Has lo mismo con el check box con la leyenda "Permitir ejecución de           
+  Operaciones validas" pero con la entrada                                      
+  02|ChekOperV|Si                                                               
+
+  Searched for 2 patterns, read 1 file (ctrl+o to expand)
+● Tengo todo el contexto. Hago los tres cambios en paralelo:
+
+  1. Conectar la señal de checkBox_permitir_parcial en connect_signals():
+
+● Update(views\panel_principal_view.py)
+  ⎿  Added 2 lines
+      355              self.btn_limpiar_config_eq.clicked.connect(self._e
+           q_limpiar_configuracion)
+      356          if self.checkBox_crear_log:
+      357              self.checkBox_crear_log.stateChanged.connect(self.
+           _on_crear_log_changed)
+      358 +        if self.checkBox_permitir_parcial:                    
+      359 +            self.checkBox_permitir_parcial.stateChanged.connec
+          +t(self._on_permitir_parcial_changed)                          
+      360          if self.lineEdit_nom_log:
+      361              self.lineEdit_nom_log.textChanged.connect(self._up
+           date_eq_button_states)
+      362          if self.btn_guardar_nom_log:
+
+● 2. Restaurar el checkbox en _load_ejecutar_querys_config():
+
+● Update(views\panel_principal_view.py)
+  ⎿  Added 6 lines, removed 1 line
+      1264          querys_guardados = [q.strip() for q in config.get("Qu
+            erys", "").split(",") if q.strip()]
+      1265          nom_log = config.get("NomLog", "").strip()
+      1266          chek_log = config.get("ChekLog", "").strip().upper() 
+            == "SI"
+      1267 +        chek_oper_v = config.get("ChekOperV", "").strip().upp
+           +er() == "SI"                                                 
+      1268  
+      1268 -        # Restaurar checkbox y nom_log siempre, sin importar 
+           -el directorio                                                
+      1269 +        # Restaurar checkboxes y nom_log siempre, sin importa
+           +r el directorio                                              
+      1270          if self.checkBox_crear_log:
+      1271              self.checkBox_crear_log.blockSignals(True)
+      1272              self.checkBox_crear_log.setChecked(chek_log)
+      1273              self.checkBox_crear_log.blockSignals(False)
+      1274 +        if self.checkBox_permitir_parcial:                   
+      1275 +            self.checkBox_permitir_parcial.blockSignals(True)
+      1276 +            self.checkBox_permitir_parcial.setChecked(chek_op
+           +er_v)                                                        
+      1277 +            self.checkBox_permitir_parcial.blockSignals(False
+           +)                                                            
+      1278          if nom_log and self.lineEdit_nom_log:
+      1279              self.lineEdit_nom_log.setText(nom_log)
+      1280  
+
+● 3. Agregar el método _on_permitir_parcial_changed() junto a 
+  _on_crear_log_changed():
+
+● Update(views\panel_principal_view.py)
+  ⎿  Added 5 lines
+      1395          self._eq_write_config("ChekLog", "Si" if checked else
+             None)
+      1396          self._update_eq_button_states()
+      1397  
+      1398 +    def _on_permitir_parcial_changed(self):                  
+      1399 +        """Persiste el estado del checkbox Permitir ejecución
+           + parcial."""                                                 
+      1400 +        checked = bool(self.checkBox_permitir_parcial and sel
+           +f.checkBox_permitir_parcial.isChecked())                     
+      1401 +        self._eq_write_config("ChekOperV", "Si" if checked el
+           +se None)                                                     
+      1402 +                                                             
+      1403      def _eq_guardar_nom_log(self):
+      1404          """Guarda el nombre del archivo de log en ConfInsert.
+            txt."""
+      1405          if not self.lineEdit_nom_log:
+
+● 4. Agregar blockSignals en _eq_limpiar_configuracion() para 
+  checkBox_permitir_parcial:
+
+● Update(views\panel_principal_view.py)
+  ⎿  Added 2 lines
+      1429              self.checkBox_crear_log.setChecked(False)
+      1430              self.checkBox_crear_log.blockSignals(False)
+      1431          if self.checkBox_permitir_parcial:
+      1432 +            self.checkBox_permitir_parcial.blockSignals(True)
+      1433              self.checkBox_permitir_parcial.setChecked(False)
+      1434 +            self.checkBox_permitir_parcial.blockSignals(False
+           +)                                                            
+      1435          if self.lineEdit_nom_log:
+      1436              self.lineEdit_nom_log.clear()
+      1437  
+
+● Listo. El comportamiento es idéntico al del checkbox anterior:
+
+  - Al marcar "Permitir ejecución de Operaciones válidas" → escribe
+  02|ChekOperV|Si en ConfInsert.txt
+  - Al desmarcar → elimina la entrada del archivo
+  - Al cargar → si existe 02|ChekOperV|Si, el checkbox aparece marcado
+  - Al limpiar configuración → se desmarca sin disparar escritura redundante (ya
+  que la limpieza borra todos los 02| directamente)
+
+✻ Sautéed for 50s
+
+❯ realiza el commit de lo anteriormente realizado para la pestaña "Ejecutar     
+  Querys"                                                                       
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+● Hay archivos sensibles/temporales staged que no deben incluirse. Primero los
+  quito del staging:
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+● El staging quedó limpio. Realizo el commit:
+
+  Committed f8b5f9c (ctrl+o to expand)
+
+● Commit f8b5f9c creado en la rama 003-agregar-ejecutar-querys con 21 archivos y
+  2,695 líneas de cambio.
+
+  Nota: @salida09062026.txt, ConexionBD.txt y ConfInsert.txt quedaron fuera del
+  commit — el primero es un log de salida temporal, y los otros dos contienen
+  datos locales/credenciales que no deben versionarse.
+
+✻ Sautéed for 57s
+
+❯ dado que los datos de los archivos  ConexionBD.txt y ConfInsert.txt son datos 
+  para las pruebas deberan subirse al controlador de versiones no reprecentan   
+  problema parta que los desarrolladores que se incorporen tambien los tengan   
+
+  Read 1 file (ctrl+o to expand)
+
+● El .gitignore ya tiene ConfInsert.txt comentado (no excluido), y
+  ConexionBD.txt tampoco está excluido. Solo necesito agregarlos y hacer el
+  commit:
+
+  Committed 25fc4b1, ran 1 shell command (ctrl+o to expand)
+
+● Commit 25fc4b1 creado. Ambos archivos ya están en el repositorio en la rama
+  003-agregar-ejecutar-querys.
+
+✻ Crunched for 22s
+
+❯ hacer el merge de la rama a main                                              
+
+  Merged 003-agregar-ejecutar-querys (ctrl+o to expand)
+
+● Merge completado. La rama 003-agregar-ejecutar-querys fue integrada a main con
+  la estrategia --no-ff (merge commit explícito), dejando el historial claro.
+  23 archivos integrados con 2,708 líneas de cambio.
+
+✻ Churned for 9s
+
+❯ push a origin main                                                            
+
+  Pushed to main (ctrl+o to expand)
+
+● Push completado. La rama main está ahora actualizada en origin (GitHub) con
+  todos los cambios de la pestaña "Ejecutar Querys".
+✻ Cooked for 9s
+
+❯ también hacer push de la rama 003-agregar-ejecutar-querys                     
+
+  Pushed to 003-agregar-ejecutar-querys (ctrl+o to expand)
+
+● Push completado. La rama 003-agregar-ejecutar-querys ya está disponible en
+  GitHub.
+
+✻ Churned for 8s

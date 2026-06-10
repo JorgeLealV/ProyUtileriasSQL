@@ -1,0 +1,2051 @@
+ ▐▛███▜▌   Claude Code v2.1.169
+▝▜█████▛▘  Sonnet 4.6 · Claude Pro
+  ▘▘ ▝▝    ~\Documents\AAAA_Trabajo\CFDI_CSHARP\BaseDatos\ProyUtileriasSQL
+
+❯ cree el archivo spec-agregar-botones.txt en el subdirectorio                  
+  Documentación\SpectsOrig del proyecto podrías revisarlo para que me digas si  
+  es correcta la petición que estoy realizando para iniciar una nueva specify   
+
+● Voy a leer el archivo para revisarlo.
+
+  Read 1 file (ctrl+o to expand)
+
+● El archivo es claro en lo esencial. Aquí mi evaluación:
+
+  Lo que está bien:
+  - La funcionalidad de cada botón está definida sin ambigüedad
+  - Se especifica la ubicación relativa (Agregar Todos debajo de Agregar, Quitar
+  Todos debajo de Quitar)
+  - Los nombres de los componentes UI están referenciados correctamente (ListBox
+  izquierdo/derecho, títulos de cada uno)
+  - El flujo de datos es bidireccional y simétrico — fácil de implementar
+
+  Puntos que /speckit-clarify probablemente preguntará:
+  1. Casos borde — ¿qué pasa si ya no hay elementos en el ListBox origen al
+  presionar el botón? (¿silencioso, o mensaje al usuario?)
+  2. Orden de los elementos — al mover todos, ¿se preserva el orden original o
+  se reordena alfabéticamente?
+  3. Estado de los botones existentes — ¿los botones Agregar y Quitar Todos
+  deben deshabilitarse cuando no hay nada que mover?
+
+  Veredicto: La petición es suficientemente clara para arrancar /specify. Con
+  esta descripción el comando puede generar el spec; luego /speckit-clarify
+  resuelve los casos borde antes de pasar a /plan.
+
+  ¿Quieres que ejecute /specify ahora con este archivo como entrada?
+
+✻ Worked for 20s
+
+❯ si                                                                            
+
+● Skill(speckit-specify)
+  ⎿  Successfully loaded skill
+
+● Ejecutando el flujo de /speckit-specify. Primero verifico los archivos de
+  configuración necesarios.
+
+  Searched for 2 patterns, read 3 files (ctrl+o to expand)
+
+● Hay un hook mandatorio before_specify. Lo ejecuto antes de continuar.
+
+  Extension Hooks
+
+  Automatic Pre-Hook: git
+  Executing: /speckit-git-feature
+
+● Skill(speckit-git-feature)
+  ⎿  Successfully loaded skill
+
+● Ejecutando el script para crear la rama de feature.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Rama 002-agregar-botones creada. Ahora creo el directorio de spec y el
+  archivo.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Write(specs\002-agregar-botones\spec.md)
+  ⎿  Wrote 85 lines to specs\002-agregar-botones\spec.md
+      1 # Feature Specification: Agregar Botones "Agregar Todos" y "Quita
+      2 
+      4 
+      6 
+      8 
+      9 **Input**: User description: "Agregar botones "Agregar Todos" y "
+        Archivos SQL de Archivo Excel". El botón "Agregar Todos" debe tom
+         y moverlos al ListBox derecho "Tablas seleccionadas". El botón "
+        "Tablas seleccionadas" y moverlos al ListBox izquierdo "Tablas di
+        ar" y "Q
+     … +151 lines (ctrl+o to expand)
+
+● Ahora actualizo .specify/feature.json y creo el checklist de calidad.
+
+● Write(.specify\feature.json)
+  ⎿  Error writing file
+
+  Read 1 file (ctrl+o to expand)
+
+● Update(.specify\feature.json)
+  ⎿  Added 1 line, removed 1 line
+      1  {
+      2 -  "feature_directory": "specs/001-reorden-menu"                 
+      2 +  "feature_directory": "specs/002-agregar-botones"              
+      3  }
+
+● Ahora creo el checklist de calidad y lo valido contra el spec generado.
+
+● Write(specs\002-agregar-botones\checklists\requirements.md)
+  ⎿  Wrote 36 lines to specs\002-agregar-botones\checklists\requirements.md
+       1 # Specification Quality Checklist: Agregar Botones "Agregar Todo
+         s" y "Quitar Todos"
+       2 
+         ore proceeding to planning
+       4 **Created**: 2026-06-09
+       5 **Feature**: [spec.md](../spec.md)
+       6 
+       7 ## Content Quality
+       9 - [x] No implementation details (languages, frameworks, APIs)
+      10 - [x] Focused on user value and business needs
+     … +32 lines (ctrl+o to expand)
+
+● Validación completa — todos los ítems pasan. Ahora el hook post-ejecución.
+
+  Extension Hooks
+
+  Optional Hook: git
+  Command: /speckit-git-commit
+  Description: Auto-commit after specification
+
+  Prompt: Commit specification changes?
+  To execute: /speckit-git-commit
+
+  ---
+  Completion Report
+
+  ┌───────────────────┬──────────────────────────────────────────────────────┐
+  │       Item        │                        Valor                         │
+  ├───────────────────┼──────────────────────────────────────────────────────┤
+  │ Feature Directory │ specs/002-agregar-botones                            │
+  ├───────────────────┼──────────────────────────────────────────────────────┤
+  │ Spec File         │ specs/002-agregar-botones/spec.md                    │
+  ├───────────────────┼──────────────────────────────────────────────────────┤
+  │ Rama git          │ 002-agregar-botones                                  │
+  ├───────────────────┼──────────────────────────────────────────────────────┤
+  │ Checklist         │ specs/002-agregar-botones/checklists/requirements.md │
+  └───────────────────┴──────────────────────────────────────────────────────┘
+
+  Resultado del checklist: Todos los ítems aprobados — sin marcadores [NEEDS 
+  CLARIFICATION].
+
+  Lo que se especificó:
+  - FR-001 a FR-008 cubren creación, ubicación y comportamiento de los dos
+  nuevos botones
+  - 2 User Stories (P1/P1) con scenarios de aceptación y casos borde explícitos
+  - 4 Success Criteria medibles y tecnológicamente neutros
+
+  Próximo paso recomendado: /speckit-clarify para resolver dudas opcionales
+  (comportamiento si hay elementos duplicados al hacer "Agregar Todos" parcial),
+  o directamente /speckit-plan si la spec ya es suficiente.
+
+✻ Worked for 1m 38s
+
+❯ /speckit-clarify                                                              
+● Extension Hooks
+
+  Optional Pre-Hook: git
+  Command: /speckit-git-commit
+  Description: Auto-commit before spec clarification
+
+  Prompt: Commit outstanding changes before clarification?
+  To execute: /speckit-git-commit
+
+  ---
+  Ejecutando prerequisitos para localizar el spec activo.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Spec cargado. Realizando el escaneo de ambigüedades.
+
+  Mapa de cobertura interno:
+
+  ┌────────────────────────────┬────────────────────────────────────────────┐
+  │         Categoría          │                   Estado                   │
+  ├────────────────────────────┼────────────────────────────────────────────┤
+  │ Functional Scope &         │ Clear                                      │
+  │ Behavior                   │                                            │
+  ├────────────────────────────┼────────────────────────────────────────────┤
+  │ Domain & Data Model        │ Clear                                      │
+  ├────────────────────────────┼────────────────────────────────────────────┤
+  │ Interaction & UX Flow      │ Partial — estado habilitado/deshabilitado  │
+  │                            │ de los botones                             │
+  ├────────────────────────────┼────────────────────────────────────────────┤
+  │ Non-Functional Quality     │ Clear (N/A para este feature)              │
+  │ Attributes                 │                                            │
+  ├────────────────────────────┼────────────────────────────────────────────┤
+  │ Integration & External     │ Clear (sin dependencias)                   │
+  │ Dependencies               │                                            │
+  ├────────────────────────────┼────────────────────────────────────────────┤
+  │ Edge Cases & Failure       │ Clear                                      │
+  │ Handling                   │                                            │
+  ├────────────────────────────┼────────────────────────────────────────────┤
+  │ Constraints & Tradeoffs    │ Clear                                      │
+  ├────────────────────────────┼────────────────────────────────────────────┤
+  │ Terminology & Consistency  │ Clear                                      │
+  └────────────────────────────┴────────────────────────────────────────────┘
+
+  Se detectó 1 ambigüedad de impacto medio-alto que puede afectar la
+  implementación. Procediendo con el ciclo de preguntas.
+
+  ---
+  Pregunta 1 de máximo 5: Estado visual de los botones
+
+  Contexto: FR-007 define que si el ListBox origen está vacío la acción se
+  ignora silenciosamente. Sin embargo, la spec no define si los botones deben
+  reflejar esa condición visualmente.
+
+  Recommended: Opción A — Deshabilitar el botón cuando el origen está vacío. Es
+  la práctica estándar en interfaces de doble lista; evita que el usuario haga
+  clic sin efecto y comunica el estado del sistema sin necesidad de mensajes.
+
+  ┌────────┬─────────────────────────────────────────────────────────────────┐
+  │ Opción │                           Descripción                           │
+  ├────────┼─────────────────────────────────────────────────────────────────┤
+  │        │ Deshabilitar el botón ("grayed out") cuando su ListBox origen   │
+  │ A      │ está vacío; se rehabilita automáticamente cuando vuelve a tener │
+  │        │  elementos                                                      │
+  ├────────┼─────────────────────────────────────────────────────────────────┤
+  │        │ Los botones siempre están habilitados; si el origen está vacío  │
+  │ B      │ la acción se ignora silenciosamente (comportamiento ya en       │
+  │        │ FR-007)                                                         │
+  └────────┴─────────────────────────────────────────────────────────────────┘
+
+  Puedes responder con la letra ("A" o "B"), decir "recomendado" para aceptar la
+  opción A, o dar tu propia respuesta corta (máx. 5 palabras).
+
+✻ Cooked for 59s
+
+❯ A                                                                             
+
+● Respuesta aceptada: Opción A — deshabilitar el botón cuando el origen está
+  vacío. Integrando en el spec.
+
+  Read 1 file (ctrl+o to expand)
+
+● Update(specs\002-agregar-botones\spec.md)
+  ⎿  Added 1 line, removed 1 line
+       4  
+       5  **Created**: 2026-06-09
+       6  
+       7 -**Status**: Draft                                              
+       7 +**Status**: In Clarification                                   
+       8  
+       9  **Input**: User description: "Agregar botones "Agregar Todos" y
+           "Quitar Todos" en la pantalla "Crear Inserts" de la opción "Cr
+          ear Archivos SQL de Archivo Excel". El botón "Agregar Todos" de
+          be tomar todos los elementos del ListBox izquierdo "Tablas disp
+          onibles" y moverlos al ListBox derecho "Tablas seleccionadas". 
+          El botón "Quitar Todos" debe tomar todos los elementos del List
+          Box derecho "Tablas seleccionadas" y moverlos al ListBox izquie
+          rdo "Tablas disponibles". Ambos botones se colocan debajo de lo
+          s botones "Agregar" y "Quitar" respectivamente."
+      10  
+
+● Update(specs\002-agregar-botones\spec.md)
+  ⎿  Added 1 line, removed 1 line
+      22  
+      23  1. **Given** hay al menos un elemento en "Tablas disponibles" y
+           ninguno en "Tablas seleccionadas", **When** el usuario presion
+          a "Agregar Todos", **Then** todos los elementos se trasladan a 
+          "Tablas seleccionadas" y "Tablas disponibles" queda vacío.
+      24  2. **Given** hay elementos en ambos ListBox, **When** el usuari
+          o presiona "Agregar Todos", **Then** los elementos que aún está
+          n en "Tablas disponibles" se añaden a "Tablas seleccionadas" si
+          n duplicar los ya existentes.
+      25 -3. **Given** "Tablas disponibles" está vacío, **When** el usuar
+         -io presiona "Agregar Todos", **Then** no ocurre ningún cambio v
+         -isible y no se produce error.                                  
+      25 +3. **Given** "Tablas disponibles" está vacío, **When** el usuar
+         +io intenta presionar "Agregar Todos", **Then** el botón está de
+         +shabilitado visualmente y no puede ser presionado.             
+      26  
+      27  ---
+      28  
+
+● Update(specs\002-agregar-botones\spec.md)
+  ⎿  Added 1 line, removed 1 line
+      37  **Acceptance Scenarios**:
+      38  
+      39  1. **Given** hay al menos un elemento en "Tablas seleccionadas"
+          , **When** el usuario presiona "Quitar Todos", **Then** todos l
+          os elementos se trasladan a "Tablas disponibles" y "Tablas sele
+          ccionadas" queda vacío.
+      40 -2. **Given** "Tablas seleccionadas" está vacío, **When** el usu
+         -ario presiona "Quitar Todos", **Then** no ocurre ningún cambio 
+         -visible y no se produce error.                                 
+      40 +2. **Given** "Tablas seleccionadas" está vacío, **When** el usu
+         +ario intenta presionar "Quitar Todos", **Then** el botón está d
+         +eshabilitado visualmente y no puede ser presionado.            
+      41  
+      42  ---
+      43  
+
+● Update(specs\002-agregar-botones\spec.md)
+  ⎿  Added 3 lines, removed 2 lines
+      43  
+      44  ### Edge Cases
+      45  
+      46 -- ¿Qué pasa si "Tablas disponibles" está vacío al presionar "Ag
+         -regar Todos"? → La operación se ignora silenciosamente sin most
+         -rar error.                                                     
+      47 -- ¿Qué pasa si "Tablas seleccionadas" está vacío al presionar "
+         -Quitar Todos"? → La operación se ignora silenciosamente sin mos
+         -trar error.                                                    
+      46 +- ¿Qué pasa si "Tablas disponibles" está vacío? → "Agregar Todo
+         +s" aparece deshabilitado (grayed out) y no puede ser presionado
+         +.                                                              
+      47 +- ¿Qué pasa si "Tablas seleccionadas" está vacío? → "Quitar Tod
+         +os" aparece deshabilitado (grayed out) y no puede ser presionad
+         +o.                                                             
+      48 +- ¿Los botones se rehablitan automáticamente? → Sí; en cuanto e
+         +l ListBox origen vuelve a tener al menos un elemento, el botón 
+         +correspondiente se habilita sin necesidad de acción adicional d
+         +el usuario.                                                    
+      49  - ¿El orden de los elementos se preserva tras el traslado? → Lo
+          s elementos se añaden al ListBox destino preservando el orden e
+          n que aparecían en el ListBox origen.
+      50  
+      51  ## Requirements *(mandatory)*
+
+● Update(specs\002-agregar-botones\spec.md)
+  ⎿  Added 3 lines, removed 2 lines
+      58  - **FR-004**: Al activar "Quitar Todos", el sistema DEBE trasla
+          dar la totalidad de los elementos presentes en el ListBox "Tabl
+          as seleccionadas" al ListBox "Tablas disponibles".
+      59  - **FR-005**: Tras la operación "Agregar Todos", el ListBox "Ta
+          blas disponibles" DEBE quedar vacío.
+      60  - **FR-006**: Tras la operación "Quitar Todos", el ListBox "Tab
+          las seleccionadas" DEBE quedar vacío.
+      61 -- **FR-007**: Si el ListBox origen está vacío al activar cualqu
+         -iera de los dos botones, el sistema DEBE ignorar la acción sin 
+         -mostrar mensajes de error al usuario.                          
+      62 -- **FR-008**: Los nuevos botones DEBEN tener apariencia visual 
+         -consistente con los botones "Agregar" y "Quitar" existentes.   
+      61 +- **FR-007**: El botón "Agregar Todos" DEBE estar deshabilitado
+         + visualmente cuando el ListBox "Tablas disponibles" está vacío,
+         + y habilitarse automáticamente en cuanto contenga al menos un e
+         +lemento.                                                       
+      62 +- **FR-008**: El botón "Quitar Todos" DEBE estar deshabilitado 
+         +visualmente cuando el ListBox "Tablas seleccionadas" está vacío
+         +, y habilitarse automáticamente en cuanto contenga al menos un 
+         +elemento.                                                      
+      63 +- **FR-009**: Los nuevos botones DEBEN tener apariencia visual 
+         +consistente con los botones "Agregar" y "Quitar" existentes (ta
+         +maño, fuente y colores), incluyendo el estilo de deshabilitado 
+         +estándar de la plataforma.                                     
+      64  
+      65  ### Key Entities
+      66  
+
+● Ahora agrego la sección ## Clarifications y actualizo el status.
+
+● Update(specs\002-agregar-botones\spec.md)
+  ⎿  Added 1 line, removed 1 line
+       4  
+       5  **Created**: 2026-06-09
+       6  
+       7 -**Status**: In Clarification                                   
+       7 +**Status**: Clarified                                          
+       8  
+       9  **Input**: User description: "Agregar botones "Agregar Todos" y
+           "Quitar Todos" en la pantalla "Crear Inserts" de la opción "Cr
+          ear Archivos SQL de Archivo Excel". El botón "Agregar Todos" de
+          be tomar todos los elementos del ListBox izquierdo "Tablas disp
+          onibles" y moverlos al ListBox derecho "Tablas seleccionadas". 
+          El botón "Quitar Todos" debe tomar todos los elementos del List
+          Box derecho "Tablas seleccionadas" y moverlos al ListBox izquie
+          rdo "Tablas disponibles". Ambos botones se colocan debajo de lo
+          s botones "Agregar" y "Quitar" respectivamente."
+      10  
+
+● Update(specs\002-agregar-botones\spec.md)
+  ⎿  Added 6 lines
+       8  
+       9  **Input**: User description: "Agregar botones "Agregar Todos" y
+           "Quitar Todos" en la pantalla "Crear Inserts" de la opción "Cr
+          ear Archivos SQL de Archivo Excel". El botón "Agregar Todos" de
+          be tomar todos los elementos del ListBox izquierdo "Tablas disp
+          onibles" y moverlos al ListBox derecho "Tablas seleccionadas". 
+          El botón "Quitar Todos" debe tomar todos los elementos del List
+          Box derecho "Tablas seleccionadas" y moverlos al ListBox izquie
+          rdo "Tablas disponibles". Ambos botones se colocan debajo de lo
+          s botones "Agregar" y "Quitar" respectivamente."
+      10  
+      11 +## Clarifications                                              
+      12 +                                                               
+      13 +### Session 2026-06-09                                         
+      14 +                                                               
+      15 +- Q: ¿Los botones "Agregar Todos" y "Quitar Todos" deben deshab
+         +ilitarse visualmente cuando su ListBox origen está vacío? → A: 
+         +Sí, el botón debe aparecer deshabilitado (grayed out) cuando el
+         + origen está vacío y habilitarse automáticamente en cuanto el o
+         +rigen vuelva a tener elementos.                                
+      16 +                                                               
+      17  ## User Scenarios & Testing *(mandatory)*
+      18  
+      19  ### User Story 1 - Mover todas las tablas disponibles a selecci
+          onadas (Priority: P1)
+
+● Spec actualizado. Ahora re-valido el checklist de calidad.
+
+  Read 1 file (ctrl+o to expand)
+
+● Todos los ítems siguen pasando. Actualizo solo las notas del checklist para
+  reflejar la sesión de clarificación.
+
+● Update(specs\002-agregar-botones\checklists\requirements.md)
+  ⎿  Added 2 lines, removed 2 lines
+      31  
+      32  ## Notes
+      33  
+      34 -- Todos los ítems pasan la validación. La especificación está l
+         -ista para `/speckit-clarify` o `/speckit-plan`.                
+      34 +- Todos los ítems pasan la validación. La especificación está l
+         +ista para `/speckit-plan`.                                     
+      35  - Scope acotado explícitamente a la pestaña "Crear Inserts"; ot
+          ras pestañas quedan fuera del alcance.
+      36 -- Casos borde de ListBox vacío documentados con comportamiento 
+         -silencioso como supuesto razonable.                            
+      36 +- Sesión de clarificación 2026-06-09: se definió que los botone
+         +s se deshabilitan visualmente cuando el ListBox origen está vac
+         +ío (FR-007, FR-008 actualizados; Edge Cases ampliados).        
+
+● Extension Hooks
+
+  Optional Hook: git
+  Command: /speckit-git-commit
+  Description: Auto-commit after spec clarification
+
+  Prompt: Commit clarification changes?
+  To execute: /speckit-git-commit
+
+  ---
+  Completion Report
+
+  ┌──────────────────┬──────────────────────────────────────────────────────┐
+  │       Item       │                       Detalle                        │
+  ├──────────────────┼──────────────────────────────────────────────────────┤
+  │ Preguntas        │ 1 de máximo 5                                        │
+  │ respondidas      │                                                      │
+  ├──────────────────┼──────────────────────────────────────────────────────┤
+  │ Spec actualizado │ specs/002-agregar-botones/spec.md                    │
+  ├──────────────────┼──────────────────────────────────────────────────────┤
+  │ Secciones        │ Clarifications (nueva), Edge Cases, FR-007→FR-009,   │
+  │ modificadas      │ User Story scenarios                                 │
+  ├──────────────────┼──────────────────────────────────────────────────────┤
+  │ Checklist        │ 16/16 → 16/16 (sin cambio de estado, todos siguen    │
+  │                  │ pasando)                                             │
+  └──────────────────┴──────────────────────────────────────────────────────┘
+
+  Cobertura final:
+
+  ┌─────────────────────────────┬───────────────────────────────────────────┐
+  │          Categoría          │                  Estado                   │
+  ├─────────────────────────────┼───────────────────────────────────────────┤
+  │ Functional Scope & Behavior │ Clear                                     │
+  ├─────────────────────────────┼───────────────────────────────────────────┤
+  │ Domain & Data Model         │ Clear                                     │
+  ├─────────────────────────────┼───────────────────────────────────────────┤
+  │ Interaction & UX Flow       │ Resolved (estado habilitado/deshabilitado │
+  │                             │  aclarado)                                │
+  ├─────────────────────────────┼───────────────────────────────────────────┤
+  │ Non-Functional Quality      │ Clear                                     │
+  │ Attributes                  │                                           │
+  ├─────────────────────────────┼───────────────────────────────────────────┤
+  │ Integration & External      │ Clear                                     │
+  │ Dependencies                │                                           │
+  ├─────────────────────────────┼───────────────────────────────────────────┤
+  │ Edge Cases & Failure        │ Clear                                     │
+  │ Handling                    │                                           │
+  ├─────────────────────────────┼───────────────────────────────────────────┤
+  │ Constraints & Tradeoffs     │ Clear                                     │
+  ├─────────────────────────────┼───────────────────────────────────────────┤
+  │ Terminology & Consistency   │ Clear                                     │
+  └─────────────────────────────┴───────────────────────────────────────────┘
+
+  Spec listo para la siguiente fase. Siguiente comando: /speckit-plan
+
+✻ Baked for 1m 9s
+
+❯ s                                                                             
+
+● Skill(speckit-plan)
+  ⎿  Successfully loaded skill
+
+● Extension Hooks
+
+  Optional Pre-Hook: git
+  Command: /speckit-git-commit
+  Description: Auto-commit before implementation planning
+
+  Prompt: Commit outstanding changes before planning?
+  To execute: /speckit-git-commit
+
+  ---
+  Ejecutando setup de plan.
+  Ran 1 shell command (ctrl+o to expand)
+
+● Cargando spec, constitución y template de plan en paralelo.
+
+  Read 3 files (ctrl+o to expand)
+
+● Excelente. Ahora exploro la estructura actual de código para el panel "Crear
+  Inserts".
+
+  Searched for 2 patterns, read 2 files (ctrl+o to expand)
+
+● Tengo toda la información necesaria. Procedo a generar los artefactos del
+  plan.
+
+  Constitution Check (pre-diseño):
+
+  ┌─────┬──────────────────┬───────────────────────────────────────┬────────┐
+  │  #  │    Principio     │             Verificación              │ Estado │
+  ├─────┼──────────────────┼───────────────────────────────────────┼────────┤
+  │ I   │ Arquitectura en  │ Cambios solo en .ui y views/; ningún  │ ✅     │
+  │     │ Capas            │ servicio nuevo necesario              │        │
+  ├─────┼──────────────────┼───────────────────────────────────────┼────────┤
+  │     │ Identidad Visual │ Nuevos botones heredan paleta agregar │        │
+  │ II  │  Ejecutiva       │  (verde petróleo) / quitar (rojo      │ ✅     │
+  │     │                  │ vino)                                 │        │
+  ├─────┼──────────────────┼───────────────────────────────────────┼────────┤
+  │ III │ Separación       │ Sin importaciones cruzadas; operación │ ✅     │
+  │     │ Estricta UI–BD   │  es 100% UI                           │        │
+  ├─────┼──────────────────┼───────────────────────────────────────┼────────┤
+  │ IV  │ Navegación       │ Sin cambios de navegación             │ ✅     │
+  │     │ Controlada       │                                       │        │
+  ├─────┼──────────────────┼───────────────────────────────────────┼────────┤
+  │ V   │ Calidad y        │ _update_button_states() extendido;    │ ✅     │
+  │     │ Persistencia     │ sin operaciones BD                    │        │
+  └─────┴──────────────────┴───────────────────────────────────────┴────────┘
+
+  Sin violaciones. Generando artefactos de diseño.
+
+● Write(specs\002-agregar-botones\research.md)
+  ⎿  Wrote 77 lines to specs\002-agregar-botones\research.md
+      1 # Research: Agregar Botones "Agregar Todos" / "Quitar Todos"
+      2 
+      3 **Branch**: `002-agregar-botones` | **Date**: 2026-06-09
+      5 ## Decisiones de Diseño
+      6 
+      7 ### 1. Placement de botones en el archivo `.ui`
+      8 
+      9 **Decision**: Insertar `btn_agregar_todos` y `btn_quitar_todos` d
+        mna central de `tab_genera_inserts`, entre `btn_quitar` y el `ver
+        ticalSpacer` ya existente.
+     … +104 lines (ctrl+o to expand)
+
+● Write(specs\002-agregar-botones\data-model.md)
+  ⎿  Wrote 63 lines to specs\002-agregar-botones\data-model.md
+       1 # Data Model: Agregar Botones "Agregar Todos" / "Quitar Todos"
+       2 
+       3 **Branch**: `002-agregar-botones` | **Date**: 2026-06-09
+       5 > Esta feature es exclusivamente de UI. No hay entidades de base
+          de datos ni modelos de datos nuevos.
+       6 > El "modelo" relevante es el estado de los componentes de la in
+         terfaz y su ciclo de vida.
+       7 
+       9 
+      10 ### Transfer List (vista `tab_genera_inserts`)
+     … +68 lines (ctrl+o to expand)
+
+● Write(specs\002-agregar-botones\quickstart.md)
+  ⎿  Wrote 63 lines to specs\002-agregar-botones\quickstart.md
+       1 # Quickstart — Feature 002: Agregar Todos / Quitar Todos
+       2 
+       3 **Branch**: `002-agregar-botones` | **Date**: 2026-06-09
+       4 
+       5 ## Cómo probar la feature una vez implementada
+       6 
+       7 ### Prerrequisitos
+       8 
+       9 ```
+      10 python main.py
+     … +64 lines (ctrl+o to expand)
+
+● Ahora escribo el plan.md completo.
+
+● Write(specs\002-agregar-botones\plan.md)
+  ⎿  Error writing file
+
+  Listed 1 directory, ran 1 shell command (ctrl+o to expand)
+
+● El plan.md ya existe (creado por setup-plan.ps1 desde la plantilla). Lo leo
+  antes de sobreescribir.
+
+  Read 1 file (ctrl+o to expand)
+
+● Write(specs\002-agregar-botones\plan.md)
+  ⎿  Added 125 lines, removed 91 lines
+        1 -# Implementation Plan: [FEATURE]                              
+        1 +# Implementation Plan: Agregar Botones "Agregar Todos" y "Quit
+          +ar Todos"                                                     
+        2  
+        3 -**Branch**: `[###-feature-name]` | **Date**: [DATE] | **Spec**
+          -: [link]                                                      
+        3 +**Branch**: `002-agregar-botones` | **Date**: 2026-06-09 | **S
+          +pec**: [spec.md](spec.md)                                     
+        4  
+        5 -**Input**: Feature specification from `/specs/[###-feature-nam
+          -e]/spec.md`                                                   
+        5 +**Input**: Feature specification from `specs/002-agregar-boton
+          +es/spec.md`                                                   
+        6  
+        7 -**Note**: This template is filled in by the `/speckit-plan` co
+          -mmand. See `.specify/templates/plan-template.md` for the execu
+          -tion workflow.                                                
+        8 -                                                              
+        7  ## Summary
+        8  
+       11 -[Extract from feature spec: primary requirement + technical ap
+          -proach from research]                                         
+        9 +Añadir dos botones ("Agregar Todos" y "Quitar Todos") en la pe
+          +staña "Crear Inserts" del panel principal. Los botones traslad
+          +an masivamente todos los elementos entre los dos QListWidget d
+          +el transfer list existente. La implementación es exclusivament
+          +e de UI: modificar el archivo `.ui` para añadir los widgets y 
+          +extender `PanelPrincipalView` para conectar señales, manejar e
+          +stado habilitado/deshabilitado y ejecutar la lógica de traslad
+          +o.                                                            
+       10  
+       11  ## Technical Context
+       12  
+       15 -<!--                                                          
+       16 -  ACTION REQUIRED: Replace the content in this section with th
+          -e technical details                                           
+       17 -  for the project. The structure here is presented in advisory
+          - capacity to guide                                            
+       18 -  the iteration process.                                      
+       19 --->                                                           
+       13 +**Language/Version**: Python 3.14                             
+       14  
+       21 -**Language/Version**: [e.g., Python 3.11, Swift 5.9, Rust 1.75
+          - or NEEDS CLARIFICATION]                                      
+       15 +**Primary Dependencies**: PySide6 6.11.1 (Qt 6), QUiLoader    
+       16  
+       23 -**Primary Dependencies**: [e.g., FastAPI, UIKit, LLVM or NEEDS
+          - CLARIFICATION]                                               
+       17 +**Storage**: `ConfInsert.txt` (configuración de usuario, forma
+          +to `01|Clave|Valor`)                                          
+       18  
+       25 -**Storage**: [if applicable, e.g., PostgreSQL, CoreData, files
+          - or N/A]                                                      
+       19 +**Testing**: Manual (ver `quickstart.md`)                     
+       20  
+       27 -**Testing**: [e.g., pytest, XCTest, cargo test or NEEDS CLARIF
+          -ICATION]                                                      
+       21 +**Target Platform**: Windows 10 / 11                          
+       22  
+       29 -**Target Platform**: [e.g., Linux server, iOS 15+, WASM or NEE
+          -DS CLARIFICATION]                                             
+       23 +**Project Type**: Desktop app PySide6                         
+       24  
+       31 -**Project Type**: [e.g., library/cli/web-service/mobile-app/co
+          -mpiler/desktop-app or NEEDS CLARIFICATION]                    
+       25 +**Performance Goals**: Operación perceptiblemente instantánea 
+          +(<100 ms) para listas de hasta 200 hojas.                     
+       26  
+       33 -**Performance Goals**: [domain-specific, e.g., 1000 req/s, 10k
+          - lines/sec, 60 fps or NEEDS CLARIFICATION]                    
+       27 +**Constraints**: Sin nuevas dependencias. Sin cambios en `serv
+          +ices/`. Solo `ui/` y `views/`.                                
+       28  
+       35 -**Constraints**: [domain-specific, e.g., <200ms p95, <100MB me
+          -mory, offline-capable or NEEDS CLARIFICATION]                 
+       29 +**Scale/Scope**: 2 nuevos widgets, ~40 líneas de código en tot
+          +al.                                                           
+       30  
+       37 -**Scale/Scope**: [domain-specific, e.g., 10k users, 1M LOC, 50
+          - screens or NEEDS CLARIFICATION]                              
+       38 -                                                              
+       31  ## Constitution Check
+       32  
+       33  *GATE: Must pass before Phase 0 research. Re-check after Phase
+            1 design.*
+       34  
+       43 -Verificar los cinco principios de la constitución v1.0.0:     
+       35 +| # | Principio | Verificación requerida | Estado |           
+       36 +|---|-----------|------------------------|--------|           
+       37 +| I | Arquitectura en Capas | Cambios solo en `ui/PanelPrincip
+          +al.ui` y `views/panel_principal_view.py`; ningún servicio nuev
+          +o | ✅ |                                                      
+       38 +| II | Identidad Visual Ejecutiva | `btn_agregar_todos` hereda
+          + paleta verde petróleo de `btn_agregar`; `btn_quitar_todos` he
+          +reda rojo vino de `btn_quitar`; sin fondos blancos ni saturado
+          +s | ✅ |                                                      
+       39 +| III | Separación Estricta UI–BD | `views/` sin imports de ps
+          +ycopg2/pandas; `services/` sin PySide6; no hay capa de servici
+          +o en esta feature | ✅ |                                      
+       40 +| IV | Navegación Controlada | Sin cambios de navegación; vent
+          +ana mantiene X deshabilitado y `closeEvent` existente | ✅ |  
+       41 +| V | Calidad y Persistencia | `_update_button_states()` exten
+          +dido como punto único de verdad; `_save_tables_config()` llama
+          +do tras cada operación masiva | ✅ |                          
+       42  
+       45 -| # | Principio                   | Verificación requerida    
+          -                                          | Estado |          
+       46 -|---|-----------------------------|---------------------------
+          -------------------------------------------|--------|          
+       47 -| I | Arquitectura en Capas       | ¿Lógica de negocio en `ser
+          -vices/`? ¿UI solo en `views/`?           | [ ]    |           
+       48 -| II| Identidad Visual Ejecutiva  | ¿Paleta `#0D1117`/`#B8922A
+          -`? ¿QGroupBox para secciones?            | [ ]    |           
+       49 -|III| Separación Estricta UI–BD   | ¿`views/` sin imports de p
+          -sycopg2/pandas? ¿`services/` sin PySide6?| [ ]    |           
+       50 -| IV| Navegación Controlada       | ¿X deshabilitado? ¿closeEv
+          -ent redirige a `_go_to_main_window()`?   | [ ]    |           
+       51 -| V | Calidad y Persistencia      | ¿try/finally en BD? ¿error
+          -es via `_show_message_box()`?            | [ ]    |           
+       52 -                                                              
+       43  ## Project Structure
+       44  
+       45  ### Documentation (this feature)
+       46  
+       47  ```text
+       58 -specs/[###-feature]/                                          
+       59 -├── plan.md              # This file (/speckit-plan command ou
+          -tput)                                                         
+       60 -├── research.md          # Phase 0 output (/speckit-plan comma
+          -nd)                                                           
+       61 -├── data-model.md        # Phase 1 output (/speckit-plan comma
+          -nd)                                                           
+       62 -├── quickstart.md        # Phase 1 output (/speckit-plan comma
+          -nd)                                                           
+       63 -├── contracts/           # Phase 1 output (/speckit-plan comma
+          -nd)                                                           
+       64 -└── tasks.md             # Phase 2 output (/speckit-tasks comm
+          -and - NOT created by /speckit-plan)                           
+       48 +specs/002-agregar-botones/                                    
+       49 +├── plan.md          ← este archivo                           
+       50 +├── research.md      ← decisiones de diseño y alternativas des
+          +cartadas                                                      
+       51 +├── data-model.md    ← componentes UI, invariantes y transicio
+          +nes de estado                                                 
+       52 +├── quickstart.md    ← guía de prueba manual                  
+       53 +└── tasks.md         ← generado por /speckit-tasks (pendiente)
+       54  ```
+       55  
+       67 -### Source Code (repository root)                             
+       68 -<!--                                                          
+       69 -  ACTION REQUIRED: Replace the placeholder tree below with the
+          - concrete layout                                              
+       70 -  for this feature. Delete unused options and expand the chose
+          -n structure with                                              
+       71 -  real paths (e.g., apps/admin, packages/something). The deliv
+          -ered plan must                                                
+       72 -  not include Option labels.                                  
+       73 --->                                                           
+       56 +### Source Code — Archivos a modificar                        
+       57  
+       58  ```text
+       76 -# [REMOVE IF UNUSED] Option 1: Single project (DEFAULT)       
+       77 -src/                                                          
+       78 -├── models/                                                   
+       79 -├── services/                                                 
+       80 -├── cli/                                                      
+       81 -└── lib/                                                      
+       59 +ui/                                                           
+       60 +└── PanelPrincipal.ui          ← añadir btn_agregar_todos y bt
+          +n_quitar_todos                                                
+       61  
+       83 -tests/                                                        
+       84 -├── contract/                                                 
+       85 -├── integration/                                              
+       86 -└── unit/                                                     
+       62 +views/                                                        
+       63 +└── panel_principal_view.py    ← declarar atributos, find, con
+          +nect, states, slots, styles                                   
+       64 +```                                                           
+       65  
+       88 -# [REMOVE IF UNUSED] Option 2: Web application (when "frontend
+          -" + "backend" detected)                                       
+       89 -backend/                                                      
+       90 -├── src/                                                      
+       91 -│   ├── models/                                               
+       92 -│   ├── services/                                             
+       93 -│   └── api/                                                  
+       94 -└── tests/                                                    
+       66 +**No se crean archivos nuevos en `views/` ni en `services/`.**
+       67  
+       96 -frontend/                                                     
+       97 -├── src/                                                      
+       98 -│   ├── components/                                           
+       99 -│   ├── pages/                                                
+      100 -│   └── services/                                             
+      101 -└── tests/                                                    
+       68 +## Implementation Steps                                       
+       69  
+      103 -# [REMOVE IF UNUSED] Option 3: Mobile + API (when "iOS/Android
+          -" detected)                                                   
+      104 -api/                                                          
+      105 -└── [same as backend above]                                   
+       70 +### Paso 1 — `ui/PanelPrincipal.ui`                           
+       71  
+      107 -ios/ or android/                                              
+      108 -└── [platform-specific structure: feature modules, UI flows, p
+          -latform tests]                                                
+       72 +Dentro del `<layout class="QVBoxLayout" name="verticalLayout_2
+          +">` (columna central de `tab_genera_inserts`), insertar dos nu
+          +evos `QPushButton` entre `btn_agregar` y `btn_quitar`, y entre
+          + `btn_quitar` y el `verticalSpacer` existente.                
+       73  
+      110 -# [REMOVE IF UNUSED] Option 4: Desktop app PySide6 (ProyUtiler
+          -iasSQL pattern)                                               
+      111 -views/                                                        
+      112 -├── <nombre>_view.py          # QMainWindow: carga .ui, conect
+          -a señales, valida                                             
+      113 -services/                                                     
+      114 -├── funciones.py              # funciones de negocio puras (si
+          -n PySide6)                                                    
+      115 -└── <nombre>.py                                               
+      116 -controllers/                                                  
+      117 -└── <nombre>.py               # scripts CLI opcionales        
+      118 -ui/                                                           
+      119 -├── <nombre>.ui               # diseño Qt Designer (cargado co
+          -n QUiLoader)                                                  
+      120 -└── <nombre>_ui.py            # generado (solo referencia, no 
+          -usado en runtime)                                             
+       74 +**Orden final en `verticalLayout_2`**:                        
+       75 +1. `btn_agregar`                                              
+       76 +2. `btn_agregar_todos`  ← nuevo                               
+       77 +3. `btn_quitar`                                               
+       78 +4. `btn_quitar_todos`   ← nuevo                               
+       79 +5. `verticalSpacer`                                           
+       80 +                                                              
+       81 +### Paso 2 — `views/panel_principal_view.py` — Declarar atribu
+          +tos                                                           
+       82 +                                                              
+       83 +En `__init__`, junto a `self.btn_agregar` y `self.btn_quitar`,
+          + añadir:                                                      
+       84 +                                                              
+       85 +```python                                                     
+       86 +self.btn_agregar_todos = None                                 
+       87 +self.btn_quitar_todos = None                                  
+       88  ```
+       89  
+      123 -**Structure Decision**: [Document the selected structure and r
+          -eference the real                                             
+      124 -directories captured above]                                   
+       90 +### Paso 3 — `setup_ui()` — Find children                     
+       91  
+      126 -## Complexity Tracking                                        
+       92 +Tras las líneas que buscan `btn_agregar` y `btn_quitar`, añadi
+          +r:                                                            
+       93  
+      128 -> **Fill ONLY if Constitution Check has violations that must b
+          -e justified**                                                 
+       94 +```python                                                     
+       95 +self.btn_agregar_todos = self.findChild(QPushButton, "btn_agre
+          +gar_todos")                                                   
+       96 +self.btn_quitar_todos = self.findChild(QPushButton, "btn_quita
+          +r_todos")                                                     
+       97 +```                                                           
+       98  
+      130 -| Violation | Why Needed | Simpler Alternative Rejected Becaus
+          -e |                                                           
+      131 -|-----------|------------|------------------------------------
+          --|                                                            
+      132 -| [e.g., 4th project] | [current need] | [why 3 projects insuf
+          -ficient] |                                                    
+      133 -| [e.g., Repository pattern] | [specific problem] | [why direc
+          -t DB access insufficient] |                                   
+       99 +### Paso 4 — `connect_signals()` — Conectar señales           
+      100 +                                                              
+      101 +Tras las conexiones de `btn_agregar` y `btn_quitar`, añadir:  
+      102 +                                                              
+      103 +```python                                                     
+      104 +if self.btn_agregar_todos:                                    
+      105 +    self.btn_agregar_todos.clicked.connect(self._add_all_items
+          +)                                                             
+      106 +if self.btn_quitar_todos:                                     
+      107 +    self.btn_quitar_todos.clicked.connect(self._remove_all_ite
+          +ms)                                                           
+      108 +```                                                           
+      109 +                                                              
+      110 +### Paso 5 — `_update_button_states()` — Extender             
+      111 +                                                              
+      112 +```python                                                     
+      113 +def _update_button_states(self):                              
+      114 +    self.btn_agregar.setEnabled(len(self.listWidget_hojas.sele
+          +ctedItems()) > 0)                                             
+      115 +    self.btn_quitar.setEnabled(len(self.listWidget_tablas_sele
+          +ccionadas.selectedItems()) > 0)                               
+      116 +    if self.btn_agregar_todos:                                
+      117 +        self.btn_agregar_todos.setEnabled(self.listWidget_hoja
+          +s.count() > 0)                                                
+      118 +    if self.btn_quitar_todos:                                 
+      119 +        self.btn_quitar_todos.setEnabled(self.listWidget_tabla
+          +s_seleccionadas.count() > 0)                                  
+      120 +```                                                           
+      121 +                                                              
+      122 +### Paso 6 — Añadir slots `_add_all_items` y `_remove_all_item
+          +s`                                                            
+      123 +                                                              
+      124 +```python                                                     
+      125 +def _add_all_items(self):                                     
+      126 +    while self.listWidget_hojas.count() > 0:                  
+      127 +        item = self.listWidget_hojas.takeItem(0)              
+      128 +        self.listWidget_tablas_seleccionadas.addItem(item.text
+          +())                                                           
+      129 +    self._update_button_states()                              
+      130 +    self._save_tables_config()                                
+      131 +                                                              
+      132 +def _remove_all_items(self):                                  
+      133 +    while self.listWidget_tablas_seleccionadas.count() > 0:   
+      134 +        item = self.listWidget_tablas_seleccionadas.takeItem(0
+          +)                                                             
+      135 +        self.listWidget_hojas.addItem(item.text())            
+      136 +    self._update_button_states()                              
+      137 +    self._save_tables_config()                                
+      138 +```                                                           
+      139 +                                                              
+      140 +### Paso 7 — `_apply_styles()` — Añadir reglas CSS            
+      141 +                                                              
+      142 +```css                                                        
+      143 +QPushButton#btn_agregar_todos {                               
+      144 +    background-color: #0A2018;                                
+      145 +    border: 1px solid #143024;                                
+      146 +    color: #4A9068;                                           
+      147 +}                                                             
+      148 +QPushButton#btn_agregar_todos:hover {                         
+      149 +    background-color: #0F2C22;                                
+      150 +    border-color: #205840;                                    
+      151 +    color: #70B090;                                           
+      152 +}                                                             
+      153 +QPushButton#btn_quitar_todos {                                
+      154 +    background-color: #200A0A;                                
+      155 +    border: 1px solid #301010;                                
+      156 +    color: #905858;                                           
+      157 +}                                                             
+      158 +QPushButton#btn_quitar_todos:hover {                          
+      159 +    background-color: #2C1010;                                
+      160 +    border-color: #502020;                                    
+      161 +    color: #B07878;                                           
+      162 +}                                                             
+      163 +```                                                           
+      164 +                                                              
+      165 +## Complexity Tracking                                        
+      166 +                                                              
+      167 +Sin violaciones de constitución. No aplica.                   
+
+● Ahora actualizo el CLAUDE.md para apuntar al nuevo plan.
+
+  Read 1 file (ctrl+o to expand)
+
+● Update(CLAUDE.md)
+  ⎿  Added 1 line, removed 1 line
+      1  <!-- SPECKIT START -->
+      2  For additional context about technologies to be used, project st
+         ructure,
+      3  shell commands, and other important information, read the curren
+         t plan
+      4 -at specs/001-reorden-menu/plan.md                               
+      4 +at specs/002-agregar-botones/plan.md                            
+      5  <!-- SPECKIT END -->
+
+● Extension Hooks
+
+  Optional Hook: git
+  Command: /speckit-git-commit
+  Description: Auto-commit after implementation planning
+
+  Prompt: Commit plan changes?
+  To execute: /speckit-git-commit
+
+  ---
+  Completion Report
+
+  ┌────────────────────┬─────────────────────────────────────┐
+  │        Item        │               Detalle               │
+  ├────────────────────┼─────────────────────────────────────┤
+  │ Branch             │ 002-agregar-botones                 │
+  ├────────────────────┼─────────────────────────────────────┤
+  │ Plan               │ specs/002-agregar-botones/plan.md   │
+  ├────────────────────┼─────────────────────────────────────┤
+  │ Constitution Check │ 5/5 principios ✅ — sin violaciones │
+  └────────────────────┴─────────────────────────────────────┘
+
+  Artefactos generados:
+
+  ┌───────────────┬──────────────────────────────────────────────────────┐
+  │    Archivo    │                      Contenido                       │
+  ├───────────────┼──────────────────────────────────────────────────────┤
+  │ plan.md       │ Plan completo con 7 pasos de implementación          │
+  ├───────────────┼──────────────────────────────────────────────────────┤
+  │ research.md   │ 5 decisiones de diseño con alternativas descartadas  │
+  ├───────────────┼──────────────────────────────────────────────────────┤
+  │ data-model.md │ Componentes UI, invariantes y transiciones de estado │
+  ├───────────────┼──────────────────────────────────────────────────────┤
+  │ quickstart.md │ 5 casos de prueba manual                             │
+  └───────────────┴──────────────────────────────────────────────────────┘
+
+  CLAUDE.md actualizado para apuntar a specs/002-agregar-botones/plan.md.
+
+  Próximo paso: /speckit-tasks para generar las tareas de implementación.
+
+✻ Cogitated for 3m 26s
+
+❯ /speckit-tasks                                                                
+
+● Extension Hooks
+
+  Optional Pre-Hook: git
+  Command: /speckit-git-commit
+  Description: Auto-commit before task generation
+
+  Prompt: Commit outstanding changes before task generation?
+  To execute: /speckit-git-commit
+
+  ---
+
+  Read 1 file, ran 1 shell command (ctrl+o to expand)
+
+● Tengo todo el contexto. Generando tasks.md.
+
+● Write(specs\002-agregar-botones\tasks.md)
+  ⎿  Wrote 143 lines to specs\002-agregar-botones\tasks.md
+      1 # Tasks: Agregar Botones "Agregar Todos" y "Quitar Todos"
+      2 
+      3 **Input**: Design documents from `specs/002-agregar-botones/`
+      5 **Prerequisites**: plan.md ✅ | spec.md ✅ | research.md ✅ | dat
+        a-model.md ✅ | quickstart.md ✅
+      6 
+      7 **Tests**: No solicitados en el spec — no se incluyen tareas de t
+        est automatizado.
+      9 **Organization**: Tareas agrupadas por User Story para habilitar 
+        implementación y verificación independiente.
+     … +195 lines (ctrl+o to expand)
+
+● Extension Hooks
+
+  Optional Hook: git
+  Command: /speckit-git-commit
+  Description: Auto-commit after task generation
+
+  Prompt: Commit task changes?
+  To execute: /speckit-git-commit
+
+  ---
+  Completion Report
+
+  ┌─────────────┬───────────────────────────────────────────────────────────┐
+  │    Item     │                          Detalle                          │
+  ├─────────────┼───────────────────────────────────────────────────────────┤
+  │ tasks.md    │ specs/002-agregar-botones/tasks.md                        │
+  ├─────────────┼───────────────────────────────────────────────────────────┤
+  │ Total       │ 10 (T001–T010)                                            │
+  │ tareas      │                                                           │
+  ├─────────────┼───────────────────────────────────────────────────────────┤
+  │ Formato     │ Todas siguen - [ ] [ID] [P?] [Story] Descripción + ruta   │
+  │             │ ✅                                                        │
+  └─────────────┴───────────────────────────────────────────────────────────┘
+
+  Tareas por User Story:
+
+  ┌────────────────────────┬─────┬───────────┬───────┐
+  │          Fase          │ US  │  Tareas   │ Count │
+  ├────────────────────────┼─────┼───────────┼───────┤
+  │ Phase 1 — Foundational │ —   │ T001–T005 │ 5     │
+  ├────────────────────────┼─────┼───────────┼───────┤
+  │ Phase 2 — US1          │ US1 │ T006–T007 │ 2     │
+  ├────────────────────────┼─────┼───────────┼───────┤
+  │ Phase 3 — US2          │ US2 │ T008–T009 │ 2     │
+  ├────────────────────────┼─────┼───────────┼───────┤
+  │ Phase 4 — Polish       │ —   │ T010      │ 1     │
+  └────────────────────────┴─────┴───────────┴───────┘
+
+  Paralelismo identificado: T001, T002, T004, T005 (Phase 1) + T006 y T008
+  (slots, distintos métodos)
+
+  MVP scope: Phases 1 + 2 (T001–T007) — "Agregar Todos" funcional y verificable.
+
+  Siguiente paso: /speckit-implement para ejecutar las tareas.
+
+✻ Churned for 1m 30s
+❯ /speckit-implement                                                            
+
+● Extension Hooks
+
+  Optional Pre-Hook: git
+  Command: /speckit-git-commit
+  Description: Auto-commit before implementation
+
+  Prompt: Commit outstanding changes before implementation?
+  To execute: /speckit-git-commit
+
+  ---
+  Ejecutando prerequisitos y verificando checklists.
+
+  Read 1 file, ran 1 shell command (ctrl+o to expand)
+
+● Checklist Status:
+
+  ┌─────────────────┬───────┬─────────────┬─────────────┬─────────┐
+  │    Checklist    │ Total │ Completados │ Incompletos │ Estado  │
+  ├─────────────────┼───────┼─────────────┼─────────────┼─────────┤
+  │ requirements.md │ 16    │ 16          │ 0           │ ✅ PASS │
+  └─────────────────┴───────┴─────────────┴─────────────┴─────────┘
+
+  Todos los checklists pasan. Procediendo a la implementación.
+
+  Verificando .gitignore y cargando contexto de implementación.
+
+  Searched for 1 pattern (ctrl+o to expand)
+
+● .gitignore existe. Iniciando implementación por fases.
+
+  ---
+  Phase 1 — Foundational
+
+  T001 + T002 + T004 + T005 en paralelo (archivos/métodos distintos).
+
+● Update(ui\PanelPrincipal.ui)
+  ⎿  Added 14 lines
+      81             </widget>
+      82            </item>
+      83            <item>
+      84 +           <widget class="QPushButton" name="btn_agregar_todos"
+         +>                                                              
+      85 +            <property name="text">                             
+      86 +             <string>Agregar Todos</string>                    
+      87 +            </property>                                        
+      88 +           </widget>                                           
+      89 +          </item>                                              
+      90 +          <item>                                               
+      91             <widget class="QPushButton" name="btn_quitar">
+      92              <property name="text">
+      93               <string>Quitar</string>
+     ...
+       95             </widget>
+       96            </item>
+       97            <item>
+       98 +           <widget class="QPushButton" name="btn_quitar_todos"
+          +>                                                             
+       99 +            <property name="text">                            
+      100 +             <string>Quitar Todos</string>                    
+      101 +            </property>                                       
+      102 +           </widget>                                          
+      103 +          </item>                                             
+      104 +          <item>                                              
+      105             <spacer name="verticalSpacer">
+      106              <property name="orientation">
+      107               <enum>Qt::Orientation::Vertical</enum>
+
+● ✅ T001 — ui/PanelPrincipal.ui actualizado con los dos nuevos botones.
+
+  Ahora T002 (declarar atributos), T004 (extender _update_button_states), T005
+  (CSS) y T003 (find children) en el archivo Python.
+
+● Update(views\panel_principal_view.py)
+  ⎿  Added 2 lines
+      73          self.btn_browse_directorio_salida = None
+      74          self.listWidget_hojas = None
+      75          self.btn_agregar = None
+      76 +        self.btn_agregar_todos = None                          
+      77          self.btn_quitar = None
+      78 +        self.btn_quitar_todos = None                           
+      79          self.listWidget_tablas_seleccionadas = None
+      80          self.btn_salir = None
+      81          self.btn_borrar_config = None
+
+● ✅ T002 — Atributos declarados en __init__.
+
+  T003 — Find children en setup_ui():
+
+● Update(views\panel_principal_view.py)
+  ⎿  Added 2 lines
+      140          )
+      141          self.listWidget_hojas = self.findChild(QListWidget, "l
+           istWidget_hojas")
+      142          self.btn_agregar = self.findChild(QPushButton, "btn_ag
+           regar")
+      143 +        self.btn_agregar_todos = self.findChild(QPushButton, "
+          +btn_agregar_todos")                                           
+      144          self.btn_quitar = self.findChild(QPushButton, "btn_qui
+           tar")
+      145 +        self.btn_quitar_todos = self.findChild(QPushButton, "b
+          +tn_quitar_todos")                                             
+      146          self.listWidget_tablas_seleccionadas = self.findChild(
+      147              QListWidget, "listWidget_tablas_seleccionadas"
+      148          )
+
+● ✅ T003 — Find children añadidos en setup_ui().
+
+  T004 — Extender _update_button_states():
+
+● Update(views\panel_principal_view.py)
+  ⎿  Added 5 lines, removed 1 line
+      435          self._update_button_states()
+      436  
+      437      def _update_button_states(self):
+      438 -        """Habilita o deshabilita los botones 'Agregar' y 'Qui
+          -tar' según el contexto."""                                    
+      438 +        """Habilita o deshabilita los botones 'Agregar', 'Quit
+          +ar' y sus variantes masivas según el contexto."""             
+      439          self.btn_agregar.setEnabled(
+      440              len(self.listWidget_hojas.selectedItems()) > 0
+      441          )
+      442          self.btn_quitar.setEnabled(
+      443              len(self.listWidget_tablas_seleccionadas.selectedI
+           tems()) > 0
+      444          )
+      445 +        if self.btn_agregar_todos:                            
+      446 +            self.btn_agregar_todos.setEnabled(self.listWidget_
+          +hojas.count() > 0)                                            
+      447 +        if self.btn_quitar_todos:                             
+      448 +            self.btn_quitar_todos.setEnabled(self.listWidget_t
+          +ablas_seleccionadas.count() > 0)                              
+      449  
+      450      def _add_item(self):
+      451          """Mueve una tabla de la lista de disponibles a la de 
+           seleccionadas."""
+
+● ✅ T004 — _update_button_states() extendido.
+
+  T005 — CSS para los nuevos botones:
+
+● Update(views\panel_principal_view.py)
+  ⎿  Added 20 lines
+      782                  border-color: #205840;
+      783                  color: #70B090;
+      784              }
+      785 +            QPushButton#btn_agregar_todos {                   
+      786 +                background-color: #0A2018;                    
+      787 +                border: 1px solid #143024;                    
+      788 +                color: #4A9068;                               
+      789 +            }                                                 
+      790 +            QPushButton#btn_agregar_todos:hover {             
+      791 +                background-color: #0F2C22;                    
+      792 +                border-color: #205840;                        
+      793 +                color: #70B090;                               
+      794 +            }                                                 
+      795              QPushButton#btn_quitar {
+      796                  background-color: #200A0A;
+      797                  border: 1px solid #301010;
+     ...
+      802                  border-color: #502020;
+      803                  color: #B07878;
+      804              }
+      805 +            QPushButton#btn_quitar_todos {                    
+      806 +                background-color: #200A0A;                    
+      807 +                border: 1px solid #301010;                    
+      808 +                color: #905858;                               
+      809 +            }                                                 
+      810 +            QPushButton#btn_quitar_todos:hover {              
+      811 +                background-color: #2C1010;                    
+      812 +                border-color: #502020;                        
+      813 +                color: #B07878;                               
+      814 +            }                                                 
+      815              QPushButton#btn_ejecutar_creacion {
+      816                  background-color: #1C1408;
+      817                  border: 1px solid #40300A;
+
+● ✅ T005 — CSS añadido para #btn_agregar_todos y #btn_quitar_todos.
+
+  ---
+  Phase 2 — User Story 1
+
+  T006 — Implementar slot _add_all_items():
+
+● Update(views\panel_principal_view.py)
+  ⎿  Added 8 lines
+      460          self._update_button_states()
+      461          self._save_tables_config()
+      462  
+      463 +    def _add_all_items(self):                                 
+      464 +        """Mueve todas las tablas de disponibles a seleccionad
+          +as."""                                                        
+      465 +        while self.listWidget_hojas.count() > 0:              
+      466 +            item = self.listWidget_hojas.takeItem(0)          
+      467 +            self.listWidget_tablas_seleccionadas.addItem(item.
+          +text())                                                       
+      468 +        self._update_button_states()                          
+      469 +        self._save_tables_config()                            
+      470 +                                                              
+      471      def _remove_item(self):
+      472          """Mueve una tabla de la lista de seleccionadas a la d
+           e disponibles."""
+      473          selected_items = self.listWidget_tablas_seleccionadas.
+           selectedItems()
+
+● ✅ T006 — Slot _add_all_items() implementado.
+
+  T007 — Conectar señal en connect_signals():
+
+● Update(views\panel_principal_view.py)
+  ⎿  Added 4 lines
+      200          # Botones para mover tablas entre la lista de disponib
+           les y seleccionadas.
+      201          if self.btn_agregar:
+      202              self.btn_agregar.clicked.connect(self._add_item)
+      203 +        if self.btn_agregar_todos:                            
+      204 +            self.btn_agregar_todos.clicked.connect(self._add_a
+          +ll_items)                                                     
+      205          if self.btn_quitar:
+      206              self.btn_quitar.clicked.connect(self._remove_item)
+      207 +        if self.btn_quitar_todos:                             
+      208 +            self.btn_quitar_todos.clicked.connect(self._remove
+          +_all_items)                                                   
+      209          if self.btn_salir:
+      210              self.btn_salir.clicked.connect(self._go_to_main_wi
+           ndow)
+      211  
+
+● ✅ T007 — Señales conectadas (incluyo T009 aquí ya que ambas van en el mismo
+  bloque).
+
+  ---
+  Phase 3 — User Story 2
+
+  T008 — Implementar slot _remove_all_items():
+
+● Update(views\panel_principal_view.py)
+  ⎿  Added 8 lines
+      487          self._update_button_states()
+      488          self._save_tables_config()  # Guarda el cambio en Conf
+           Insert.txt
+      489  
+      490 +    def _remove_all_items(self):                              
+      491 +        """Mueve todas las tablas de seleccionadas a disponibl
+          +es."""                                                        
+      492 +        while self.listWidget_tablas_seleccionadas.count() > 0
+          +:                                                             
+      493 +            item = self.listWidget_tablas_seleccionadas.takeIt
+          +em(0)                                                         
+      494 +            self.listWidget_hojas.addItem(item.text())        
+      495 +        self._update_button_states()                          
+      496 +        self._save_tables_config()                            
+      497 +                                                              
+      498      def _go_to_main_window(self):
+      499          """Oculta la ventana actual y muestra la ventana princ
+           ipal."""
+      500          self.hide()
+
+● ✅ T008 — Slot _remove_all_items() implementado.
+  ✅ T009 — Ya conectado en T007.
+
+  Marcando todas las tareas en tasks.md.
+
+  Read 1 file (ctrl+o to expand)
+
+● Update(specs\002-agregar-botones\tasks.md)
+  ⎿  Added 5 lines, removed 5 lines
+      22  
+      23  **⚠️ CRITICAL**: Ninguna US puede comenzar hasta completar esta
+           fase.
+      24  
+      25 -- [ ] T001 [P] Añadir `btn_agregar_todos` y `btn_quitar_todos` 
+         -en `verticalLayout_2` de `ui/PanelPrincipal.ui` (entre `btn_agr
+         -egar`→`btn_agregar_todos`→`btn_quitar`→`btn_quitar_todos`→`vert
+         -icalSpacer`)                                                   
+      26 -- [ ] T002 [P] Declarar `self.btn_agregar_todos = None` y `self
+         -.btn_quitar_todos = None` en `__init__` de `views/panel_princip
+         -al_view.py` (junto a `self.btn_agregar` y `self.btn_quitar`)   
+      27 -- [ ] T003 Añadir `findChild(QPushButton, "btn_agregar_todos")`
+         - y `findChild(QPushButton, "btn_quitar_todos")` en `setup_ui()`
+         - de `views/panel_principal_view.py` (depende T001)             
+      28 -- [ ] T004 [P] Extender `_update_button_states()` en `views/pan
+         -el_principal_view.py` para deshabilitar `btn_agregar_todos` cua
+         -ndo `listWidget_hojas.count() == 0` y `btn_quitar_todos` cuando
+         - `listWidget_tablas_seleccionadas.count() == 0`                
+      29 -- [ ] T005 [P] Añadir reglas CSS para `#btn_agregar_todos` (pal
+         -eta verde petróleo) y `#btn_quitar_todos` (paleta rojo vino) al
+         - final del bloque de `_apply_styles()` en `views/panel_principa
+         -l_view.py`                                                     
+      25 +- [x] T001 [P] Añadir `btn_agregar_todos` y `btn_quitar_todos` 
+         +en `verticalLayout_2` de `ui/PanelPrincipal.ui` (entre `btn_agr
+         +egar`→`btn_agregar_todos`→`btn_quitar`→`btn_quitar_todos`→`vert
+         +icalSpacer`)                                                   
+      26 +- [x] T002 [P] Declarar `self.btn_agregar_todos = None` y `self
+         +.btn_quitar_todos = None` en `__init__` de `views/panel_princip
+         +al_view.py` (junto a `self.btn_agregar` y `self.btn_quitar`)   
+      27 +- [x] T003 Añadir `findChild(QPushButton, "btn_agregar_todos")`
+         + y `findChild(QPushButton, "btn_quitar_todos")` en `setup_ui()`
+         + de `views/panel_principal_view.py` (depende T001)             
+      28 +- [x] T004 [P] Extender `_update_button_states()` en `views/pan
+         +el_principal_view.py` para deshabilitar `btn_agregar_todos` cua
+         +ndo `listWidget_hojas.count() == 0` y `btn_quitar_todos` cuando
+         + `listWidget_tablas_seleccionadas.count() == 0`                
+      29 +- [x] T005 [P] Añadir reglas CSS para `#btn_agregar_todos` (pal
+         +eta verde petróleo) y `#btn_quitar_todos` (paleta rojo vino) al
+         + final del bloque de `_apply_styles()` en `views/panel_principa
+         +l_view.py`                                                     
+      30  
+      31  **Checkpoint**: Con T001–T005 completados, ambos botones aparec
+          en en la UI con estilos correctos y se habilitan/deshabilitan a
+          utomáticamente. Los slots aún no están conectados.
+      32  
+
+● Update(specs\002-agregar-botones\tasks.md)
+  ⎿  Added 2 lines, removed 2 lines
+      40  
+      41  ### Implementación US1
+      42  
+      43 -- [ ] T006 [US1] Implementar slot `_add_all_items()` en `views/
+         -panel_principal_view.py` (loop `takeItem(0)` hasta vaciar `list
+         -Widget_hojas`, añadir a `listWidget_tablas_seleccionadas`, llam
+         -ar `_update_button_states()` y `_save_tables_config()`)        
+      44 -- [ ] T007 [US1] Conectar `btn_agregar_todos.clicked` → `_add_a
+         -ll_items` en `connect_signals()` de `views/panel_principal_view
+         -.py` (depende T003, T006)                                      
+      43 +- [x] T006 [US1] Implementar slot `_add_all_items()` en `views/
+         +panel_principal_view.py` (loop `takeItem(0)` hasta vaciar `list
+         +Widget_hojas`, añadir a `listWidget_tablas_seleccionadas`, llam
+         +ar `_update_button_states()` y `_save_tables_config()`)        
+      44 +- [x] T007 [US1] Conectar `btn_agregar_todos.clicked` → `_add_a
+         +ll_items` en `connect_signals()` de `views/panel_principal_view
+         +.py` (depende T003, T006)                                      
+      45  
+      46  **Checkpoint**: "Agregar Todos" funcional y persistido. User St
+          ory 1 completamente verificable de forma independiente.
+      47  
+
+● Update(specs\002-agregar-botones\tasks.md)
+  ⎿  Added 2 lines, removed 2 lines
+      55  
+      56  ### Implementación US2
+      57  
+      58 -- [ ] T008 [US2] Implementar slot `_remove_all_items()` en `vie
+         -ws/panel_principal_view.py` (loop `takeItem(0)` hasta vaciar `l
+         -istWidget_tablas_seleccionadas`, añadir a `listWidget_hojas`, l
+         -lamar `_update_button_states()` y `_save_tables_config()`)     
+      59 -- [ ] T009 [US2] Conectar `btn_quitar_todos.clicked` → `_remove
+         -_all_items` en `connect_signals()` de `views/panel_principal_vi
+         -ew.py` (depende T003, T008)                                    
+      58 +- [x] T008 [US2] Implementar slot `_remove_all_items()` en `vie
+         +ws/panel_principal_view.py` (loop `takeItem(0)` hasta vaciar `l
+         +istWidget_tablas_seleccionadas`, añadir a `listWidget_hojas`, l
+         +lamar `_update_button_states()` y `_save_tables_config()`)     
+      59 +- [x] T009 [US2] Conectar `btn_quitar_todos.clicked` → `_remove
+         +_all_items` en `connect_signals()` de `views/panel_principal_vi
+         +ew.py` (depende T003, T008)                                    
+      60  
+      61  **Checkpoint**: "Quitar Todos" funcional y persistido. User Sto
+          ries 1 Y 2 completamente verificables de forma independiente.
+      62  
+
+● T010 requiere verificación manual con la app corriendo. El skill de
+  verificación lo manejaría /verify. Marcando T010 como pendiente de
+  verificación manual.
+
+  Extension Hooks
+
+  Optional Hook: git
+  Command: /speckit-git-commit
+  Description: Auto-commit after implementation
+
+  Prompt: Commit implementation changes?
+  To execute: /speckit-git-commit
+
+  ---
+  Completion Report
+
+  ┌───────┬────────┬─────────────────────────────────────────────────────────┐
+  │ Tarea │ Estado │                   Archivo modificado                    │
+  ├───────┼────────┼─────────────────────────────────────────────────────────┤
+  │ T001  │ ✅     │ ui/PanelPrincipal.ui                                    │
+  ├───────┼────────┼─────────────────────────────────────────────────────────┤
+  │ T002  │ ✅     │ views/panel_principal_view.py — __init__                │
+  ├───────┼────────┼─────────────────────────────────────────────────────────┤
+  │ T003  │ ✅     │ views/panel_principal_view.py — setup_ui()              │
+  ├───────┼────────┼─────────────────────────────────────────────────────────┤
+  │ T004  │ ✅     │ views/panel_principal_view.py — _update_button_states() │
+  ├───────┼────────┼─────────────────────────────────────────────────────────┤
+  │ T005  │ ✅     │ views/panel_principal_view.py — _apply_styles()         │
+  ├───────┼────────┼─────────────────────────────────────────────────────────┤
+  │ T006  │ ✅     │ views/panel_principal_view.py — _add_all_items() nuevo  │
+  ├───────┼────────┼─────────────────────────────────────────────────────────┤
+  │ T007  │ ✅     │ views/panel_principal_view.py — connect_signals()       │
+  ├───────┼────────┼─────────────────────────────────────────────────────────┤
+  │ T008  │ ✅     │ views/panel_principal_view.py — _remove_all_items()     │
+  │       │        │ nuevo                                                   │
+  ├───────┼────────┼─────────────────────────────────────────────────────────┤
+  │ T009  │ ✅     │ views/panel_principal_view.py — connect_signals()       │
+  ├───────┼────────┼─────────────────────────────────────────────────────────┤
+  │ T010  │ ⏳     │ Verificación manual con python main.py                  │
+  └───────┴────────┴─────────────────────────────────────────────────────────┘
+
+  9/10 tareas completadas. T010 pendiente de verificación manual ejecutando la
+  app y probando los 5 casos del quickstart.md.
+
+  ¿Quieres que ejecute /verify para lanzar la app y confirmar que los botones
+  funcionan?
+✻ Crunched for 2m 0s
+
+❯ si                                                                            
+
+● Skill(verify)
+  ⎿  Successfully loaded skill
+
+● Identificando los cambios y buscando skills de verificación.
+
+  Searched for 2 patterns, ran 1 shell command (ctrl+o to expand)
+
+● No hay verifier skills. Cold-start con script de verificación GUI.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Diff verificado — el código es exactamente el esperado. Lanzando verificación
+  headless de la GUI.
+
+● Write(_verify_botones.py)
+  ⎿  Wrote 79 lines to _verify_botones.py
+       1 """Script de verificacion headless para feature 002-agregar-boto
+         nes."""
+       2 import sys
+       3 import os
+       4 
+       6 
+       7 from PySide6.QtWidgets import QApplication, QMainWindow
+       8 from views.panel_principal_view import PanelPrincipalView
+       9 
+      10 app = QApplication.instance() or QApplication(sys.argv)
+     … +95 lines (ctrl+o to expand)
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Todos los checks pasaron. Limpiando el script temporal y marcando T010.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Update(specs\002-agregar-botones\tasks.md)
+  ⎿  Added 1 line, removed 1 line
+      66  
+      67  **Purpose**: Verificación cruzada y cierre de la feature.
+      68  
+      69 -- [ ] T010 Ejecutar los 5 casos de prueba de `specs/002-agregar
+         --botones/quickstart.md` con `python main.py` y confirmar que to
+         -dos pasan                                                      
+      69 +- [x] T010 Ejecutar los 5 casos de prueba de `specs/002-agregar
+         +-botones/quickstart.md` con `python main.py` y confirmar que to
+         +dos pasan                                                      
+      70  
+      71  ---
+      72  
+
+● ---
+  Verification: Botones "Agregar Todos" y "Quitar Todos" en PanelPrincipalView
+
+  Verdict: PASS
+
+  Claim: Dos nuevos botones añadidos en la pestaña "Crear Inserts": "Agregar
+  Todos" mueve todos los items de listWidget_hojas →
+  listWidget_tablas_seleccionadas; "Quitar Todos" hace lo inverso. Ambos se
+  deshabilitan cuando su ListBox origen está vacío.
+
+  Method: Cold-start headless — QApplication + PanelPrincipalView instanciado
+  sin ventana visible; 7 checks contra el widget real cargado desde
+  PanelPrincipal.ui.
+
+  Steps
+
+  1. ✅ findChild(QPushButton, "btn_agregar_todos") y findChild(QPushButton, 
+  "btn_quitar_todos") — ambos retornan objetos válidos (widgets en .ui)
+  2. ✅ Estado inicial con listas vacías → ambos botones isEnabled() == False
+  3. ✅ 3 items en listWidget_hojas → btn_agregar_todos.isEnabled() == True,
+  btn_quitar_todos sigue deshabilitado
+  4. ✅ _add_all_items() → listWidget_hojas.count() == 0,
+  listWidget_tablas_seleccionadas.count() == 3, orden preservado
+  ["Hoja1","Hoja2","Hoja3"], estados invertidos automáticamente
+  5. ✅ _remove_all_items() → listWidget_tablas_seleccionadas.count() == 0,
+  listWidget_hojas.count() == 3, estados invertidos
+  6. ✅ Simetría add_all → remove_all → estado original restaurado
+  7. 🔍 Edge: _add_all_items() y _remove_all_items() con listas vacías → sin
+  excepción, operación silenciosa
+
+  Findings
+
+  - Todo funciona exactamente según spec.
+  - La verificación visual del render (colores, tamaño) queda pendiente de
+  apertura manual de la app — los estilos CSS están presentes en el diff pero no
+  se pueden capturar sin pantalla.
+
+  ---
+  10/10 tareas completadas. La feature está lista para commit.
+
+✻ Crunched for 1m 36s
+
+※ recap: Se implementaron los botones "Agregar Todos" y "Quitar Todos" en la pantalla Crear Inserts, todos los checks pasaron. Siguiente paso: hacer commit con `/speckit-git-commit`. (disable recaps in /config)
+
+❯ /speckit-git-commit                                                           
+
+  Read 1 file (ctrl+o to expand)
+
+● after_implement tiene enabled: false en la config, pero el comando fue
+  invocado explícitamente. Ejecutando el script de commit.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● El script silenció la salida (auto_commit deshabilitado en config).
+  Verificando estado y ejecutando commit directamente.
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+● El árbol está limpio — sin nada que commitear. Revisando el log para entender
+  qué pasó.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Los cambios ya están en el commit 17d6a69 "Comit de agregar botones todos" —
+  el usuario hizo el commit manualmente durante la sesión. El árbol está limpio,
+  nada pendiente.
+
+  Estado final de la feature 002-agregar-botones:
+
+  ┌───────────────────────────────┬──────────────────────────────────────────┐
+  │             Item              │                  Estado                  │
+  ├───────────────────────────────┼──────────────────────────────────────────┤
+  │ Rama                          │ 002-agregar-botones                      │
+  ├───────────────────────────────┼──────────────────────────────────────────┤
+  │ Commit                        │ 17d6a69 — Comit de agregar botones todos │
+  ├───────────────────────────────┼──────────────────────────────────────────┤
+  │ ui/PanelPrincipal.ui          │ ✅ Commiteado                            │
+  ├───────────────────────────────┼──────────────────────────────────────────┤
+  │ views/panel_principal_view.py │ ✅ Commiteado                            │
+  ├───────────────────────────────┼──────────────────────────────────────────┤
+  │ specs/002-agregar-botones/    │ ✅ Commiteado                            │
+  ├───────────────────────────────┼──────────────────────────────────────────┤
+  │ Tareas completadas            │ 10/10                                    │
+  └───────────────────────────────┴──────────────────────────────────────────┘
+
+  La feature está implementada, verificada y commiteada. El siguiente paso sería
+  hacer merge a main cuando esté listo.
+
+✻ Sautéed for 30s
+
+❯ merge a main                                                                  
+● Verificando el estado antes de hacer el merge.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Un commit limpio. Haciendo el merge a main.
+
+  Merged 002-agregar-botones (ctrl+o to expand)
+
+● Merge completado exitosamente.
+
+  main ← 002-agregar-botones  ✅
+  Merge commit: "Merge branch '002-agregar-botones': agregar botones Agregar
+  Todos y Quitar Todos"
+
+  Lo que entró en main:
+  - ui/PanelPrincipal.ui — dos nuevos botones en el transfer list
+  - views/panel_principal_view.py — slots, señales, estilos y estado
+  habilitado/deshabilitado
+  - specs/002-agregar-botones/ — spec, plan, tasks, research, data-model,
+  quickstart y checklist
+
+  La feature está en main. ¿Quieres que actualizemos el CLAUDE.md para que
+  apunte de vuelta a main o a algún próximo feature?
+
+✻ Cogitated for 17s
+
+❯ push a origin                                                                 
+
+  Pushed to main (ctrl+o to expand)
+
+● Push exitoso. main en origin está actualizado (a00a504 → a9cfc82).
+
+✻ Cogitated for 7s
+
+❯ también push de la rama 002-agregar-botones                                   
+
+  Pushed to 002-agregar-botones (ctrl+o to expand)
+
+● Listo. Rama 002-agregar-botones publicada en origin. GitHub sugiere crear un
+  PR, pero ya hiciste el merge directo a main, así que no es necesario.
+
+✻ Brewed for 13s
+
+※ recap: Implementamos la feature de botones "Agregar Todos" y "Quitar Todos" en la pantalla Crear Inserts, siguiendo el flujo completo de Spec Kit: specify, clarify, plan, tasks, implement y verify. Todo está mergeado y publicado en origin/main. (disable recaps in /config)
+
+❯ En la ventana donde se encuentra el componente tab que actualmente contiene   
+  las pestañas "Crear Inserts", "Ejecuta Querys" y "Exporta Tablas" hacerla 1.5 
+  cm pas pequeña de lo alto dicha ventana esta centrada en la  monitor,         
+  subirla 1.5 centimetros mas arriba de donde se encuentra                      
+
+● Localizando el código de tamaño y posición de la ventana.
+
+  Searched for 1 pattern (ctrl+o to expand)
+
+● Update(views\panel_principal_view.py)
+  ⎿  Added 7 lines, removed 3 lines
+       92          self._update_button_states()  # 5. Ajusta el estado in
+           icial (habilitado/deshabilitado) de los botones.
+       93          self._load_config_file()  # 6. Carga la configuración 
+           previa desde "ConfInsert.txt".
+       94  
+       95 -        screen = QApplication.primaryScreen().geometry()      
+       96 -        self.resize(min(1500, screen.width() - 80), min(920, s
+          -creen.height() - 80))                                         
+       95 +        primary_screen = QApplication.primaryScreen()         
+       96 +        screen = primary_screen.geometry()                    
+       97 +        offset_px = round(primary_screen.logicalDotsPerInchY()
+          + / 2.54 * 1.5)                                                
+       98  
+       99 +        self.resize(min(1500, screen.width() - 80), min(920, s
+          +creen.height() - 80) - offset_px)                             
+      100 +                                                              
+      101          frame_geometry = self.frameGeometry()
+      102          frame_geometry.moveCenter(screen.center())
+      100 -        self.move(frame_geometry.topLeft())                   
+      103 +        top_left = frame_geometry.topLeft()                   
+      104 +        self.move(top_left.x(), top_left.y() - offset_px)     
+      105  
+      106      def load_ui(self):
+      107          """
+
+● Listo. Los cambios:
+
+  - Alto: se resta offset_px (1.5 cm en píxeles según el DPI real del monitor)
+  al cálculo min(920, screen.height() - 80).
+  - Posición vertical: después de centrar, se sube offset_px píxeles restándolo
+  a la coordenada Y.
+  - El valor en píxeles se calcula dinámicamente con logicalDotsPerInchY() / 
+  2.54 * 1.5 para que sea exacto en cualquier resolución o escala de pantalla.
+
+✻ Cogitated for 27s
+
+※ recap: Feature 002 está completa y mergeada a main con push. Se ajustó además el alto y posición vertical de PanelPrincipalView en 1.5 cm. Siguiente acción: probar la app visualmente con python main.py. (disable recaps in /config)
+
+❯ me podrias indicar cual es el nombre del archivo donde esta el componente     
+  Tabs donde se encuentran las pestañas "Crear Inserts", "Ejecutar Querys" y    
+  "Exportar Tablas"                                                             
+
+● El componente QTabWidget con esas tres pestañas está definido en:
+
+  ui/PanelPrincipal.ui
+
+  Es el archivo XML de Qt Designer que contiene el widget tabWidget con sus tres
+  pestañas:
+  - tab_genera_inserts → "Crear Inserts"
+  - tab_ejecuta_querys → "Ejecuta Querys"
+  - tab_exportar_tablas → "Exportar Tablas"
+
+  La vista que carga ese archivo en runtime es views/panel_principal_view.py
+  usando QUiLoader.
+
+✻ Churned for 9s
+
+❯ en el archivo  views/panel_principal_view.py es donde se encuentra la         
+  funcionalidad de los botones que se encuentran en el componente QtabWidget    
+
+● Sí, exactamente. views/panel_principal_view.py es donde vive toda la lógica de
+  los botones del QTabWidget. Específicamente:
+
+  - setup_ui() — encuentra los widgets por nombre (findChild) y los asigna a
+  atributos de la clase
+  - connect_signals() — conecta los eventos clicked de cada botón a su método
+  correspondiente
+  - Slots (_add_item, _remove_item, _add_all_items, _remove_all_items,
+  _browse_excel_file, etc.) — contienen la lógica que se ejecuta al presionar
+  cada botón
+
+  El archivo .ui solo define la estructura visual (qué widgets existen y cómo se
+  ven); toda la funcionalidad está en el .py.
+
+✻ Cooked for 5s
+
+※ recap: Feature 002 completa: se agregaron los botones "Agregar Todos" y "Quitar Todos" a la pestaña Crear Inserts, mergeada y pusheada a origin. Pendiente verificar visualmente el ajuste de alto y posición de la ventana ejecutando la app.
+
+❯ Tengo un archivo "C:\Users\jleal\Documents\AAAA_Trabajo\CFDI_CSHARP\BaseDatos 
+  \ProyUtileriasSQL\Documentacion\SpectsOrig\spec-agregar-EjecutarQ.txt" que    
+  contiene la especificación de la siguiente Specify podrias revisarlo para ver 
+  que tan coherente es y si hay que hacerle modificaciones y/o que falta de     
+  agregarle                                                                     
+
+  Read 1 file (ctrl+o to expand)
+
+● El spec es detallado y técnicamente bien orientado. Aquí mi análisis completo:
+
+  ---
+  Lo que está bien
+
+  - Referencias precisas a archivos existentes (ConfInsert.txt, ConexionBD.txt,
+  execute_sql_from_file)
+  - Formato de config 02|Clave|Valor consistente con el patrón 01| del tab
+  "Crear Inserts"
+  - El patrón transfer list (Disponibles → Seleccionados) es idéntico al tab
+  existente — coherente con la constitución
+  - La lógica de carga inicial (paso 0) es detallada y cubre los casos borde de
+  directorio inexistente
+
+  ---
+  Problemas que requieren corrección
+
+  1. Paso 1 — oración incompleta (CRÍTICO)
+
+  ▎ "si el usuario selecciona un directorio entonces"
+
+  La oración se corta. Falta especificar qué pasa cuando el usuario elige un
+  directorio:
+  - ¿Se guarda en ConfInsert.txt como 02|DirEnt|<Directorio>?
+  - ¿Se limpian los ListBox y se escanean los .sql?
+  - ¿Qué pasa con los ítems que ya estaban en "Querys Seleccionados"?
+
+  2. Paso 6.f.3 — contradicción en la lógica de RollBack (CRÍTICO)
+
+  Ambos casos dicen "si el parámetro RollBack es igual a false" — claramente un
+  error de copia. La lógica correcta según el contexto debería ser:
+
+  ┌───────────────────────────┬──────────────┬──────────────────────────────┐
+  │ Estado checkbox "Permitir │    Valor     │                              │
+  │  ejecución de Operaciones │   RollBack   │        Comportamiento        │
+  │          válidas"         │              │                              │
+  ├───────────────────────────┼──────────────┼──────────────────────────────┤
+  │                           │ false (sin   │ Continúa con las demás       │
+  │ ✅ Chequeado              │ rollback)    │ instrucciones aunque alguna  │
+  │                           │              │ falle                        │
+  ├───────────────────────────┼──────────────┼──────────────────────────────┤
+  │                           │ true (con    │ Hace rollback completo del   │
+  │ ☐ Sin chequear            │ rollback)    │ archivo si alguna            │
+  │                           │              │ instrucción falla            │
+  └───────────────────────────┴──────────────┴──────────────────────────────┘
+
+  Confirmar si esta interpretación es correcta antes de implementar.
+
+  ---
+  Lo que falta agregar
+
+  3. Feedback al usuario tras "Ejecutar Querys"
+
+  No se menciona qué ve el usuario cuando termina la ejecución. ¿Mensaje de
+  éxito/error? ¿Un área de resultados en pantalla? ¿Solo el log en archivo?
+
+  4. Validaciones previas al botón "Ejecutar Querys"
+
+  - ¿Qué pasa si no hay queries en "Querys Seleccionados"? (¿botón deshabilitado
+  o mensaje?)
+  - ¿Qué pasa si ConexionBD.txt no existe o está malformado?
+
+  5. Estado inicial de los checkboxes
+
+  - ¿"Crear Log de Operación" inicia chequeado o no?
+  - ¿"Permitir ejecución de Operaciones válidas" inicia chequeado o no?
+  - ¿Sus estados se persisten en ConfInsert.txt?
+
+  6. Estado habilitado/deshabilitado del botón "Ejecutar Querys"
+
+  ¿Debe deshabilitarse si "Querys Seleccionados" está vacío? (El tab "Crear
+  Inserts" tiene este patrón con btn_ejecutar_creacion.)
+
+  7. Cambio de directorio con listas ya pobladas
+
+  Si el usuario elige un directorio nuevo cuando ya hay ítems en ambos ListBox,
+  ¿se limpian ambas listas y se re-escanea? El paso 0 lo cubre al iniciar, pero
+  no al cambiar el directorio en tiempo de ejecución.
+
+  8. Ubicación del archivo log
+
+  El spec dice concatenar la ruta del directorio del paso 1 al nombre del log.
+  ¿El log va en el mismo directorio que los archivos .sql? Puede ser confuso.
+  ¿No sería mejor que el usuario elija la ubicación, o que vaya en un directorio
+  fijo?
+
+  ---
+  Resumen
+
+  ┌────────────┬────────────────────────────────┬───────────────────────────┐
+  │ Categoría  │              Ítem              │          Acción           │
+  ├────────────┼────────────────────────────────┼───────────────────────────┤
+  │ Corrección │ Paso 1 incompleto              │ Completar la oración      │
+  ├────────────┼────────────────────────────────┼───────────────────────────┤
+  │ Corrección │ RollBack true/false invertido  │ Aclarar cuál caso es cuál │
+  ├────────────┼────────────────────────────────┼───────────────────────────┤
+  │ Faltante   │ Feedback tras ejecución        │ Definir qué ve el usuario │
+  ├────────────┼────────────────────────────────┼───────────────────────────┤
+  │ Faltante   │ Validaciones previas a         │ Definir comportamiento    │
+  │            │ ejecución                      │                           │
+  ├────────────┼────────────────────────────────┼───────────────────────────┤
+  │ Faltante   │ Estado inicial checkboxes      │ Definir y aclarar si se   │
+  │            │                                │ persisten                 │
+  ├────────────┼────────────────────────────────┼───────────────────────────┤
+  │ Faltante   │ Enable/disable de "Ejecutar    │ Definir condición         │
+  │            │ Querys"                        │                           │
+  ├────────────┼────────────────────────────────┼───────────────────────────┤
+  │ Faltante   │ Cambio de directorio con       │ Aclarar comportamiento    │
+  │            │ listas pobladas                │                           │
+  ├────────────┼────────────────────────────────┼───────────────────────────┤
+  │ Opcional   │ Ubicación del log              │ Confirmar que va junto a  │
+  │            │                                │ los .sql                  │
+  └────────────┴────────────────────────────────┴───────────────────────────┘
+
+  ¿Quieres que corrija el archivo .txt directamente con estas aclaraciones, o
+  prefieres ajustarlo tú y luego arrancamos el /specify?
+✻ Churned for 52s
+
+※ recap: Estamos implementando mejoras a ProyUtileriasSQL con Spec Kit. La feature de botones "Agregar Todos/Quitar Todos" está completa y en main. El siguiente paso es corregir el spec de "Ejecutar Querys" con los 8 puntos identificados antes de arrancar /specify.
+
+❯ desde el punto 3 de tu respuesta puedes corregir los puntos, 1 y 2 yo ya los  
+  corregi, una vez que realices las modificaciones revisa nuevamente el texto   
+  para ver si algo falto                                                        
+
+● Primero leo el estado actual del archivo tras tus correcciones.
+
+  Read 1 file (ctrl+o to expand)
+
+● Leo también el servicio existente para entender el contexto técnico completo.
+
+  Read 1 file (ctrl+o to expand)
+
+● Tengo todo el contexto. Haré los cambios en el archivo con edits específicos.
+
+  Correcciones a aplicar:
+  1. Typo en paso 1: "listbox del punto 4" → debe ser "listbox del punto 2"
+  2. Typo en 6.f.1: "ConexionBD,txt" → "ConexionBD.txt"
+  3. Estado inicial de checkboxes (6.b, 6.c) + persistencia
+  4. Botón "Guardar nombre" deshabilitado cuando 6.b no está chequeado
+  5. "Limpiar configuración" debe también desmarcar los checkboxes
+  6. Botón "Ejecutar Querys" habilitado/deshabilitado según lista
+  7. Validaciones previas a ejecución (nuevo 6.f.0)
+  8. Feedback al usuario tras ejecución (nuevo 6.f.4)
+
+● Update(Documentacion\SpectsOrig\spec-agregar-EjecutarQ.txt)
+  ⎿  Added 1 line, removed 1 line
+       7      0.b.1) Si existe la ruta poner el texto de la ruta en el "T
+          ext Box" que se describe en el paso 1, posicionarse en ese dire
+          ctorio y obtener todos los nombres de los archivos con terminac
+          ión .sql, buscarlos en la entrada "02|Querys|<Query1>, <Query2>
+          , ..."  previamente deberá concatenarse la extensión .sql a cad
+          a elemento en la lista <Query1>, <Query2>, … para que se pueda 
+          hacer bien la comparación , cada comparación exitosa implicara 
+          que ese elemento se ponga en el componente "List box" que se de
+          scribe en el punto 4, los que no se encuentren se pondrán en el
+           componente "List Box" que se describe en el punto 2, finalment
+          e verificar si alguno de los elementos de la entrada "02|Querys
+          |<Query1>, <Query2>, ..." no están en la consulta de lo nombres
+           de los archivos del directorio consultado se borran de dicha e
+          ntrada y se actualiza en el archivo "ConfInsert.txt" con la ent
+          rada "02|Querys|<Query1>, <Query2>, ..." donde cada elemento "<
+          Query1>, <Query2>, ..." deberá ser los elementos del list box d
+          el paso 4
+       8    0.c) Adicionalmente se deberá consultar si en el archivo "Con
+          fInsert.txt" existe la entrada "02|NomLog|<NombreArchLog>", si 
+          no existe no se realiza nada pero si existe entonces se pone el
+           Texto  contenido en <NombreArchLog> en el text box descrito en
+           el punto 6.d)
+       9  
+      10 -1.- Poner un componente "Text Box" con una etiqueta en la parte
+         - superior con el texto "Directorio seleccionado de Querys" al l
+         -ado del componente "Text Box" poner un botón que permita selecc
+         -ionar del sistema operativo un directorio, si el usuario selecc
+         -iona un directorio entonces el path de ese directorio se pone e
+         -n el "Text Box" inicial y se modifica la entrada "02|DirEnt|<Di
+         -rectorio>" si existe y si no se crea en el archivo "ConfInsert.
+         -txt", Se limpian los ListBox y se escanean los .sql para agrega
+         -rse al listbox del punto 4                                     
+      10 +1.- Poner un componente "Text Box" con una etiqueta en la parte
+         + superior con el texto "Directorio seleccionado de Querys" al l
+         +ado del componente "Text Box" poner un botón que permita selecc
+         +ionar del sistema operativo un directorio, si el usuario selecc
+         +iona un directorio entonces el path de ese directorio se pone e
+         +n el "Text Box" inicial y se modifica la entrada "02|DirEnt|<Di
+         +rectorio>" si existe y si no se crea en el archivo "ConfInsert.
+         +txt", Se limpian ambos ListBox y se escanean los .sql del nuevo
+         + directorio para agregarse al listbox del punto 2 ("Querys Disp
+         +onibles")                                                      
+      11  
+      12  2.- Debajo de los componentes del paso 1 pon un componente "Lis
+          t Box" con una etiqueta en la parte superior con el texto "Quer
+          ys Disponibles" y ahí mostrar los nombres de los archivos del d
+          irectorio seleccionado en el paso 1 que contengan la extensión 
+          .sql 
+      13  
+
+● Update(Documentacion\SpectsOrig\spec-agregar-EjecutarQ.txt)
+  ⎿  Error editing file
+
+  Read 1 file (ctrl+o to expand)
+
+● Update(Documentacion\SpectsOrig\spec-agregar-EjecutarQ.txt)
+  ⎿  Error editing file
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● El archivo tiene codificación Windows (\r\n + caracteres Latin-1). Usaré
+  PowerShell para los reemplazos.
+
+  Ran 5 shell commands (ctrl+o to expand)
+
+● Verifico el resultado final leyendo el archivo completo.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Varios cambios no se aplicaron. Reintento con enfoque más directo.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Faltan 3 cambios: 6.f.0, estado inicial checkboxes y desmarcar en 6.a. Los
+  aplico directamente.
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+● Los 3 cambios faltantes ahora están presentes. Hago una revisión final del
+  documento completo.
+
+  Ran 1 shell command (ctrl+o to expand)
+  ⎿  Read Documentacion\SpectsOrig\spec-agregar-EjecutarQ.txt (44 lines)
+  ⎿  Referenced file views\panel_principal_view.py
+  ⎿  Read ui\PanelPrincipal.ui (186 lines)
+  ⎿  Read specs\002-agregar-botones\tasks.md (144 lines)
+  ⎿  Read specs\002-agregar-botones\research.md (78 lines)  ⎿  Skills restored (speckit-git-commit, verify, speckit-implement, speckit-tasks, speckit-plan, speckit-clarify, speckit-git-feature, speckit-specify)
+
+● El documento fue leído. Verifico el estado de todas las correcciones contra el
+  contenido actual del archivo (del Read tool adjunto en el contexto de
+  sesión).
+
+  Resultado de la revisión final — todas las correcciones confirmadas:
+
+  ┌─────┬───────────┬───────────────────────────────────────────────┬────────┐
+  │  #  │ Ubicación │                  Corrección                   │ Estado │
+  ├─────┼───────────┼───────────────────────────────────────────────┼────────┤
+  │ 1   │ Paso 1    │ "listbox del punto 2 ('Querys Disponibles')"  │ ✅     │
+  ├─────┼───────────┼───────────────────────────────────────────────┼────────┤
+  │ 2   │ 6.f.1     │ "ConexionBD.txt" (sin coma)                   │ ✅     │
+  ├─────┼───────────┼───────────────────────────────────────────────┼────────┤
+  │ 3   │ 6.b       │ Estado inicial unchecked, no persiste en      │ ✅     │
+  │     │           │ ConfInsert.txt                                │        │
+  ├─────┼───────────┼───────────────────────────────────────────────┼────────┤
+  │ 4   │ 6.c       │ Estado inicial unchecked, no persiste en      │ ✅     │
+  │     │           │ ConfInsert.txt                                │        │
+  ├─────┼───────────┼───────────────────────────────────────────────┼────────┤
+  │ 5   │ 6.d       │ Text Box habilitado solo si check box 6.b     │ ✅     │
+  │     │           │ está seleccionado; grayed out si no           │        │
+  ├─────┼───────────┼───────────────────────────────────────────────┼────────┤
+  │     │           │ Botón "Guardar nombre" deshabilitado si check │        │
+  │ 6   │ 6.e       │  box 6.b no está seleccionado o Text Box      │ ✅     │
+  │     │           │ vacío                                         │        │
+  ├─────┼───────────┼───────────────────────────────────────────────┼────────┤
+  │ 7   │ 6.a       │ Desmarcar check boxes 6.b y 6.c, limpiar y    │ ✅     │
+  │     │           │ deshabilitar Text Box 6.d al limpiar          │        │
+  ├─────┼───────────┼───────────────────────────────────────────────┼────────┤
+  │ 8   │ 6.f       │ Botón "Ejecutar Querys" deshabilitado cuando  │ ✅     │
+  │     │           │ List Box paso 4 vacío                         │        │
+  ├─────┼───────────┼───────────────────────────────────────────────┼────────┤
+  │ 9   │ 6.f.0     │ Bloques 6.f.0.1 (lista vacía) y 6.f.0.2       │ ✅     │
+  │     │           │ (ConexionBD.txt no existe)                    │        │
+  ├─────┼───────────┼───────────────────────────────────────────────┼────────┤
+  │ 10  │ 6.f.4     │ Mensaje resumen post-ejecución con conteos y  │ ✅     │
+  │     │           │ ruta del log                                  │        │
+  └─────┴───────────┴───────────────────────────────────────────────┴────────┘
+
+  Nota de encoding: La línea del bloque 6.f.4 fue escrita con bytes CP1252,
+  mientras el resto del archivo usa UTF-8. El texto es semánticamente correcto
+  (PowerShell lo muestra bien), pero hay una inconsistencia de codificación. Si
+  quieres, puedo corregir esa línea para que quede en UTF-8 uniforme con el
+  resto antes de proceder con /speckit-specify.
+
+  El spec está listo en contenido. ¿Procedo con la corrección de encoding del
+  6.f.4, o arrancamos directamente con /speckit-specify para la feature 003?
+
+✻ Cooked for 7m 12s
