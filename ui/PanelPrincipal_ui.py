@@ -140,17 +140,17 @@ class Ui_MainWindow(object):
         self.label_dir_querys = QLabel(self.tab_ejecuta_querys)
         self.label_dir_querys.setObjectName(u"label_dir_querys")
 
-        self.gridLayout_eq.addWidget(self.label_dir_querys, 0, 0, 1, 2)
+        self.gridLayout_eq.addWidget(self.label_dir_querys, 0, 0, 1, 3)
 
         self.lineEdit_dir_querys = QLineEdit(self.tab_ejecuta_querys)
         self.lineEdit_dir_querys.setObjectName(u"lineEdit_dir_querys")
 
-        self.gridLayout_eq.addWidget(self.lineEdit_dir_querys, 1, 0, 1, 1)
+        self.gridLayout_eq.addWidget(self.lineEdit_dir_querys, 1, 0, 1, 2)
 
         self.btn_browse_dir_querys = QPushButton(self.tab_ejecuta_querys)
         self.btn_browse_dir_querys.setObjectName(u"btn_browse_dir_querys")
 
-        self.gridLayout_eq.addWidget(self.btn_browse_dir_querys, 1, 1, 1, 1)
+        self.gridLayout_eq.addWidget(self.btn_browse_dir_querys, 1, 2, 1, 1)
 
         self.label_querys_disponibles = QLabel(self.tab_ejecuta_querys)
         self.label_querys_disponibles.setObjectName(u"label_querys_disponibles")
@@ -276,13 +276,13 @@ class Ui_MainWindow(object):
         self.btn_quitar.setText(QCoreApplication.translate("MainWindow", u"Quitar", None))
         self.btn_quitar_todos.setText(QCoreApplication.translate("MainWindow", u"Quitar Todos", None))
         self.label_tablas_disponibles.setText(QCoreApplication.translate("MainWindow", u"Tablas disponibles", None))
-        self.btn_browse_archivo_excel.setText(QCoreApplication.translate("MainWindow", u"...", None))
+        self.btn_browse_archivo_excel.setText(QCoreApplication.translate("MainWindow", u"Selecciona Datos Excel", None))
         self.label_tablas_seleccionadas.setText(QCoreApplication.translate("MainWindow", u"Tablas seleccionadas", None))
         self.label_directorio_salida.setText(QCoreApplication.translate("MainWindow", u"Proporciona el directorio de salida donde se depositaran los archivos", None))
-        self.btn_browse_directorio_salida.setText(QCoreApplication.translate("MainWindow", u"...", None))
+        self.btn_browse_directorio_salida.setText(QCoreApplication.translate("MainWindow", u"Selec. Direct. SQLs", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_genera_inserts), QCoreApplication.translate("MainWindow", u"Crear Inserts", None))
         self.label_dir_querys.setText(QCoreApplication.translate("MainWindow", u"Directorio seleccionado de Querys", None))
-        self.btn_browse_dir_querys.setText(QCoreApplication.translate("MainWindow", u"...", None))
+        self.btn_browse_dir_querys.setText(QCoreApplication.translate("MainWindow", u"Selec. Directorio", None))
         self.label_querys_disponibles.setText(QCoreApplication.translate("MainWindow", u"Querys Disponibles", None))
         self.label_querys_seleccionados.setText(QCoreApplication.translate("MainWindow", u"Querys Seleccionados", None))
         self.btn_eq_agregar.setText(QCoreApplication.translate("MainWindow", u"Agregar", None))
