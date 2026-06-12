@@ -53,7 +53,7 @@ Los checkboxes (`checkBox_crear_log`, `checkBox_permitir_parcial`) **no** se per
 
 ## Entidades de Negocio
 
-### ConexionBD.txt
+### ConexionBD.conf
 Archivo en el directorio raíz del proyecto. Formato de cada línea:
 ```
 # comentario (ignorado)
@@ -89,7 +89,7 @@ Clave: texto antes del `=` (stripped). Valor: texto después del `=`, sin comill
 ```
 [IDLE] 
   → usuario presiona btn_ejecutar_querys
-  → verificación previa (lista vacía / ConexionBD.txt faltante)
+  → verificación previa (lista vacía / ConexionBD.conf faltante)
   → [ERROR_PREVIO] si falla alguna verificación
   → [RUNNING] si OK
 

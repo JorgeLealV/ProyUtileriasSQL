@@ -100,14 +100,14 @@ description: "Task list for feature 003-agregar-ejecutar-querys"
 
 ## Phase 6: User Story 4 — Ejecutar Querys contra la Base de Datos (Priority: P1)
 
-**Goal**: El usuario ejecuta todos los archivos `.sql` seleccionados contra la BD de `ConexionBD.txt`, con progreso visible, opción de cancelar, rollback por archivo o ejecución continua, y resumen final.
+**Goal**: El usuario ejecuta todos los archivos `.sql` seleccionados contra la BD de `ConexionBD.conf`, con progreso visible, opción de cancelar, rollback por archivo o ejecución continua, y resumen final.
 
 **Independent Test**: Tests 5–9 y 11 del quickstart.md — ejecución con rollback, ejecución parcial, cancelación, archivo faltante, BD no disponible.
 
 ### Implementación US4
 
-- [x] T022 [US4] Implementar método `_leer_conexion_bd()` en `views/panel_principal_view.py`: parsea `ConexionBD.txt` (líneas `clave = "valor"`, ignorando `#`); valida que existen `my_db`, `my_user`, `my_pass`, `my_host`, `my_port`; muestra error específico con `_show_message_box()` si faltan (plan.md Paso 8)
-- [x] T023 [US4] Implementar método `_eq_ejecutar_querys()` en `views/panel_principal_view.py`: verificaciones previas (lista vacía, `ConexionBD.txt` faltante); llama `_leer_conexion_bd()` y `_resolve_log_path()`; escribe encabezado en log si aplica; crea `QProgressDialog` modal; instancia `EjecutarQuerysWorker` y `QThread`; conecta señales; inicia ejecución (plan.md Paso 8)
+- [x] T022 [US4] Implementar método `_leer_conexion_bd()` en `views/panel_principal_view.py`: parsea `ConexionBD.conf` (líneas `clave = "valor"`, ignorando `#`); valida que existen `my_db`, `my_user`, `my_pass`, `my_host`, `my_port`; muestra error específico con `_show_message_box()` si faltan (plan.md Paso 8)
+- [x] T023 [US4] Implementar método `_eq_ejecutar_querys()` en `views/panel_principal_view.py`: verificaciones previas (lista vacía, `ConexionBD.conf` faltante); llama `_leer_conexion_bd()` y `_resolve_log_path()`; escribe encabezado en log si aplica; crea `QProgressDialog` modal; instancia `EjecutarQuerysWorker` y `QThread`; conecta señales; inicia ejecución (plan.md Paso 8)
 - [x] T024 [US4] Implementar método `_on_execution_finished(summary)` en `views/panel_principal_view.py`: cierra `QProgressDialog`; detiene y espera `QThread`; construye mensaje de resumen (total/exitosos/fallidos/cancelado + ruta del log si existe); muestra con `_show_message_box()` (plan.md Paso 8)
 
 **Checkpoint**: Tests 5, 6, 7 y 11 del quickstart.md pasan. La ejecución no bloquea la UI.
@@ -121,7 +121,7 @@ description: "Task list for feature 003-agregar-ejecutar-querys"
 - [x] T025 [P] Agregar reglas CSS para los 9 nuevos selectores de widgets EQ (`btn_browse_dir_querys`, `btn_eq_agregar`, `btn_eq_agregar_todos`, `btn_eq_quitar`, `btn_eq_quitar_todos`, `btn_ejecutar_querys` con sus variantes `:hover`, `:disabled`) al final del stylesheet de `_apply_styles()` en `views/panel_principal_view.py` (plan.md Paso 9)
 - [ ] T026 Ejecutar Tests 1–4 del `quickstart.md`: directorio sin configuración previa, selección de directorio nuevo, gestión de listas (agregar/quitar/todos), configuración de log
 - [ ] T027 Ejecutar Tests 5–7 del `quickstart.md`: ejecución con rollback (modo seguro), ejecución sin rollback (modo parcial), cancelación durante ejecución
-- [ ] T028 Ejecutar Tests 8–11 del `quickstart.md`: restauración al reabrir pestaña, directorio guardado eliminado, limpiar configuración, `ConexionBD.txt` faltante
+- [ ] T028 Ejecutar Tests 8–11 del `quickstart.md`: restauración al reabrir pestaña, directorio guardado eliminado, limpiar configuración, `ConexionBD.conf` faltante
 
 ---
 

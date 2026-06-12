@@ -64,17 +64,17 @@ El usuario configura si desea generar un log de operación, si permite continuar
 
 ### User Story 4 - Ejecutar Querys contra la Base de Datos (Priority: P1)
 
-El usuario presiona "Ejecutar Querys" para ejecutar todos los archivos `.sql` seleccionados contra la base de datos configurada en `ConexionBD.txt`, con soporte de rollback por archivo o ejecución continua ante errores.
+El usuario presiona "Ejecutar Querys" para ejecutar todos los archivos `.sql` seleccionados contra la base de datos configurada en `ConexionBD.conf`, con soporte de rollback por archivo o ejecución continua ante errores.
 
 **Why this priority**: Es el objetivo central de la funcionalidad. Todo lo anterior sirve para configurar esta ejecución.
 
-**Independent Test**: Se puede probar con archivos `.sql` en la lista y un `ConexionBD.txt` válido, verificando que las instrucciones se ejecutan y se muestra el resumen final.
+**Independent Test**: Se puede probar con archivos `.sql` en la lista y un `ConexionBD.conf` válido, verificando que las instrucciones se ejecutan y se muestra el resumen final.
 
 **Acceptance Scenarios**:
 
 1. **Given** "Querys Seleccionados" está vacío, **When** el usuario presiona "Ejecutar Querys", **Then** se muestra un mensaje de error indicando que no hay querys seleccionados y no se procede.
-2. **Given** `ConexionBD.txt` no existe, **When** el usuario presiona "Ejecutar Querys", **Then** se muestra un mensaje de error indicando que no se encontró el archivo de conexión.
-3. **Given** hay archivos seleccionados y `ConexionBD.txt` existe, **When** el usuario presiona "Ejecutar Querys" con "Permitir ejecución de Operaciones válidas" desmarcado (rollback), **Then** cada archivo se ejecuta en una transacción; si alguna instrucción falla se hace rollback completo del archivo y se continúa con el siguiente.
+2. **Given** `ConexionBD.conf` no existe, **When** el usuario presiona "Ejecutar Querys", **Then** se muestra un mensaje de error indicando que no se encontró el archivo de conexión.
+3. **Given** hay archivos seleccionados y `ConexionBD.conf` existe, **When** el usuario presiona "Ejecutar Querys" con "Permitir ejecución de Operaciones válidas" desmarcado (rollback), **Then** cada archivo se ejecuta en una transacción; si alguna instrucción falla se hace rollback completo del archivo y se continúa con el siguiente.
 4. **Given** hay archivos seleccionados y "Permitir ejecución de Operaciones válidas" está marcado, **When** el usuario presiona "Ejecutar Querys", **Then** se continúa ejecutando instrucciones aunque alguna falle, sin rollback.
 5. **Given** la ejecución finaliza, **When** se muestra el resumen, **Then** incluye: cantidad de archivos ejecutados, exitosos y fallidos; si hay log, muestra la ruta completa del archivo de log.
 6. **Given** "Querys Seleccionados" contiene al menos un elemento, **Then** el botón "Ejecutar Querys" está habilitado; si la lista está vacía, el botón está deshabilitado.
@@ -84,7 +84,7 @@ El usuario presiona "Ejecutar Querys" para ejecutar todos los archivos `.sql` se
 ### Edge Cases
 
 - Si un archivo `.sql` en "Querys Seleccionados" ya no existe en disco al momento de ejecutar: se salta, se cuenta como fallido en el resumen y se registra el error en el log (si existe); la ejecución continúa con los demás archivos.
-- ¿Qué sucede si `ConexionBD.txt` existe pero tiene parámetros incorrectos (usuario/contraseña inválidos)?
+- ¿Qué sucede si `ConexionBD.conf` existe pero tiene parámetros incorrectos (usuario/contraseña inválidos)?
 - Si el nombre del archivo de log ya existe en el directorio: se crea un archivo nuevo con sufijo de timestamp (p. ej. `milog_20260610_143022.txt`) para preservar el log anterior.
 - El directorio de querys se escanea de forma plana (no recursiva); los subdirectorios se ignoran.
 - Si el directorio guardado no contiene archivos `.sql`, ambas listas quedan vacías y el botón "Ejecutar Querys" permanece deshabilitado.
@@ -106,9 +106,9 @@ El usuario presiona "Ejecutar Querys" para ejecutar todos los archivos `.sql` se
 - **FR-010**: El botón "Guardar nombre" DEBE guardar la entrada `02|NomLog|<NombreArchLog>` en `ConfInsert.conf` solo si el text box tiene contenido.
 - **FR-011**: El botón "Limpiar configuración" DEBE borrar ambas listas, el text box de directorio, desmarcar ambos checkboxes, limpiar y deshabilitar el text box de log, y eliminar las entradas `02|DirEnt`, `02|Querys` y `02|NomLog` de `ConfInsert.conf`.
 - **FR-012**: El botón "Ejecutar Querys" DEBE estar deshabilitado cuando "Querys Seleccionados" esté vacío y habilitarse automáticamente cuando contenga al menos un elemento.
-- **FR-013**: Antes de ejecutar, el sistema DEBE verificar que `ConexionBD.txt` existe; si no, mostrar error y no proceder.
+- **FR-013**: Antes de ejecutar, el sistema DEBE verificar que `ConexionBD.conf` existe; si no, mostrar error y no proceder.
 - **FR-013b**: Si un archivo `.sql` de la lista "Querys Seleccionados" no existe en disco al momento de la ejecución, el sistema DEBE saltarlo, contarlo como fallido en el resumen y registrar el error en el log (si existe); la ejecución DEBE continuar con los demás archivos sin interrumpirse.
-- **FR-014**: El sistema DEBE ejecutar cada archivo `.sql` seleccionado usando la función `execute_sql_from_file` con los parámetros de `ConexionBD.txt`.
+- **FR-014**: El sistema DEBE ejecutar cada archivo `.sql` seleccionado usando la función `execute_sql_from_file` con los parámetros de `ConexionBD.conf`.
 - **FR-015**: La función `execute_sql_from_file` DEBE ser modificada para aceptar: nombre del archivo de log (con ruta completa del directorio prepended) y bandera de rollback.
 - **FR-016**: Con rollback habilitado (checkbox desmarcado): si alguna instrucción de un archivo falla, se DEBE hacer rollback completo del archivo, registrar en log y continuar con el siguiente archivo.
 - **FR-017**: Con rollback deshabilitado (checkbox marcado): si alguna instrucción falla, se DEBE continuar ejecutando las demás instrucciones sin rollback.
@@ -120,7 +120,7 @@ El usuario presiona "Ejecutar Querys" para ejecutar todos los archivos `.sql` se
 ### Key Entities
 
 - **ConfInsert.conf**: Archivo de configuración persistente con entradas clave-valor en formato `XX|Clave|Valor`. Las entradas de esta funcionalidad usan el prefijo `02`.
-- **ConexionBD.txt**: Archivo de parámetros de conexión a base de datos (`my_db`, `my_user`, `my_pass`, `my_host`, `my_port`). Las líneas que comienzan con `#` se ignoran.
+- **ConexionBD.conf**: Archivo de parámetros de conexión a base de datos (`my_db`, `my_user`, `my_pass`, `my_host`, `my_port`). Las líneas que comienzan con `#` se ignoran.
 - **Archivo SQL**: Archivo con extensión `.sql` que contiene instrucciones SQL a ejecutar. Se identifica por su nombre sin extensión en `ConfInsert.conf`.
 - **Archivo Log**: Archivo de texto donde se registra el resultado de cada instrucción ejecutada, errores y rollbacks.
 
@@ -146,8 +146,8 @@ El usuario presiona "Ejecutar Querys" para ejecutar todos los archivos `.sql` se
 ## Assumptions
 
 - Los archivos `.sql` están en el directorio raíz seleccionado; no se escanean subdirectorios (escaneo plano).
-- `ConexionBD.txt` se encuentra en el directorio raíz del proyecto y sigue el formato documentado.
-- Los parámetros de `ConexionBD.txt` sin líneas `#` son válidos y completos.
+- `ConexionBD.conf` se encuentra en el directorio raíz del proyecto y sigue el formato documentado.
+- Los parámetros de `ConexionBD.conf` sin líneas `#` son válidos y completos.
 - El archivo de log se crea en el mismo directorio que los archivos `.sql` (directorio seleccionado en el text box del paso 1), concatenando la ruta del directorio al nombre del log.
 - Los checkboxes "Crear Log de Operación" y "Permitir ejecución de Operaciones válidas" inician siempre desmarcados (no se persisten en `ConfInsert.conf`).
 - Los nombres de los querys en `02|Querys|...` se almacenan sin la extensión `.sql`; la extensión se añade al reconstruir la ruta completa.

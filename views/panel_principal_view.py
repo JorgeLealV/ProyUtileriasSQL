@@ -17,6 +17,9 @@ import pandas as pd
 _CONF_FILE = os.path.normpath(
     os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "ConfInsert.conf")
 )
+_CONN_FILE = os.path.normpath(
+    os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "ConexionBD.conf")
+)
 from PySide6.QtWidgets import (
     QMainWindow,
     QFileDialog,
@@ -61,31 +64,84 @@ class EjecutarQuerysWorker(QObject):
         self._cancelled = True
 
     def run(self):
-        from services.funciones import execute_sql_from_file
-        summary = {"total": 0, "ok": 0, "failed": 0, "cancelled": False}
-        for sql_file in self._files:
-            if self._cancelled:
-                summary["cancelled"] = True
-                break
-            nombre = os.path.basename(sql_file)
-            self.progress_updated.emit(f"Ejecutando: {nombre}")
-            result = execute_sql_from_file(
-                db_name=self._conn_params["my_db"],
-                user=self._conn_params["my_user"],
-                password=self._conn_params["my_pass"],
-                host=self._conn_params["my_host"],
-                port=self._conn_params["my_port"],
-                sql_file=sql_file,
-                log_file=self._log_file,
-                allow_partial=self._allow_partial,
+        from graphlib import CycleError
+        from services.fk_exec_order import (
+            separar_archivos, construir_grafo, ordenar_topologicamente,
+            ejecutar_generales, ejecutar_ins_ordenado, escribir_resumen_log,
+        )
+
+        _empty = {
+            "total": 0, "ok": 0, "failed": 0,
+            "pendientes": [], "abortado": False, "motivo_abort": "",
+            "ciclo_archivos": [], "cancelled": False,
+        }
+
+        generales, ins_files = separar_archivos(self._files)
+        summary_g = dict(_empty)
+
+        if generales:
+            ok_g, summary_g = ejecutar_generales(
+                generales, self._conn_params, self._log_file,
+                progress_cb=lambda msg: self.progress_updated.emit(msg),
             )
-            summary["total"] += 1
-            if result.get("success"):
-                summary["ok"] += 1
-            else:
-                summary["failed"] += 1
-            self.file_finished.emit(nombre, result.get("success", False))
-        self.execution_finished.emit(summary)
+            if not ok_g:
+                summary_g["cancelled"] = self._cancelled
+                escribir_resumen_log(self._log_file, summary_g)
+                self.execution_finished.emit(summary_g)
+                return
+
+        if self._cancelled or not ins_files:
+            summary_g["cancelled"] = self._cancelled
+            escribir_resumen_log(self._log_file, summary_g)
+            self.execution_finished.emit(summary_g)
+            return
+
+        # Construir grafo de dependencias FK
+        try:
+            self.progress_updated.emit("Consultando dependencias FK...")
+            grafo = construir_grafo(ins_files, self._conn_params)
+        except RuntimeError as e:
+            resumen = {**_empty, "abortado": True, "motivo_abort": str(e),
+                       "total": summary_g["total"], "ok": summary_g["ok"],
+                       "failed": summary_g["failed"], "cancelled": self._cancelled}
+            escribir_resumen_log(self._log_file, resumen)
+            self.execution_finished.emit(resumen)
+            return
+
+        # Ordenamiento topológico (detecta ciclos)
+        try:
+            self.progress_updated.emit("Analizando orden de ejecución...")
+            ordenados = ordenar_topologicamente(grafo)
+        except CycleError as e:
+            nodos = list(e.args[1]) if len(e.args) > 1 else []
+            ciclo_nombres = [os.path.basename(n) for n in nodos]
+            resumen = {**_empty, "abortado": True,
+                       "motivo_abort": "Ciclo de dependencias detectado",
+                       "ciclo_archivos": ciclo_nombres, "pendientes": ciclo_nombres,
+                       "total": summary_g["total"], "ok": summary_g["ok"],
+                       "failed": summary_g["failed"], "cancelled": self._cancelled}
+            escribir_resumen_log(self._log_file, resumen)
+            self.execution_finished.emit(resumen)
+            return
+
+        # Ejecutar grupo Ins_ con control de pendientes
+        resumen_ins = ejecutar_ins_ordenado(
+            ordenados, grafo, self._conn_params, self._log_file,
+            progress_cb=lambda msg: self.progress_updated.emit(msg),
+        )
+
+        resumen_final = {
+            "total": summary_g["total"] + resumen_ins.get("total_ins", 0),
+            "ok": summary_g["ok"] + resumen_ins.get("ok_ins", 0),
+            "failed": summary_g["failed"] + resumen_ins.get("failed_ins", 0),
+            "pendientes": resumen_ins.get("pendientes", []),
+            "abortado": resumen_ins.get("abortado", False),
+            "motivo_abort": resumen_ins.get("motivo_abort", ""),
+            "ciclo_archivos": [],
+            "cancelled": self._cancelled,
+        }
+        escribir_resumen_log(self._log_file, resumen_final)
+        self.execution_finished.emit(resumen_final)
 
 
 # --- Clase de la Vista Principal ---
@@ -315,10 +371,12 @@ class PanelPrincipalView(QMainWindow):
         # Actualiza el estado de los botones si cambia la selección en las listas.
         if self.listWidget_hojas:
             self.listWidget_hojas.itemSelectionChanged.connect(self._update_button_states)
+            self.listWidget_hojas.itemDoubleClicked.connect(self._add_item)
         if self.listWidget_tablas_seleccionadas:
             self.listWidget_tablas_seleccionadas.itemSelectionChanged.connect(
                 self._update_button_states
             )
+            self.listWidget_tablas_seleccionadas.itemDoubleClicked.connect(self._remove_item)
 
         # Conexiones para los botones inyectados dinámicamente.
         if self.btn_borrar_config:
@@ -348,9 +406,11 @@ class PanelPrincipalView(QMainWindow):
         if self.listWidget_querys_disponibles:
             self.listWidget_querys_disponibles.itemSelectionChanged.connect(
                 self._update_eq_button_states)
+            self.listWidget_querys_disponibles.itemDoubleClicked.connect(self._eq_add_item)
         if self.listWidget_querys_seleccionados:
             self.listWidget_querys_seleccionados.itemSelectionChanged.connect(
                 self._update_eq_button_states)
+            self.listWidget_querys_seleccionados.itemDoubleClicked.connect(self._eq_remove_item)
         if self.btn_limpiar_config_eq:
             self.btn_limpiar_config_eq.clicked.connect(self._eq_limpiar_configuracion)
         if self.checkBox_crear_log:
@@ -441,7 +501,7 @@ class PanelPrincipalView(QMainWindow):
                     if i > 0:
                         tip_boolean = True
                 else:
-                    my_archsql = os.path.join(output_dir, f"{tabla_nombre}.sql")
+                    my_archsql = os.path.join(output_dir, f"Ins_{tabla_nombre}.sql")
                     # Siempre se sobreescribe para crear archivos separados.
                     tip_boolean = False
 
@@ -693,7 +753,16 @@ class PanelPrincipalView(QMainWindow):
             self.listWidget_tablas_seleccionadas.item(i).text()
             for i in range(self.listWidget_tablas_seleccionadas.count())
         ]
-        self._write_to_config("01|Tablas|", ",".join(items))
+        value = ",".join(items)
+        if value:
+            self._write_to_config("01|Tablas|", value)
+        else:
+            config_path = _CONF_FILE
+            if os.path.exists(config_path):
+                with open(config_path, "r", encoding="utf-8") as f:
+                    lines = [l for l in f if not l.strip().startswith("01|Tablas|")]
+                with open(config_path, "w", encoding="utf-8") as f:
+                    f.writelines(lines)
 
     def _write_to_config(self, key, value):
         """
@@ -706,7 +775,7 @@ class PanelPrincipalView(QMainWindow):
         lines = []
         found = False
         if os.path.exists(config_path):
-            with open(config_path, "r") as f:
+            with open(config_path, "r", encoding="utf-8") as f:
                 lines = f.readlines()
             for i, line in enumerate(lines):
                 if line.strip().startswith(key):
@@ -715,7 +784,7 @@ class PanelPrincipalView(QMainWindow):
                     break
         if not found:
             lines.append(f"{key}{value}\n")
-        with open(config_path, "w") as f:
+        with open(config_path, "w", encoding="utf-8") as f:
             f.writelines(lines)
 
     def _load_config_file(self):
@@ -728,7 +797,7 @@ class PanelPrincipalView(QMainWindow):
             return
 
         config = {}
-        with open(config_path, "r") as f:
+        with open(config_path, "r", encoding="utf-8") as f:
             for line in f:
                 parts = line.strip().split("|")
                 if len(parts) >= 3 and parts[0] == "01":
@@ -774,9 +843,9 @@ class PanelPrincipalView(QMainWindow):
 
         config_path = _CONF_FILE
         if os.path.exists(config_path):
-            with open(config_path, "r") as f:
+            with open(config_path, "r", encoding="utf-8") as f:
                 lines = [line for line in f if not line.startswith("01|")]
-            with open(config_path, "w") as f:
+            with open(config_path, "w", encoding="utf-8") as f:
                 f.writelines(lines)
 
         self._show_message_box(
@@ -1447,10 +1516,10 @@ class PanelPrincipalView(QMainWindow):
     # --- US4: Ejecución de Querys ---
 
     def _leer_conexion_bd(self) -> dict:
-        """Parsea ConexionBD.txt y retorna dict con my_db, my_user, my_pass, my_host, my_port."""
+        """Parsea ConexionBD.conf y retorna dict con my_db, my_user, my_pass, my_host, my_port."""
         params = {}
         try:
-            with open("ConexionBD.txt", "r", encoding="utf-8") as f:
+            with open(_CONN_FILE, "r", encoding="utf-8") as f:
                 for line in f:
                     line = line.strip()
                     if not line or line.startswith("#"):
@@ -1460,7 +1529,7 @@ class PanelPrincipalView(QMainWindow):
                         params[key.strip()] = val.strip().strip('"')
         except Exception as e:
             self._show_message_box(
-                "Error", f"No se pudo leer ConexionBD.txt:\n{e}", QMessageBox.Icon.Critical)
+                "Error", f"No se pudo leer ConexionBD.conf:\n{e}", QMessageBox.Icon.Critical)
             return {}
 
         required = ["my_db", "my_user", "my_pass", "my_host", "my_port"]
@@ -1468,7 +1537,7 @@ class PanelPrincipalView(QMainWindow):
         if missing:
             self._show_message_box(
                 "Error",
-                f"ConexionBD.txt no contiene los parámetros: {', '.join(missing)}",
+                f"ConexionBD.conf no contiene los parámetros: {', '.join(missing)}",
                 QMessageBox.Icon.Critical,
             )
             return {}
@@ -1482,10 +1551,10 @@ class PanelPrincipalView(QMainWindow):
                 "Error", "No hay Querys seleccionados.", QMessageBox.Icon.Warning)
             return
 
-        if not os.path.exists("ConexionBD.txt"):
+        if not os.path.exists(_CONN_FILE):
             self._show_message_box(
                 "Error",
-                "No se encontró el archivo 'ConexionBD.txt' en el directorio raíz del proyecto.",
+                "No se encontró el archivo 'ConexionBD.conf' en el directorio raíz del proyecto.",
                 QMessageBox.Icon.Critical,
             )
             return
@@ -1554,17 +1623,44 @@ class PanelPrincipalView(QMainWindow):
         ok = summary.get("ok", 0)
         failed = summary.get("failed", 0)
         cancelled = summary.get("cancelled", False)
+        abortado = summary.get("abortado", False)
+        motivo_abort = summary.get("motivo_abort", "")
+        ciclo_archivos = summary.get("ciclo_archivos", [])
+        pendientes = summary.get("pendientes", [])
 
-        msg = f"Ejecución {'cancelada' if cancelled else 'finalizada'}.\n\n"
-        msg += f"Archivos ejecutados: {total}\n"
-        msg += f"Exitosos: {ok}\n"
-        msg += f"Fallidos: {failed}\n"
+        if ciclo_archivos:
+            msg = "Ciclo de dependencias detectado.\n\n"
+            msg += "Archivos involucrados en el ciclo:\n"
+            for a in ciclo_archivos:
+                msg += f"  • {a}\n"
+            msg += "\nNo se ejecutó ningún archivo Ins_."
+            icono = QMessageBox.Icon.Critical
+        elif abortado and motivo_abort:
+            msg = f"Ejecución truncada.\n\nMotivo: {motivo_abort}\n"
+            if pendientes:
+                msg += f"\nArchivos afectados ({len(pendientes)}):\n"
+                for a in pendientes:
+                    msg += f"  • {a}\n"
+            icono = QMessageBox.Icon.Warning
+        else:
+            msg = f"Ejecución {'cancelada' if cancelled else 'finalizada'}.\n\n"
+            msg += f"Archivos procesados: {total}\n"
+            msg += f"Exitosos: {ok}\n"
+            msg += f"Fallidos: {failed}\n"
+            if pendientes:
+                msg += f"\nArchivos pendientes ({len(pendientes)}):\n"
+                for a in pendientes:
+                    msg += f"  • {a}\n"
+            icono = (
+                QMessageBox.Icon.Information
+                if not failed and not pendientes
+                else QMessageBox.Icon.Warning
+            )
 
         log_file = self._eq_worker._log_file if self._eq_worker else ""
         if log_file and os.path.exists(log_file):
             msg += f"\nLog de detalle:\n{log_file}"
 
-        icono = QMessageBox.Icon.Information if not failed else QMessageBox.Icon.Warning
         self._show_message_box("Resumen de Ejecución", msg, icono)
 
     def closeEvent(self, event):
