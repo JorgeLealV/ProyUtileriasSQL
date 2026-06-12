@@ -5,7 +5,7 @@
 ## Prerrequisitos
 
 1. Python 3.14 en `C:\Users\jleal\AppData\Local\Python\bin\python.exe`
-2. `ConexionBD.txt` en la raíz del proyecto con parámetros válidos de PostgreSQL.
+2. `ConexionBD.conf` en la raíz del proyecto con parámetros válidos de PostgreSQL.
 3. Al menos un directorio con archivos `.sql` de prueba.
 4. Crear archivos de prueba:
    - `C:\temp\querys_test\insert_a.sql` — INSERT válido
@@ -121,9 +121,9 @@ Abrir el panel principal y seleccionar la pestaña **"Ejecutar Querys"**.
 
 ---
 
-## Test 11 — ConexionBD.txt faltante
+## Test 11 — ConexionBD.conf faltante
 
-1. Renombrar `ConexionBD.txt` temporalmente.
+1. Renombrar `ConexionBD.conf` temporalmente.
 2. Con querys seleccionados, presionar **Ejecutar Querys**.
 3. **Esperado**: mensaje de error "archivo de conexión no encontrado"; no se procede con ejecución.
-4. Restaurar `ConexionBD.txt`.
+4. Restaurar `ConexionBD.conf`.

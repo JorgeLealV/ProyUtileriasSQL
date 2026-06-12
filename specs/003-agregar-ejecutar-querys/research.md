@@ -30,11 +30,11 @@
 
 ---
 
-## Decisión 3 — Formato y parseo de ConexionBD.txt
+## Decisión 3 — Formato y parseo de ConexionBD.conf
 
 **Decision**: Parsear línea a línea con `split("=", 1)`. La clave es el texto antes del `=` (stripped); el valor es el texto después, sin comillas dobles y con strip(). Líneas que empiecen con `#` se ignoran.
 
-**Rationale**: El formato documentado en el spec es `my_db = "<Base datos>"`, etc. No existe un parser de ConexionBD.txt en el código actual; se implementa uno inline en el método `_leer_conexion_bd()` de la vista.
+**Rationale**: El formato documentado en el spec es `my_db = "<Base datos>"`, etc. No existe un parser de ConexionBD.conf en el código actual; se implementa uno inline en el método `_leer_conexion_bd()` de la vista.
 
 **Expected format**:
 ```

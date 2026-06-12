@@ -14,7 +14,7 @@ Implementar la funcionalidad completa de la pestaña "Ejecutar Querys" que ya ex
 
 **Primary Dependencies**: PySide6 6.11.1 (Qt 6), psycopg2-binary 2.9.12, QUiLoader
 
-**Storage**: `ConfInsert.conf` (02|Clave|Valor), `ConexionBD.txt` (parámetros BD)
+**Storage**: `ConfInsert.conf` (02|Clave|Valor), `ConexionBD.conf` (parámetros BD)
 
 **Testing**: Manual (ver `quickstart.md`)
 
@@ -471,10 +471,10 @@ def _eq_ejecutar_querys(self):
         self._show_message_box("Error", "No hay Querys seleccionados.", QMessageBox.Icon.Warning)
         return
 
-    if not os.path.exists("ConexionBD.txt"):
+    if not os.path.exists("ConexionBD.conf"):
         self._show_message_box(
             "Error",
-            "No se encontró el archivo 'ConexionBD.txt' en el directorio raíz del proyecto.",
+            "No se encontró el archivo 'ConexionBD.conf' en el directorio raíz del proyecto.",
             QMessageBox.Icon.Critical,
         )
         return
@@ -547,7 +547,7 @@ def _on_execution_finished(self, summary):
 def _leer_conexion_bd(self) -> dict:
     params = {}
     try:
-        with open("ConexionBD.txt", "r", encoding="utf-8") as f:
+        with open("ConexionBD.conf", "r", encoding="utf-8") as f:
             for line in f:
                 line = line.strip()
                 if not line or line.startswith("#"):
@@ -556,7 +556,7 @@ def _leer_conexion_bd(self) -> dict:
                     key, _, val = line.partition("=")
                     params[key.strip()] = val.strip().strip('"')
     except Exception as e:
-        self._show_message_box("Error", f"No se pudo leer ConexionBD.txt:\n{e}", QMessageBox.Icon.Critical)
+        self._show_message_box("Error", f"No se pudo leer ConexionBD.conf:\n{e}", QMessageBox.Icon.Critical)
         return {}
 
     required = ["my_db", "my_user", "my_pass", "my_host", "my_port"]
@@ -564,7 +564,7 @@ def _leer_conexion_bd(self) -> dict:
     if missing:
         self._show_message_box(
             "Error",
-            f"ConexionBD.txt no contiene los parámetros: {', '.join(missing)}",
+            f"ConexionBD.conf no contiene los parámetros: {', '.join(missing)}",
             QMessageBox.Icon.Critical,
         )
         return {}
