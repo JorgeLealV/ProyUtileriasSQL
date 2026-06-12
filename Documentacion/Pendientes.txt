@@ -1,0 +1,51 @@
+Pendientes:
+
+El archivo de configuración denominado ConfInsert.txt en el proyecto cámbialo para que diga ConfInsert.conf en todo los procesos donde se utilice
+
+En la pestaña "Crear inserts" en el botón "Quitar Todos" en pantalla los quita pero en el archivo de ConfInsert.conf no realiza la operación de quitarlos de la entrada 01|Tablas podrías corregir el error 
+
+
+En la pestaña "Ejecutar Querys"  en el list box con la leyenda "Querys disponibles" cuando se le de doble click a un elemento de la lista realice la operación del botón con la leyenda "Agregar", por otra parte en el list box con la leyenda "Querys seleccionadas" cuando se le de doble click a un elemento de la lista realice la operación del botón con la leyenda "Quitar"
+
+En la pestaña "Ejecutar Querys" en el botón con la leyenda "Ejecutar Querys" actualmente ejecuta cada archivo .sql del list box "Querys Seleccionados" conforme al orden en que están en dicho componente list box, lo que se requiere ahora es que si un archivo .sql que corresponde 
+
+
+Actualmente el proyecto toma el archivo "ConexionBD.txt" que contiene los elementos de conexión a la base de datos, cambiar lo que sea necesario en el proyecto para que ahora el archivo se llame "ConexionBD.conf"
+
+
+En la pestaña "Crear inserts" en el botón "Ejecutar creación" al momento de crear el archivo sql se utiliza el nombre que esta en el list box con la leyenda "Querys Seleccionados" con la extensión .sql lo que hay que hacer es que al Nombre del archivo se le antepondrá la cadena "Ins_" al nombre del archivo antes de guardarlo 
+
+
+
+En la pestaña "Ejecutar Querys" en el botón con la leyenda "Ejecutar Querys" actualmente ejecuta cada archivo .sql del list box "Querys Seleccionados" conforme al orden en que están en dicho componente list box, lo que se requiere ahora es.
+
+1.- Si el nombre del archivo que se va a ejecutar inicia con el acrónimo "Ins" antepuesto a su nombre por ejemplo "Ins_TipAlcance.sql" entonces quitarle el inicio con la cadena "Ins" y el fin de la cadena ".sql"  para que quede conforme al ejemplo quede la subcadena "TipAlcance" 
+
+2.- Con ese nombre obtener de la base de datos si existen tablas padre de esta tabla en el ejemplo "TipAlcance" y si existen compararla con la lista del list box "Querys Seleccionados" solo con los nombres de archivo que tengan antepuesto "Ins" en sus nombres por ejemplo "Ins_TipoPermiso,sql" la cual quedaría como "TipoPermiso" para poder compararlo y si existe una  o mas éxitos de comparación entonces marcarla como pendiente y seguir ejecutando los demás archivos ".sql"
+
+3.- Para cada elemento del list box "Querys Seleccionados" que contengan la cadena al inicio "Ins" se realizara el mismo procedimiento del paso 2 
+
+4.- Es posible que en algún momento uno de los archivos a ejecutar tenga una tabla padre que haya sido marcada como pendiente, esto quiere decir que estará pendiente también porque su tabla padre esta pendiente, pero abra que llevar un registro de cuantas veces se visito esa tabla pendiente como padre de otra tabla ya que puede crearse un ciclo interminable, se deberá establecer un máximo de 5 visitas para una tabla que es padre de otras y siga pendiente, en ese punto se deberá de truncar el proceso de ejecución y se deberá informar en el log cuales tablas quedaron marcadas como pendientes.
+
+ 
+
+
+
+del nombre es decir  verificar antes de ejecutarlo si existe en el list box con la leyenda "Querys Seleccionados" un archivo con el mismo acrónimo antepuesto "Ins" donde se extrae un nombre de tabla quitándole a ese nombre el "Ins" inicial y el ".sql" final 
+
+que sea padre del archivo en la base de datos el nombre del archivo se obtiene 
+
+
+
+
+
+ lo que se requiere ahora es que si un archivo .sql que corresponde 
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,9 @@
+En la pestaña "Ejecutar Querys" en el botón con la leyenda "Ejecutar Querys" actualmente ejecuta cada archivo .sql del list box "Querys Seleccionados" conforme al orden en que están en dicho componente list box, lo que se requiere ahora es.
+
+1.- Si el nombre del archivo que se va a ejecutar inicia con el acrónimo "Ins" antepuesto a su nombre por ejemplo "Ins_TipAlcance.sql" entonces quitarle el inicio con la cadena "Ins" y el fin de la cadena ".sql"  para que quede conforme al ejemplo quede la subcadena "TipAlcance" 
+
+2.- Con ese nombre obtener de la base de datos si existen tablas padre de esta tabla en el ejemplo "TipAlcance" y si existen compararla con la lista del list box "Querys Seleccionados" solo con los nombres de archivo que tengan antepuesto "Ins" en sus nombres por ejemplo "Ins_TipoPermiso,sql" la cual quedaría como "TipoPermiso" para poder compararlo y si existe una  o mas éxitos de comparación entonces marcarla como pendiente y seguir ejecutando los demás archivos ".sql"
+
+3.- Para cada elemento del list box "Querys Seleccionados" que contengan la cadena al inicio "Ins" se realizara el mismo procedimiento del paso 2 
+
+4.- Es posible que en algún momento uno de los archivos a ejecutar tenga una tabla padre que haya sido marcada como pendiente, esto quiere decir que estará pendiente también porque su tabla padre esta pendiente, pero abra que llevar un registro de cuantas veces se visito esa tabla pendiente como padre de otra tabla ya que puede crearse un ciclo interminable, se deberá establecer un máximo de 5 visitas para una tabla que es padre de otras y siga pendiente, en ese punto se deberá de truncar el proceso de ejecución y se deberá informar en el log cuales tablas quedaron marcadas como pendientes.
